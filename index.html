@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Agentic Standard — We make agentic AI work inside your organization</title>
 <meta name="description" content="A specialized consulting firm that closes the gap between AI technology and the operating model that has to meet it. Six weeks. Fixed fee. Operating AI, not strategy decks.">
+<meta property="og:title" content="Agentic Standard — We make agentic AI work inside your organization">
+<meta property="og:description" content="A specialized consulting firm that closes the gap between AI technology and the operating model that has to meet it. Six weeks. Fixed fee.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agenticstandard.ca">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -14,8 +20,8 @@
     --bg-soft:      #15110D;
     --fg:           #E8E1D4;
     --fg-dim:       #C4BCAC;
-    --muted:        #7A736A;
-    --muted-dim:    #4E483F;
+    --muted:        #918A80;
+    --muted-dim:    #635C52;
     --border:       rgba(232, 225, 212, 0.08);
     --border-strong:rgba(232, 225, 212, 0.14);
     --accent:       #D27A3F;
@@ -54,6 +60,22 @@
     opacity: 0.025;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    z-index: 100;
+    border-radius: 0;
+  }
+  .skip-link:focus { top: 8px; }
 
   .container { width: var(--container); margin: 0 auto; position: relative; z-index: 2; }
   .frame { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
@@ -176,6 +198,10 @@
     max-width: 58ch;
     line-height: 1.5;
   }
+
+  p.lead + p.lead { margin-top: 28px; }
+  p.lead.narrow { max-width: 60ch; }
+  p.lead.muted-lead { color: var(--muted); }
 
   /* ============ HERO ============ */
   .hero {
@@ -493,7 +519,7 @@
   .offer-stakes {
     margin-top: clamp(36px, 4vw, 52px);
     padding: clamp(28px, 3.5vw, 40px);
-    border-left: 2px solid var(--accent);
+    border-top: 1px solid var(--accent);
     background: rgba(210, 122, 63, 0.04);
   }
 
@@ -744,16 +770,70 @@
   .hero .lead { animation-delay: 0.36s; }
   .hero .hero-actions { animation-delay: 0.52s; }
 
+  /* ============ HAMBURGER ============ */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 4px;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 60;
+  }
+
+  .nav-toggle-bar {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--fg);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
   /* ============ MOBILE ============ */
   @media (max-width: 880px) {
+    .nav-toggle { display: flex; }
+
     .primary-nav {
-      gap: 14px;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      z-index: 55;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
     }
-    .primary-nav a:not(.cta) { display: none; }
-    .primary-nav a.cta {
+
+    .primary-nav.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .primary-nav a:not(.cta) {
+      display: block;
       font-size: 13px;
-      padding: 6px 14px;
+      letter-spacing: 0.22em;
+      padding: 18px 0;
+      color: var(--fg-dim);
     }
+
+    .primary-nav a.cta {
+      font-size: 17px;
+      padding: 14px 32px;
+      margin-top: 28px;
+    }
+
     .site-nav .wordmark { font-size: 20px; }
 
     .disciplines { grid-template-columns: 1fr; }
@@ -800,12 +880,34 @@
     .hero-actions { flex-direction: column; align-items: stretch; }
     .btn-primary, .btn-secondary { text-align: center; }
   }
+
+  /* ============ ACCESSIBILITY ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .btn-primary:focus-visible,
+  .cta-button:focus-visible,
+  .primary-nav a.cta:focus-visible {
+    outline-offset: 4px;
+  }
 </style>
 </head>
 <body>
 
 <!-- ============ NAVIGATION ============ -->
-<nav class="site-nav">
+<a href="#main" class="skip-link">Skip to content</a>
+<nav class="site-nav" aria-label="Main navigation">
   <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
   <div class="primary-nav">
     <a href="/foundation.html">Foundation</a>
@@ -814,14 +916,18 @@
     <a href="/standard.html">Standard</a>
     <a href="/book.html" class="cta">Book a Call</a>
   </div>
+  <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+  </button>
 </nav>
 
-<div class="container frame">
+<div class="container frame" id="main">
 
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="section-label accent">Agentic Standard · 2026</div>
-    <h1>We make Claude and agentic AI <em>work</em> inside your organization &mdash; not just in a demo.</h1>
+    <h1>We make agentic AI <em>work</em> inside your organization, not just in a demo.</h1>
     <p class="lead">Most enterprises have tried AI. Few have made it stick. We're a specialized firm that closes that gap by preparing your people, instrumenting your workflows, and deploying agents that measurably give time back.</p>
     <div class="hero-actions">
       <a href="/book.html" class="btn-primary">Book a 45-minute call</a>
@@ -834,8 +940,8 @@
     <div class="section-label">Why We Exist</div>
     <h2>Most enterprise AI fails to <em>stick</em>.</h2>
     <p class="lead">We've watched big consulting firms burn millions and leave clients with a chatbot nobody uses. We've watched data teams ship models that produce reports &amp; dashboards nobody reads. We've seen executives on stage describing an AI strategy in unbroken detail though they've never run a prompt themselves.</p>
-    <p class="lead" style="color: var(--muted); margin-top: 28px;">This pattern is uncomfortable, but consistent: the technology arrives, the organization doesn't.</p>
-    <p class="lead" style="margin-top: 28px;">Agentic Standard exists to do the work nobody else is doing. To close the gap between the technology and the operating model that has to meet it. We deliver operating AI, a workforce that uses it, and a roadmap your team can run on its own.</p>
+    <p class="lead muted-lead">This pattern is uncomfortable, but consistent: the technology arrives, the organization doesn't.</p>
+    <p class="lead">Agentic Standard exists to do the work nobody else is doing. To close the gap between the technology and the operating model that has to meet it. We deliver operating AI, a workforce that uses it, and a roadmap your team can run on its own.</p>
   </section>
 
   <!-- ============ WHAT WE DO ============ -->
@@ -870,7 +976,7 @@
   <section>
     <div class="section-label">How It Works</div>
     <h2>Six weeks to operating AI. Then the <em>choice</em>.</h2>
-    <p class="lead" style="margin-top: 28px; max-width: 60ch;">Every engagement begins with a fixed-fee six-week sprint. By the end you have AI doing real work, a roadmap your board will recognize, and three honest paths forward.</p>
+    <p class="lead narrow">Every engagement begins with a fixed-fee six-week sprint. By the end you have AI doing real work, a roadmap your board will recognize, and three honest paths forward.</p>
 
     <div class="journey-grid">
       <div class="journey-step">
@@ -901,13 +1007,13 @@
   <section>
     <div class="section-label accent">Our Standard</div>
     <h2>What we believe.</h2>
-    <p class="lead" style="margin-top: 24px; max-width: 60ch;">These are a few of our seven tenets. Each one rejects a common failure mode in the consulting industry, and filters who we work with as much as how we work.</p>
+    <p class="lead narrow">These are a few of our seven tenets. Each one rejects a common failure mode in the consulting industry, and filters who we work with as much as how we work.</p>
 
     <div class="standard-grid">
       <div class="standard-tenet">
         <span class="num">01</span>
         <h4>The gap is human, <em>not technological</em>.</h4>
-        <p>The model isn't the bottleneck. The workflow is. The habit is. The governance is. We don't sell technology &mdash; we build the bridge between technology and the operating model that has to meet it.</p>
+        <p>The model isn't the bottleneck. The workflow is. The habit is. The governance is. We don't sell technology. We build the bridge between technology and the operating model that has to meet it.</p>
       </div>
       <div class="standard-tenet">
         <span class="num">03</span>
@@ -923,6 +1029,40 @@
 
     <div class="standard-link">
       <a href="/standard.html">Read all seven tenets &nbsp;→</a>
+    </div>
+  </section>
+
+  <!-- ============ READ DEEPER ============ -->
+  <section class="docs-intro">
+    <div class="section-label accent">Discover the Firm</div>
+    <h2>We give the work <em>away</em>.</h2>
+    <p class="lead">Everything you'd want to read before signing a six-figure contract. The methodology, the principles, the contract terms, the way we run the engagement. If you decide to do this without us, you'll have what you need.</p>
+
+    <div class="docs-grid">
+      <a href="/standard.html" class="doc-card">
+        <span class="tag">The Beliefs</span>
+        <h4>The Agentic <em>Standard</em></h4>
+        <p>Seven tenets that anchor every engagement. The worldview the firm operates from.</p>
+        <span class="arrow">Read the manifesto →</span>
+      </a>
+      <a href="/map.html" class="doc-card">
+        <span class="tag">The Methodology</span>
+        <h4>The Agentic Readiness <em>Map</em></h4>
+        <p>Six dimensions of agentic readiness, scored on observation. The framework that produces your roadmap.</p>
+        <span class="arrow">Read the methodology →</span>
+      </a>
+      <a href="/foundation.html" class="doc-card">
+        <span class="tag">The Entry Offer</span>
+        <h4>The Agentic <em>Foundation</em></h4>
+        <p>The six-week engagement that puts operating AI in your stack. Scope, schedule, deliverables, guarantee.</p>
+        <span class="arrow">Read the offer →</span>
+      </a>
+      <a href="/continuum.html" class="doc-card">
+        <span class="tag">The Partnership</span>
+        <h4>The Agentic <em>Continuum</em></h4>
+        <p>Seven things that happen every month. The retainer that compounds the Foundation into a year of operating capacity.</p>
+        <span class="arrow">Read the partnership →</span>
+      </a>
     </div>
   </section>
 
@@ -962,40 +1102,6 @@
     </div>
   </section>
 
-  <!-- ============ READ DEEPER ============ -->
-  <section class="docs-intro">
-    <div class="section-label accent">Discover the Firm</div>
-    <h2>We give the work <em>away</em>.</h2>
-    <p class="lead" style="max-width: 64ch;">Everything you'd want to read before signing a six-figure contract. The methodology, the principles, the contract terms, the way we run the engagement. If you decide to do this without us, you'll have what you need.</p>
-
-    <div class="docs-grid">
-      <a href="/standard.html" class="doc-card">
-        <span class="tag">The Beliefs</span>
-        <h4>The Agentic <em>Standard</em></h4>
-        <p>Seven tenets that anchor every engagement. The worldview the firm operates from.</p>
-        <span class="arrow">Read the manifesto →</span>
-      </a>
-      <a href="/map.html" class="doc-card">
-        <span class="tag">The Methodology</span>
-        <h4>The Agentic Readiness <em>Map</em></h4>
-        <p>Six dimensions of agentic readiness, scored on observation. The framework that produces your roadmap.</p>
-        <span class="arrow">Read the methodology →</span>
-      </a>
-      <a href="/foundation.html" class="doc-card">
-        <span class="tag">The Entry Offer</span>
-        <h4>The Agentic <em>Foundation</em></h4>
-        <p>The six-week engagement that puts operating AI in your stack. Scope, schedule, deliverables, guarantee.</p>
-        <span class="arrow">Read the offer →</span>
-      </a>
-      <a href="/continuum.html" class="doc-card">
-        <span class="tag">The Partnership</span>
-        <h4>The Agentic <em>Continuum</em></h4>
-        <p>Seven things that happen every month. The retainer that compounds the Foundation into a year of operating capacity.</p>
-        <span class="arrow">Read the partnership →</span>
-      </a>
-    </div>
-  </section>
-
 </div>
 
 <!-- ============ CTA SECTION ============ -->
@@ -1012,7 +1118,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
-        <div class="tagline">We make agentic AI work inside your organization &mdash; not just in a demo.</div>
+        <div class="tagline">We make agentic AI work inside your organization, not just in a demo.</div>
       </div>
       <div class="footer-col">
         <div class="heading">The Work</div>
@@ -1041,5 +1147,13 @@
   </div>
 </footer>
 
+<script>
+document.querySelector('.nav-toggle').addEventListener('click', function() {
+  const nav = document.querySelector('.primary-nav');
+  const open = nav.classList.toggle('open');
+  this.setAttribute('aria-expanded', open);
+  this.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+});
+</script>
 </body>
 </html>

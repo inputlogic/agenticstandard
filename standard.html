@@ -4,6 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The Agentic Standard — What We Believe</title>
+<meta property="og:title" content="The Agentic Standard — What We Believe">
+<meta property="og:description" content="What we believe about agentic AI inside the enterprise, and the standard we hold ourselves to.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -13,8 +18,8 @@
     --bg-soft:      #15110D;
     --fg:           #E8E1D4;
     --fg-dim:       #C4BCAC;
-    --muted:        #7A736A;
-    --muted-dim:    #4E483F;
+    --muted:        #918A80;
+    --muted-dim:    #635C52;
     --border:       rgba(232, 225, 212, 0.08);
     --border-strong:rgba(232, 225, 212, 0.14);
     --accent:       #D27A3F;
@@ -56,6 +61,22 @@
     opacity: 0.025;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    z-index: 100;
+    border-radius: 0;
+  }
+  .skip-link:focus { top: 8px; }
 
   .container {
     width: var(--container);
@@ -586,19 +607,100 @@
     color: var(--muted-dim);
   }
 
+  /* ============ HAMBURGER ============ */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 4px;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 60;
+  }
+
+  .nav-toggle-bar {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--fg);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
   @media (max-width: 880px) {
-    .primary-nav { gap: 14px; }
-    .primary-nav a:not(.cta) { display: none; }
-    .primary-nav a.cta { font-size: 13px; padding: 6px 14px; }
+    .nav-toggle { display: flex; }
+
+    .primary-nav {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      z-index: 55;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .primary-nav.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .primary-nav a:not(.cta) {
+      display: block;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      padding: 18px 0;
+      color: var(--fg-dim);
+    }
+
+    .primary-nav a.cta {
+      font-size: 17px;
+      padding: 14px 32px;
+      margin-top: 28px;
+    }
+
     .footer-grid { grid-template-columns: 1fr; gap: 36px; }
     .footer-bottom { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+
+  /* ============ ACCESSIBILITY ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .btn-primary:focus-visible,
+  .cta-button:focus-visible,
+  .primary-nav a.cta:focus-visible {
+    outline-offset: 4px;
   }
 </style>
 </head>
 <body>
 
   <!-- NAVIGATION -->
-  <nav class="site-nav">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav class="site-nav" aria-label="Main navigation">
     <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
     <div class="primary-nav">
       <a href="/foundation.html">Foundation</a>
@@ -607,15 +709,19 @@
       <a href="/standard.html" class="active">Standard</a>
       <a href="/book.html" class="cta">Book a Call</a>
     </div>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+    </button>
   </nav>
 
-  <div class="container frame">
+  <div class="container frame" id="main">
 
   <!-- HERO -->
   <section class="hero">
     <div class="section-label accent">Our Beliefs</div>
     <h1>The Agentic <em>Standard</em>.</h1>
-    <div class="subtitle">What we believe about agentic AI inside the enterprise &mdash; and the standard we hold ourselves to inside every engagement.</div>
+    <div class="subtitle">What we believe about agentic AI inside the enterprise, and the standard we hold ourselves to inside every engagement.</div>
   </section>
 
   <!-- OPENING — Why we exist -->
@@ -624,7 +730,7 @@
       <div class="section-label">Why we exist</div>
       <h2>Most enterprise AI <em>fails to stick</em>.</h2>
       <p class="lead">We've sat in pilot post-mortems at firms that spent millions and ended with a Slack bot nobody uses. We've watched data teams ship models that produce insights nobody reads. We've coached executives who can describe their AI strategy in unbroken detail and have never run a prompt themselves.</p>
-      <p>The pattern is uncomfortable and consistent. The technology arrives; the organization doesn't. The model works, the use case is sound, the investment is real &mdash; and six months in there's a dashboard nobody opens and a champion who's moved teams.</p>
+      <p>The pattern is uncomfortable and consistent. The technology arrives; the organization doesn't. The model works, the use case is sound, the investment is real, and six months in there's a dashboard nobody opens and a champion who's moved teams.</p>
       <p>Agentic Standard exists to do the work nobody else is doing. To close the gap between the technology and the operating model that has to meet it. To leave behind operating AI, a workforce that uses it, and a roadmap the team can run on its own.</p>
       <p>This document is what we believe, why we believe it, and the standard we hold ourselves to.</p>
     </div>
@@ -739,7 +845,7 @@
       <div class="tenet-body">
         <h3>Practitioners, <em>not framework consultants</em>.</h3>
         <p>We are engineers and operators, not slide producers. There are plent of people &amp; vendors out there talking about theoretical frameworks. Our team has built production AI systems, deployed enterprise data platforms, and coached real workforces through change.</p>
-        <p>If you want a two-hundred-page transformation strategy, there are better-resourced firms for that work. If you want operating AI inside your organization within six weeks, and the roadmap to scale it &mdash; that's what we do, and that's all we do. The narrowness of the focus is the point.</p>
+        <p>If you want a two-hundred-page transformation strategy, there are better-resourced firms for that work. If you want operating AI inside your organization within six weeks, and the roadmap to scale it; that's what we do, and that's all we do. The narrowness of the focus is the point.</p>
       </div>
     </div>
   </article>
@@ -773,7 +879,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
-        <div class="tagline">We make agentic AI work inside your organization &mdash; not just in a demo.</div>
+        <div class="tagline">We make agentic AI work inside your organization, not just in a demo.</div>
       </div>
       <div class="footer-col">
         <div class="heading">The Work</div>
@@ -799,5 +905,13 @@
   </div>
 </footer>
 
+<script>
+document.querySelector('.nav-toggle').addEventListener('click', function() {
+  const nav = document.querySelector('.primary-nav');
+  const open = nav.classList.toggle('open');
+  this.setAttribute('aria-expanded', open);
+  this.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+});
+</script>
 </body>
 </html>

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The Agentic Foundation — Agentic Standard</title>
 <meta name="description" content="Six weeks. Fixed fee. Two to three deployed agents, The Agentic Readiness Map, and a working-session presentation. Operating AI, not a strategy deck.">
+<meta property="og:title" content="The Agentic Foundation — Agentic Standard">
+<meta property="og:description" content="Six weeks. Fixed fee. Two to three deployed agents, The Agentic Readiness Map, and a working-session presentation. Operating AI, not a strategy deck.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -14,8 +19,8 @@
     --bg-soft:      #15110D;
     --fg:           #E8E1D4;
     --fg-dim:       #C4BCAC;
-    --muted:        #7A736A;
-    --muted-dim:    #4E483F;
+    --muted:        #918A80;
+    --muted-dim:    #635C52;
     --border:       rgba(232, 225, 212, 0.08);
     --border-strong:rgba(232, 225, 212, 0.14);
     --accent:       #D27A3F;
@@ -56,6 +61,22 @@
     opacity: 0.025;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    z-index: 100;
+    border-radius: 0;
+  }
+  .skip-link:focus { top: 8px; }
 
   .container {
     width: var(--container);
@@ -282,7 +303,7 @@
   .guarantee-block {
     margin-top: clamp(36px, 4vw, 52px);
     padding: clamp(28px, 3.5vw, 40px);
-    border-left: 2px solid var(--accent);
+    border-top: 1px solid var(--accent);
     background: rgba(210, 122, 63, 0.04);
   }
 
@@ -498,11 +519,69 @@
   .footer-col a:hover { color: var(--accent); }
   .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-dim); }
 
+  /* ============ HAMBURGER ============ */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 4px;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 60;
+  }
+
+  .nav-toggle-bar {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--fg);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
   /* ============ MOBILE ============ */
   @media (max-width: 880px) {
-    .primary-nav { gap: 14px; }
-    .primary-nav a:not(.cta) { display: none; }
-    .primary-nav a.cta { font-size: 13px; padding: 6px 14px; }
+    .nav-toggle { display: flex; }
+
+    .primary-nav {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      z-index: 55;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .primary-nav.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .primary-nav a:not(.cta) {
+      display: block;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      padding: 18px 0;
+      color: var(--fg-dim);
+    }
+
+    .primary-nav a.cta {
+      font-size: 17px;
+      padding: 14px 32px;
+      margin-top: 28px;
+    }
 
     .deliverable-grid { grid-template-columns: 1fr; gap: 18px; }
 
@@ -532,11 +611,33 @@
     p { color: #333; }
     em, .italic-accent { color: #B85A20; }
   }
+
+  /* ============ ACCESSIBILITY ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .btn-primary:focus-visible,
+  .cta-button:focus-visible,
+  .primary-nav a.cta:focus-visible {
+    outline-offset: 4px;
+  }
 </style>
 </head>
 <body>
 
-<nav class="site-nav">
+<a href="#main" class="skip-link">Skip to content</a>
+<nav class="site-nav" aria-label="Main navigation">
   <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
   <div class="primary-nav">
     <a href="/foundation.html" class="active">Foundation</a>
@@ -545,15 +646,19 @@
     <a href="/standard.html">Standard</a>
     <a href="/book.html" class="cta">Book a Call</a>
   </div>
+  <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+  </button>
 </nav>
 
-<div class="container frame">
+<div class="container frame" id="main">
 
   <!-- HERO -->
   <section class="hero">
     <div class="section-label accent">The Entry Engagement</div>
     <h1>The Agentic <em>Foundation</em>.</h1>
-    <div class="subtitle">Six weeks. Fixed fee. Operating AI inside your organization &mdash; not a strategy deck about what you could do someday.</div>
+    <div class="subtitle">Six weeks. Fixed fee. Operating AI inside your organization, not a strategy deck about what you could do someday.</div>
   </section>
 
   <!-- OPENING -->
@@ -561,7 +666,7 @@
     <div class="reading">
       <div class="section-label">What it is</div>
       <h2>The engagement that puts AI <em>to work</em>.</h2>
-      <p class="lead">The Agentic Foundation is how every client relationship begins. In six weeks, we deploy two to three working agents into your real workflows, produce The Agentic Readiness Map &mdash; a scored diagnostic and phased roadmap &mdash; and present the whole thing in a working session with your sponsor.</p>
+      <p class="lead">The Agentic Foundation is how every client relationship begins. In six weeks, we deploy two to three working agents into your real workflows, produce The Agentic Readiness Map (a scored diagnostic and phased roadmap) and present the whole thing in a working session with your sponsor.</p>
       <p>By week six your organization has AI doing real work in production, a roadmap your board will recognize, and three honest paths forward. You choose which one fits.</p>
       <p>This is not a pilot. Pilots are designed to prove a concept; the Foundation is designed to <em>change the operating capacity of your organization</em> and leave behind the roadmap to keep going.</p>
     </div>
@@ -587,7 +692,7 @@
         <h3>Two to three <em>deployed agents</em>.</h3>
         <p>Working agents in production on real workflows we observe and agree on together during the first two weeks. These are not demos or proofs of concept. They run on your data, in your tools, doing work that previously required a person.</p>
         <p>Each agent ships with workflow shadowing, tuning, stabilization, and a named champion on your team who understands what it does and how to evaluate it. The agents run on <em>Harbour</em>, our hosted infrastructure, with audit trails, failure handling, and observability built in.</p>
-        <p>By the end of week six, you can point to hours returned and capacity unlocked &mdash; not a dashboard of what might be possible.</p>
+        <p>By the end of week six, you can point to hours returned and capacity unlocked, not a dashboard of what might be possible.</p>
       </div>
     </div>
   </article>
@@ -601,8 +706,8 @@
       </div>
       <div class="deliverable-body">
         <h3>The Agentic Readiness <em>Map</em>.</h3>
-        <p>A scored diagnostic across six dimensions of organizational readiness &mdash; operating habit, workflow legibility, data accessibility, system surface, governance posture, and sponsorship &mdash; each scored 1&ndash;5 on direct observation, not questionnaires.</p>
-        <p>Alongside the scores: a complete opportunity inventory of every automation candidate we surfaced during the six weeks, catalogued in a consistent format with effort, impact, confidence scores, and a phase recommendation. Candidates are grouped into a phased roadmap &mdash; 90 days, 180 days, 365 days &mdash; based on real dependencies, not appetite.</p>
+        <p>A scored diagnostic across six dimensions of organizational readiness: operating habit, workflow legibility, data accessibility, system surface, governance posture, and sponsorship, each scored 1&ndash;5 on direct observation, not questionnaires.</p>
+        <p>Alongside the scores: a complete opportunity inventory of every automation candidate we surfaced during the six weeks, catalogued in a consistent format with effort, impact, confidence scores, and a phase recommendation. Candidates are grouped into a phased roadmap (90 days, 180 days, 365 days) based on real dependencies, not appetite.</p>
         <p>The Map is yours. If you walk away from us with the document and never call back, it's good enough to run on. That is part of the value.</p>
         <a href="/map.html" style="font-family: var(--font-display); font-style: italic; color: var(--accent); text-decoration: none; font-size: 16px;">Read the full methodology &rarr;</a>
       </div>
@@ -619,7 +724,7 @@
       <div class="deliverable-body">
         <h3>The working-session <em>presentation</em>.</h3>
         <p>A sixty to ninety minute session with your sponsor where we walk the agents running, present the Map, review every automation opportunity we surfaced, and lay out the three paths forward.</p>
-        <p>This is not a read-out. It's a working session. We watch what gets debated, what surprises the room, and what the sponsor prioritizes. That conversation becomes the foundation for whatever comes next &mdash; whether with us or without us.</p>
+        <p>This is not a read-out. It's a working session. We watch what gets debated, what surprises the room, and what the sponsor prioritizes. That conversation becomes the foundation for whatever comes next, whether with us or without us.</p>
       </div>
     </div>
   </article>
@@ -711,7 +816,7 @@
 
     <div class="guarantee-block">
       <span class="label">The Deal</span>
-      <p>If your sponsor isn't happy at week six, <strong>we don't get paid.</strong> If we succeed, <strong>$20,000 of your engagement fee carries forward as your first Continuum month</strong> &mdash; so the transition to the ongoing partnership is already funded.</p>
+      <p>If your sponsor isn't happy at week six, <strong>we don't get paid.</strong> If we succeed, <strong>$20,000 of your engagement fee carries forward as your first Continuum month</strong>, so the transition to the ongoing partnership is already funded.</p>
     </div>
   </section>
 
@@ -762,7 +867,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
-        <div class="tagline">We make agentic AI work inside your organization &mdash; not just in a demo.</div>
+        <div class="tagline">We make agentic AI work inside your organization, not just in a demo.</div>
       </div>
       <div class="footer-col">
         <div class="heading">The Work</div>
@@ -788,5 +893,13 @@
   </div>
 </footer>
 
+<script>
+document.querySelector('.nav-toggle').addEventListener('click', function() {
+  const nav = document.querySelector('.primary-nav');
+  const open = nav.classList.toggle('open');
+  this.setAttribute('aria-expanded', open);
+  this.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+});
+</script>
 </body>
 </html>

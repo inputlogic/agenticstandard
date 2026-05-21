@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-21T00:00:00Z",
+  "title": "Design System: Agentic Standard",
+  "extensions": {
+    "colorMeta": {
+      "charred-walnut": { "role": "neutral", "displayName": "Charred Walnut", "canonical": "oklch(12% 0.01 60)", "tonalRamp": ["oklch(5% 0.005 60)", "oklch(10% 0.008 60)", "oklch(15% 0.01 60)", "oklch(25% 0.012 60)", "oklch(40% 0.012 60)", "oklch(55% 0.01 60)", "oklch(70% 0.008 60)", "oklch(85% 0.005 60)"] },
+      "smoked-oak": { "role": "neutral", "displayName": "Smoked Oak", "canonical": "oklch(14% 0.01 55)", "tonalRamp": ["oklch(6% 0.005 55)", "oklch(11% 0.008 55)", "oklch(16% 0.01 55)", "oklch(26% 0.012 55)", "oklch(41% 0.012 55)", "oklch(56% 0.01 55)", "oklch(71% 0.008 55)", "oklch(86% 0.005 55)"] },
+      "parchment": { "role": "neutral", "displayName": "Parchment", "canonical": "oklch(91% 0.015 75)", "tonalRamp": ["oklch(15% 0.005 75)", "oklch(30% 0.008 75)", "oklch(45% 0.01 75)", "oklch(55% 0.012 75)", "oklch(65% 0.013 75)", "oklch(75% 0.014 75)", "oklch(85% 0.015 75)", "oklch(93% 0.015 75)"] },
+      "aged-linen": { "role": "neutral", "displayName": "Aged Linen", "canonical": "oklch(80% 0.012 70)", "tonalRamp": ["oklch(15% 0.004 70)", "oklch(28% 0.006 70)", "oklch(40% 0.008 70)", "oklch(52% 0.01 70)", "oklch(64% 0.011 70)", "oklch(74% 0.012 70)", "oklch(83% 0.012 70)", "oklch(92% 0.01 70)"] },
+      "warm-stone": { "role": "neutral", "displayName": "Warm Stone", "canonical": "oklch(53% 0.012 65)", "tonalRamp": ["oklch(15% 0.004 65)", "oklch(25% 0.006 65)", "oklch(35% 0.008 65)", "oklch(43% 0.01 65)", "oklch(53% 0.012 65)", "oklch(63% 0.012 65)", "oklch(75% 0.01 65)", "oklch(87% 0.008 65)"] },
+      "deep-umber": { "role": "neutral", "displayName": "Deep Umber", "canonical": "oklch(37% 0.01 60)", "tonalRamp": ["oklch(10% 0.004 60)", "oklch(18% 0.006 60)", "oklch(26% 0.008 60)", "oklch(34% 0.009 60)", "oklch(42% 0.01 60)", "oklch(55% 0.01 60)", "oklch(68% 0.008 60)", "oklch(82% 0.006 60)"] },
+      "burnt-sienna": { "role": "primary", "displayName": "Burnt Sienna", "canonical": "oklch(65% 0.14 55)", "tonalRamp": ["oklch(20% 0.04 55)", "oklch(30% 0.06 55)", "oklch(40% 0.08 55)", "oklch(50% 0.1 55)", "oklch(60% 0.13 55)", "oklch(70% 0.12 55)", "oklch(80% 0.08 55)", "oklch(90% 0.04 55)"] },
+      "copper-glow": { "role": "primary", "displayName": "Copper Glow", "canonical": "oklch(73% 0.12 55)", "tonalRamp": ["oklch(22% 0.03 55)", "oklch(33% 0.05 55)", "oklch(44% 0.07 55)", "oklch(55% 0.09 55)", "oklch(65% 0.11 55)", "oklch(73% 0.12 55)", "oklch(82% 0.08 55)", "oklch(91% 0.04 55)"] },
+      "raw-cream": { "role": "neutral", "displayName": "Raw Cream", "canonical": "oklch(92% 0.015 80)", "tonalRamp": ["oklch(15% 0.005 80)", "oklch(30% 0.008 80)", "oklch(45% 0.01 80)", "oklch(58% 0.012 80)", "oklch(68% 0.013 80)", "oklch(78% 0.014 80)", "oklch(87% 0.015 80)", "oklch(94% 0.015 80)"] },
+      "ink-brown": { "role": "neutral", "displayName": "Ink Brown", "canonical": "oklch(20% 0.015 65)", "tonalRamp": ["oklch(8% 0.005 65)", "oklch(15% 0.01 65)", "oklch(22% 0.015 65)", "oklch(32% 0.015 65)", "oklch(45% 0.013 65)", "oklch(58% 0.01 65)", "oklch(72% 0.008 65)", "oklch(86% 0.005 65)"] },
+      "dark-ember": { "role": "primary", "displayName": "Dark Ember", "canonical": "oklch(55% 0.15 50)", "tonalRamp": ["oklch(18% 0.04 50)", "oklch(28% 0.06 50)", "oklch(38% 0.08 50)", "oklch(48% 0.12 50)", "oklch(55% 0.15 50)", "oklch(65% 0.12 50)", "oklch(77% 0.08 50)", "oklch(89% 0.04 50)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page hero headlines only. Cormorant Garamond at maximum scale." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings. Cormorant Garamond at mid-scale. Max-width 18ch." },
+      "title": { "displayName": "Title", "purpose": "Sub-section headings, grid item titles. Cormorant Garamond at small scale." },
+      "body": { "displayName": "Body", "purpose": "Running text. Instrument Sans. Capped at 68ch." },
+      "label": { "displayName": "Label", "purpose": "Section markers, metadata. Uppercase Instrument Sans, tracked wide." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "rise", "value": "opacity 0→1, translateY(16px→0), cubic-bezier(0.2, 0.7, 0.2, 1) 1.1s", "purpose": "Hero entrance animation. Staggered across label, h1, lead, and actions." },
+      { "name": "ease-color", "value": "color 0.2s ease", "purpose": "Default easing for link and text color transitions." },
+      { "name": "ease-all", "value": "all 0.25s ease", "purpose": "Button and CTA state transitions." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "880px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main call-to-action on dark surfaces. Burnt Sienna fill, uppercase, no radius.",
+      "html": "<a href=\"#\" class=\"ds-btn-primary\">BOOK A 45-MINUTE CALL</a>",
+      "css": ".ds-btn-primary { display: inline-block; padding: 16px 36px; background: #D27A3F; color: #100D0A; text-decoration: none; font-family: 'Instrument Sans', -apple-system, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; border: 1px solid #D27A3F; transition: background 0.25s ease, border-color 0.25s ease; } .ds-btn-primary:hover { background: #E89968; border-color: #E89968; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet companion CTA. Italic serif, no border, no background.",
+      "html": "<a href=\"#\" class=\"ds-btn-secondary\">Read what we believe →</a>",
+      "css": ".ds-btn-secondary { display: inline-block; padding: 16px 30px; color: #C4BCAC; text-decoration: none; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 17px; transition: color 0.25s ease; } .ds-btn-secondary:hover { color: #D27A3F; }"
+    },
+    {
+      "name": "CTA Button (Cream)",
+      "kind": "button",
+      "refersTo": "button-cta",
+      "description": "Primary CTA on cream surfaces. Inverted palette: dark fill, cream text.",
+      "html": "<a href=\"#\" class=\"ds-cta-button\">BOOK THE CALL</a>",
+      "css": ".ds-cta-button { display: inline-block; padding: 20px 44px; background: #2A241C; color: #ECE5D5; text-decoration: none; font-family: 'Instrument Sans', -apple-system, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; transition: background 0.3s ease; } .ds-cta-button:hover { background: #B85A20; }"
+    },
+    {
+      "name": "Nav CTA",
+      "kind": "button",
+      "refersTo": "nav-cta",
+      "description": "Navigation call-to-action. Italic serif, accent border, the only rounded element.",
+      "html": "<a href=\"#\" class=\"ds-nav-cta\">Book a Call</a>",
+      "css": ".ds-nav-cta { display: inline-block; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 15px; font-style: italic; font-weight: 500; color: #D27A3F; padding: 7px 20px; border: 1px solid #D27A3F; border-radius: 1px; text-decoration: none; transition: all 0.25s ease; } .ds-nav-cta:hover { background: #D27A3F; color: #100D0A; }"
+    },
+    {
+      "name": "Section Label",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Structural spine of every section. Uppercase, tracked, small.",
+      "html": "<div class=\"ds-section-label\">OUR PRACTICE</div><div class=\"ds-section-label ds-accent\">THE ENTRY ENGAGEMENT</div>",
+      "css": ".ds-section-label { font-family: 'Instrument Sans', -apple-system, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #7A736A; margin-bottom: 36px; } .ds-section-label.ds-accent { color: #D27A3F; }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Sticky frosted nav. Wordmark left, uppercase links right, italic CTA.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" class=\"ds-wordmark\">Agentic<span class=\"ds-dot\">.</span>Standard</a><div class=\"ds-nav-links\"><a href=\"#\">FOUNDATION</a><a href=\"#\">MAP</a><a href=\"#\" class=\"ds-nav-cta\">Book a Call</a></div></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 40px; background: rgba(16, 13, 10, 0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(232, 225, 212, 0.08); } .ds-wordmark { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; font-weight: 500; color: #E8E1D4; text-decoration: none; letter-spacing: -0.01em; } .ds-dot { color: #D27A3F; } .ds-nav-links { display: flex; align-items: center; gap: 36px; } .ds-nav-links > a { font-family: 'Instrument Sans', -apple-system, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #7A736A; text-decoration: none; transition: color 0.2s ease; } .ds-nav-links > a:hover { color: #E8E1D4; } .ds-nav-links .ds-nav-cta { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 15px; font-style: italic; font-weight: 500; text-transform: none; letter-spacing: 0; color: #D27A3F; padding: 7px 20px; border: 1px solid #D27A3F; border-radius: 1px; transition: all 0.25s ease; } .ds-nav-links .ds-nav-cta:hover { background: #D27A3F; color: #100D0A; }"
+    },
+    {
+      "name": "Evidence Block",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Callout with accent left border and tinted background. For guarantees, stakes, evidence.",
+      "html": "<div class=\"ds-evidence\"><span class=\"ds-evidence-label\">OUR STAKES</span><p class=\"ds-evidence-body\">If your sponsor isn't happy at week six, <strong>we don't get paid.</strong></p></div>",
+      "css": ".ds-evidence { padding: 32px; border-left: 2px solid #D27A3F; background: rgba(210, 122, 63, 0.04); } .ds-evidence-label { display: block; font-family: 'Instrument Sans', -apple-system, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #D27A3F; margin-bottom: 12px; } .ds-evidence-body { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 18px; color: #C4BCAC; font-style: italic; line-height: 1.5; margin: 0; max-width: 70ch; } .ds-evidence-body strong { color: #E8E1D4; font-style: normal; font-weight: 500; font-family: 'Cormorant Garamond', Georgia, serif; }"
+    },
+    {
+      "name": "Italic Link",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "In-content cross-reference. Italic serif, accent color, arrow suffix.",
+      "html": "<a href=\"#\" class=\"ds-italic-link\">See the Foundation →</a>",
+      "css": ".ds-italic-link { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; color: #D27A3F; text-decoration: none; font-size: 16px; transition: color 0.2s ease; } .ds-italic-link:hover { color: #E89968; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Operator's Study",
+    "overview": "A private room where serious work gets discussed over warm light. Not a showroom, not a stage, not a conference room with a projector. The kind of space where a founder and a trusted advisor sit across from each other and speak directly. Dark walls, warm materials, the quiet confidence of a room that doesn't need to impress anyone.\n\nThe system rejects everything that signals \"consulting theater\": gradient blobs, illustration packs, logo bars, bouncy animations, stock photography, corporate blue, neon accents, glowing orbs. It rejects the template-polished Squarespace aesthetic that makes every boutique firm interchangeable. It rejects the SaaS landing page playbook entirely.\n\nWhat it pursues instead: the weight of a well-set book, the warmth of aged paper, the directness of a handwritten brief. Every element earns its presence through content, not decoration.",
+    "keyCharacteristics": [
+      "Dark, warm palette grounded in near-black and burnt orange; no cool tones",
+      "Serif display type (Cormorant Garamond) paired with clean sans body (Instrument Sans)",
+      "Border-grid layouts instead of cards; content separated by structure, not containers",
+      "Subtle grain texture overlay for tactile warmth",
+      "Italic serif used as the accent voice: CTAs, emphasis, editorial asides",
+      "Sharp, unrounded edges throughout; the system has no soft corners",
+      "Generous vertical rhythm; sections breathe"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Burnt Sienna is the only saturated color in the system. No secondary accent, no tertiary, no status colors, no data-viz palette. If something needs emphasis, it's Burnt Sienna or it's typographic weight. The constraint is the identity.", "section": "colors" },
+      { "name": "The Cream Inversion Rule", "body": "Every page ends with a cream CTA section. On cream, the palette inverts: Dark Ember replaces Burnt Sienna, Ink Brown replaces Parchment, and the button flips to dark-on-light. The inversion is always the same; never improvised.", "section": "colors" },
+      { "name": "The Italic Accent Rule", "body": "Italic Cormorant Garamond in Burnt Sienna is the system's primary emphasis device. It replaces bold for editorial stress. Used inside headings for the key word, for CTA link text, for subtitles and pull quotes. It is never decorative; it always marks the operative word or the call to action.", "section": "typography" },
+      { "name": "The Label Discipline Rule", "body": "Every section opens with a label: 11px, uppercase, tracked at 0.22em, Instrument Sans. Labels are either Warm Stone or Burnt Sienna. No section exists without its label. The label is the structural skeleton of the entire site.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "No element casts a shadow. If a future component needs perceived depth, use tonal stepping (Smoked Oak) or border separation. Shadows are reserved for truly exceptional moments; reaching for one should feel like breaking a rule, because it is.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Burnt Sienna exclusively for emphasis. One accent, applied with restraint. Its power comes from scarcity.",
+      "Do open every section with an uppercase label. The label is the skeleton; the heading is the voice.",
+      "Do constrain heading line lengths (12-18ch for Display, 18ch for Headline). Let the serif break dramatically across lines.",
+      "Do use italic Cormorant Garamond as the accent voice for CTAs, emphasis, and editorial asides.",
+      "Do separate content with border grids, not cards. Lines, not boxes.",
+      "Do end every page with the cream CTA inversion.",
+      "Do cap body text at 68ch.",
+      "Do use clamp() for all responsive sizing.",
+      "Do include the grain texture overlay on every page.",
+      "Do include print styles on long-form pages."
+    ],
+    "donts": [
+      "Don't introduce a second accent color. The system has one voice.",
+      "Don't use gradient blobs, illustration packs, 'trusted by' logo bars, or bouncy animations.",
+      "Don't use corporate blue, stock photography, or meaningless buzzwords about 'digital transformation.'",
+      "Don't use neon accents, glowing orbs, particle effects, 'powered by AI' badges, or futuristic sans-serifs.",
+      "Don't use box-shadows for decoration. The system is flat.",
+      "Don't use border-radius greater than 1px on any element.",
+      "Don't use bold for emphasis in body text. Use italic Cormorant in Burnt Sienna.",
+      "Don't create card components with background fills, rounded corners, and internal padding.",
+      "Don't animate layout properties. Only rise (opacity + translateY) on hero elements."
+    ]
+  }
+}

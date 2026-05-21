@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Agentic Foundation — Agentic Standard</title>
+<meta name="description" content="Six weeks. Fixed fee. Two to three deployed agents, The Agentic Readiness Map, and a working-session presentation. Operating AI, not a strategy deck.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #100D0A;
+    --bg-soft:      #15110D;
+    --fg:           #E8E1D4;
+    --fg-dim:       #C4BCAC;
+    --muted:        #7A736A;
+    --muted-dim:    #4E483F;
+    --border:       rgba(232, 225, 212, 0.08);
+    --border-strong:rgba(232, 225, 212, 0.14);
+    --accent:       #D27A3F;
+    --accent-soft:  #E89968;
+    --cream:        #ECE5D5;
+    --cream-text:   #2A241C;
+
+    --font-display: "Cormorant Garamond", "Cormorant", Georgia, serif;
+    --font-body:    "Instrument Sans", -apple-system, "Helvetica Neue", sans-serif;
+
+    --container:    min(1180px, 92vw);
+    --gutter:       clamp(20px, 4vw, 60px);
+    --reading:      min(720px, 92vw);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    width: var(--container);
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .frame {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  section {
+    border-bottom: 1px solid var(--border);
+    padding: clamp(60px, 9vw, 110px) var(--gutter);
+    position: relative;
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: clamp(28px, 4vw, 44px);
+  }
+
+  .section-label.accent { color: var(--accent); }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    color: var(--fg);
+  }
+
+  h1 { font-size: clamp(42px, 6.5vw, 84px); line-height: 1.04; font-weight: 500; }
+  h2 { font-size: clamp(32px, 4.5vw, 56px); line-height: 1.08; }
+  h3 { font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; }
+
+  em, .italic-accent {
+    font-style: italic;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+
+  p {
+    color: var(--fg-dim);
+    margin-bottom: 1.2em;
+  }
+
+  .reading p {
+    max-width: var(--reading);
+    font-size: clamp(16px, 1.4vw, 18px);
+    line-height: 1.7;
+  }
+
+  .reading p.lead {
+    font-size: clamp(18px, 1.8vw, 22px);
+    color: var(--fg-dim);
+    line-height: 1.55;
+  }
+
+  .reading p em {
+    font-style: italic;
+    color: var(--accent-soft);
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+
+  /* Hero */
+  .hero { padding-top: clamp(80px, 12vw, 140px); padding-bottom: clamp(70px, 10vw, 120px); }
+  .hero h1 { max-width: 14ch; margin-bottom: clamp(32px, 4vw, 44px); }
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .hero .subtitle {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.4vw, 30px);
+    color: var(--fg-dim);
+    font-style: italic;
+    max-width: 36ch;
+    line-height: 1.35;
+    font-weight: 400;
+  }
+
+  /* Reading sections */
+  .reading { max-width: var(--reading); }
+  .reading h2 { margin-bottom: clamp(28px, 3.5vw, 42px); max-width: 18ch; }
+  .reading h2 em { color: var(--accent); font-style: italic; }
+
+  /* Deliverables */
+  .deliverables-intro { padding-bottom: clamp(40px, 6vw, 72px); }
+  .deliverables-intro h2 { max-width: 16ch; margin-bottom: 32px; }
+  .deliverables-intro .lead {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2vw, 24px);
+    color: var(--fg-dim);
+    max-width: 52ch;
+    font-style: italic;
+    line-height: 1.45;
+  }
+
+  .deliverable {
+    padding: clamp(48px, 7vw, 88px) var(--gutter);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .deliverable:last-of-type { border-bottom: 1px solid var(--border-strong); }
+
+  .deliverable-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: clamp(28px, 4vw, 60px);
+    align-items: start;
+  }
+
+  .deliverable-num {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .deliverable-tag {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+  }
+
+  .deliverable-body { max-width: 56ch; }
+
+  .deliverable h3 {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 3.2vw, 38px);
+    line-height: 1.1;
+    color: var(--fg);
+    font-weight: 500;
+    margin-bottom: clamp(20px, 2.5vw, 28px);
+    letter-spacing: -0.005em;
+  }
+
+  .deliverable h3 em { color: var(--accent); font-style: italic; }
+
+  .deliverable p {
+    font-size: clamp(15px, 1.3vw, 17px);
+    line-height: 1.7;
+    color: var(--fg-dim);
+    margin-bottom: 1.1em;
+  }
+
+  .deliverable p:last-child { margin-bottom: 0; }
+
+  .deliverable p em {
+    color: var(--accent-soft);
+    font-style: italic;
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+
+  /* Timeline */
+  .timeline {
+    margin-top: clamp(40px, 5vw, 60px);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+  }
+
+  .week {
+    padding: clamp(20px, 2.5vw, 30px) clamp(16px, 2vw, 22px);
+    border-left: 1px solid var(--border);
+    min-height: 240px;
+  }
+
+  .week:first-child { border-left: none; }
+
+  .week .num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+    font-weight: 500;
+  }
+
+  .week .label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+    margin-top: 4px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .week h5 {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    margin-bottom: 10px;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .week p {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 0;
+    max-width: none;
+  }
+
+  /* Guarantee */
+  .guarantee-block {
+    margin-top: clamp(36px, 4vw, 52px);
+    padding: clamp(28px, 3.5vw, 40px);
+    border-left: 2px solid var(--accent);
+    background: rgba(210, 122, 63, 0.04);
+  }
+
+  .guarantee-block .label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: block;
+    font-weight: 500;
+  }
+
+  .guarantee-block p {
+    font-family: var(--font-display);
+    font-size: clamp(17px, 1.7vw, 20px);
+    color: var(--fg-dim);
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: 0;
+    max-width: 70ch;
+  }
+
+  .guarantee-block strong {
+    color: var(--fg);
+    font-style: normal;
+    font-weight: 500;
+    font-family: var(--font-display);
+  }
+
+  /* What we need from you */
+  .prereq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: clamp(36px, 4vw, 56px);
+    border-top: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+  }
+
+  .prereq {
+    padding: clamp(28px, 3.5vw, 44px) clamp(24px, 3vw, 36px);
+    border-left: 1px solid var(--border);
+  }
+
+  .prereq:nth-child(odd) { border-left: none; padding-left: 0; }
+  .prereq:nth-child(even) { padding-right: 0; }
+  .prereq:nth-child(n+3) { border-top: 1px solid var(--border); }
+
+  .prereq .num {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .prereq h4 {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2.2vw, 26px);
+    color: var(--fg);
+    font-weight: 500;
+    margin-bottom: 12px;
+    letter-spacing: -0.005em;
+    text-transform: none;
+    line-height: 1.15;
+  }
+
+  .prereq p {
+    font-size: 14.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+    max-width: none;
+  }
+
+  /* Pricing band */
+  .pricing-band {
+    padding: clamp(48px, 6vw, 80px) var(--gutter);
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    text-align: center;
+  }
+
+  .pricing-band .price {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 10vw, 140px);
+    line-height: 1;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    margin-bottom: 18px;
+  }
+
+  .pricing-band .price .unit {
+    font-family: var(--font-body);
+    font-size: clamp(13px, 1.2vw, 16px);
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-left: 12px;
+    vertical-align: middle;
+    font-weight: 500;
+  }
+
+  .pricing-band .qualifier {
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.6vw, 22px);
+    color: var(--fg-dim);
+    font-style: italic;
+    max-width: 50ch;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* Three paths */
+  .paths {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: clamp(36px, 4vw, 56px);
+    border-top: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+  }
+
+  .path {
+    padding: clamp(28px, 3.5vw, 44px) clamp(24px, 3vw, 36px);
+    border-left: 1px solid var(--border);
+  }
+
+  .path:first-child { border-left: none; padding-left: 0; }
+  .path:last-child { padding-right: 0; }
+
+  .path .label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: block;
+    font-weight: 500;
+  }
+
+  .path h4 {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.4vw, 28px);
+    color: var(--fg);
+    font-weight: 500;
+    margin-bottom: 14px;
+    letter-spacing: -0.005em;
+    text-transform: none;
+    line-height: 1.15;
+  }
+
+  .path h4 em { color: var(--accent); font-style: italic; }
+
+  .path p {
+    font-size: 14.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+    max-width: none;
+  }
+
+  /* Animations */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero h1, .hero .subtitle, .hero .section-label {
+    animation: rise 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .hero .section-label { animation-delay: 0.05s; }
+  .hero h1             { animation-delay: 0.2s; }
+  .hero .subtitle      { animation-delay: 0.45s; }
+
+  /* ============ SITE NAVIGATION ============ */
+  .site-nav { position: sticky; top: 0; z-index: 50; background: rgba(16, 13, 10, 0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 18px var(--gutter); display: flex; align-items: center; justify-content: space-between; }
+  .site-nav .wordmark { font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--fg); text-decoration: none; letter-spacing: -0.01em; }
+  .site-nav .wordmark .dot { color: var(--accent); }
+  .primary-nav { display: flex; align-items: center; gap: clamp(20px, 3vw, 40px); }
+  .primary-nav a { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s ease; }
+  .primary-nav a:hover { color: var(--fg); }
+  .primary-nav a.active { color: var(--fg); }
+  .primary-nav a.cta { font-family: var(--font-display); font-size: 15px; font-style: italic; text-transform: none; letter-spacing: 0; color: var(--accent); font-weight: 500; padding: 7px 20px; border: 1px solid var(--accent); border-radius: 1px; transition: all 0.25s ease; }
+  .primary-nav a.cta:hover { background: var(--accent); color: var(--bg); }
+
+  /* ============ CTA SECTION ============ */
+  .cta-section { background: var(--cream); color: var(--cream-text); padding: clamp(80px, 11vw, 140px) var(--gutter); text-align: center; border-bottom: none; }
+  .cta-section .section-label { color: rgba(42, 36, 28, 0.5); margin-bottom: 32px; font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; }
+  .cta-section .section-label.accent { color: #B85A20; }
+  .cta-section h2 { color: var(--cream-text); font-family: var(--font-display); font-size: clamp(36px, 5vw, 64px); line-height: 1.08; font-weight: 500; max-width: 22ch; margin: 0 auto clamp(28px, 3.5vw, 40px); letter-spacing: -0.01em; }
+  .cta-section h2 em { color: #B85A20; font-style: italic; }
+  .cta-section .sub { font-family: var(--font-display); font-style: italic; font-size: clamp(18px, 1.9vw, 22px); color: rgba(42, 36, 28, 0.7); max-width: 44ch; margin: 0 auto clamp(40px, 5vw, 60px); line-height: 1.45; }
+  .cta-button { display: inline-block; padding: 20px 44px; background: var(--cream-text); color: var(--cream); text-decoration: none; font-family: var(--font-body); font-size: 13px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; transition: all 0.3s ease; }
+  .cta-button:hover { background: #B85A20; }
+
+  /* ============ SITE FOOTER ============ */
+  .site-footer { background: var(--bg); border-top: 1px solid var(--border); padding: clamp(60px, 7vw, 84px) var(--gutter) clamp(36px, 4vw, 52px); }
+  .footer-inner { width: min(1180px, 92vw); margin: 0 auto; }
+  .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: clamp(28px, 4vw, 60px); margin-bottom: clamp(40px, 5vw, 60px); align-items: start; }
+  .footer-brand .wordmark { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--fg); text-decoration: none; letter-spacing: -0.01em; display: block; margin-bottom: 14px; }
+  .footer-brand .wordmark .dot { color: var(--accent); }
+  .footer-brand .tagline { font-family: var(--font-display); font-style: italic; font-size: 16px; color: var(--muted); line-height: 1.45; max-width: 28ch; }
+  .footer-col .heading { font-family: var(--font-body); font-size: 10px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+  .footer-col a { display: block; font-family: var(--font-display); font-size: 17px; color: var(--fg-dim); text-decoration: none; margin-bottom: 10px; transition: color 0.2s ease; }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-dim); }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 880px) {
+    .primary-nav { gap: 14px; }
+    .primary-nav a:not(.cta) { display: none; }
+    .primary-nav a.cta { font-size: 13px; padding: 6px 14px; }
+
+    .deliverable-grid { grid-template-columns: 1fr; gap: 18px; }
+
+    .timeline { grid-template-columns: 1fr 1fr; }
+    .week { border-left: none; border-top: 1px solid var(--border); min-height: 0; }
+    .week:nth-child(odd) { border-right: 1px solid var(--border); }
+    .week:first-child, .week:nth-child(2) { border-top: none; }
+
+    .prereq-grid { grid-template-columns: 1fr; }
+    .prereq { border-left: none !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .prereq:nth-child(n+2) { border-top: 1px solid var(--border); }
+
+    .paths { grid-template-columns: 1fr; }
+    .path { border-left: none; padding: 28px 0; }
+    .path:nth-child(n+2) { border-top: 1px solid var(--border); }
+
+    .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+    .footer-bottom { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    section, .deliverable { background: white; color: black; }
+    .pricing-band { background: white; color: black; }
+    body::before { display: none; }
+    h1, h2, h3, .pricing-band .price { color: black; }
+    p { color: #333; }
+    em, .italic-accent { color: #B85A20; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
+  <div class="primary-nav">
+    <a href="/foundation.html" class="active">Foundation</a>
+    <a href="/map.html">Map</a>
+    <a href="/continuum.html">Continuum</a>
+    <a href="/standard.html">Standard</a>
+    <a href="/book.html" class="cta">Book a Call</a>
+  </div>
+</nav>
+
+<div class="container frame">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="section-label accent">The Entry Engagement</div>
+    <h1>The Agentic <em>Foundation</em>.</h1>
+    <div class="subtitle">Six weeks. Fixed fee. Operating AI inside your organization &mdash; not a strategy deck about what you could do someday.</div>
+  </section>
+
+  <!-- OPENING -->
+  <section>
+    <div class="reading">
+      <div class="section-label">What it is</div>
+      <h2>The engagement that puts AI <em>to work</em>.</h2>
+      <p class="lead">The Agentic Foundation is how every client relationship begins. In six weeks, we deploy two to three working agents into your real workflows, produce The Agentic Readiness Map &mdash; a scored diagnostic and phased roadmap &mdash; and present the whole thing in a working session with your sponsor.</p>
+      <p>By week six your organization has AI doing real work in production, a roadmap your board will recognize, and three honest paths forward. You choose which one fits.</p>
+      <p>This is not a pilot. Pilots are designed to prove a concept; the Foundation is designed to <em>change the operating capacity of your organization</em> and leave behind the roadmap to keep going.</p>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES INTRO -->
+  <section class="deliverables-intro">
+    <div class="reading">
+      <div class="section-label accent">Deliverables</div>
+      <h2>Three things you walk away with.</h2>
+      <p class="lead">Not slides about what could be done. Artifacts that are already running, already scored, and already defensible to your board.</p>
+    </div>
+  </section>
+
+  <!-- DELIVERABLE 01 -->
+  <article class="deliverable">
+    <div class="deliverable-grid">
+      <div>
+        <div class="deliverable-num">01</div>
+        <div class="deliverable-tag">The Agents</div>
+      </div>
+      <div class="deliverable-body">
+        <h3>Two to three <em>deployed agents</em>.</h3>
+        <p>Working agents in production on real workflows we observe and agree on together during the first two weeks. These are not demos or proofs of concept. They run on your data, in your tools, doing work that previously required a person.</p>
+        <p>Each agent ships with workflow shadowing, tuning, stabilization, and a named champion on your team who understands what it does and how to evaluate it. The agents run on <em>Harbour</em>, our hosted infrastructure, with audit trails, failure handling, and observability built in.</p>
+        <p>By the end of week six, you can point to hours returned and capacity unlocked &mdash; not a dashboard of what might be possible.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- DELIVERABLE 02 -->
+  <article class="deliverable">
+    <div class="deliverable-grid">
+      <div>
+        <div class="deliverable-num">02</div>
+        <div class="deliverable-tag">The Map</div>
+      </div>
+      <div class="deliverable-body">
+        <h3>The Agentic Readiness <em>Map</em>.</h3>
+        <p>A scored diagnostic across six dimensions of organizational readiness &mdash; operating habit, workflow legibility, data accessibility, system surface, governance posture, and sponsorship &mdash; each scored 1&ndash;5 on direct observation, not questionnaires.</p>
+        <p>Alongside the scores: a complete opportunity inventory of every automation candidate we surfaced during the six weeks, catalogued in a consistent format with effort, impact, confidence scores, and a phase recommendation. Candidates are grouped into a phased roadmap &mdash; 90 days, 180 days, 365 days &mdash; based on real dependencies, not appetite.</p>
+        <p>The Map is yours. If you walk away from us with the document and never call back, it's good enough to run on. That is part of the value.</p>
+        <a href="/map.html" style="font-family: var(--font-display); font-style: italic; color: var(--accent); text-decoration: none; font-size: 16px;">Read the full methodology &rarr;</a>
+      </div>
+    </div>
+  </article>
+
+  <!-- DELIVERABLE 03 -->
+  <article class="deliverable">
+    <div class="deliverable-grid">
+      <div>
+        <div class="deliverable-num">03</div>
+        <div class="deliverable-tag">The Session</div>
+      </div>
+      <div class="deliverable-body">
+        <h3>The working-session <em>presentation</em>.</h3>
+        <p>A sixty to ninety minute session with your sponsor where we walk the agents running, present the Map, review every automation opportunity we surfaced, and lay out the three paths forward.</p>
+        <p>This is not a read-out. It's a working session. We watch what gets debated, what surprises the room, and what the sponsor prioritizes. That conversation becomes the foundation for whatever comes next &mdash; whether with us or without us.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- THE SIX WEEKS -->
+  <section>
+    <div class="section-label">The Engagement</div>
+    <h2>How the six weeks run.</h2>
+    <p class="lead" style="margin-top: 24px; max-width: 60ch;">Every week has a job. The agents ship early so the Map is grounded in real operating experience, not interviews about what people think they do.</p>
+
+    <div class="timeline">
+      <div class="week">
+        <div class="num">1</div>
+        <span class="label">Kickoff</span>
+        <h5>Sponsor alignment</h5>
+        <p>Sponsor interview. System inventory. Workflow shadowing candidates identified. Security and IT introductions made.</p>
+      </div>
+      <div class="week">
+        <div class="num">2</div>
+        <span class="label">Discovery</span>
+        <h5>Shadowing &amp; data probe</h5>
+        <p>Three to five workflow shadowing sessions. We attempt to pull three specific data sets ourselves. All policies read.</p>
+      </div>
+      <div class="week">
+        <div class="num">3</div>
+        <span class="label">Build</span>
+        <h5>First deploys</h5>
+        <p>First one or two Harbour agents ship. Observation continues. Dimensions 1&ndash;4 scoring begins on collected evidence.</p>
+      </div>
+      <div class="week">
+        <div class="num">4</div>
+        <span class="label">Build</span>
+        <h5>Stabilize &amp; expand</h5>
+        <p>Deployed agents tuned. Candidate list grows and starts being sorted. Phase placements debated internally.</p>
+      </div>
+      <div class="week">
+        <div class="num">5</div>
+        <span class="label">Govern</span>
+        <h5>Governance review</h5>
+        <p>Remaining agents ship. Security and compliance scoring conversation. Dimensions 5 &amp; 6 scored. Draft inventory complete.</p>
+      </div>
+      <div class="week">
+        <div class="num">6</div>
+        <span class="label">Present</span>
+        <h5>Synthesis &amp; handoff</h5>
+        <p>Document written. Internal review pass. Working session with the sponsor. The Map and agents are left behind.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE NEED FROM YOU -->
+  <section>
+    <div class="section-label">What We Need From You</div>
+    <h2>Four things to make the six weeks <em>work</em>.</h2>
+    <p class="lead" style="margin-top: 24px; max-width: 60ch;">We bring the methodology, the engineering, and the operating rigor. You bring the access and the mandate. Without these four, the engagement stalls.</p>
+
+    <div class="prereq-grid">
+      <div class="prereq">
+        <span class="num">01</span>
+        <h4>An executive sponsor</h4>
+        <p>Someone who can approve the engagement, clear blockers, and attend the week-six working session. This person owns the outcome.</p>
+      </div>
+      <div class="prereq">
+        <span class="num">02</span>
+        <h4>An operational owner</h4>
+        <p>Someone on your team who meets with us weekly, coordinates access to people and systems, and becomes the internal champion.</p>
+      </div>
+      <div class="prereq">
+        <span class="num">03</span>
+        <h4>Access to the work</h4>
+        <p>Permission to shadow real workflows, talk to real people doing real work, and access the systems where that work happens. We can't score what we can't see.</p>
+      </div>
+      <div class="prereq">
+        <span class="num">04</span>
+        <h4>IT and security introduction</h4>
+        <p>A warm handoff to the people who control system access, credentials, and policy. Agents need to read and write to your tools.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE GUARANTEE -->
+  <section>
+    <div class="reading">
+      <div class="section-label accent">The Guarantee</div>
+      <h2>If it doesn't land, you don't <em>pay</em>.</h2>
+      <p class="lead">The Foundation carries a satisfaction guarantee. If your sponsor isn't happy with the work, the process, or the result at week six, you don't get paid. No negotiation, no partial billing, no awkward conversation about scope.</p>
+      <p>We carry this risk because we believe in the work and because it forces us to choose engagements we can actually win. A consulting firm that guarantees outcomes is a consulting firm that disqualifies honestly.</p>
+    </div>
+
+    <div class="guarantee-block">
+      <span class="label">The Deal</span>
+      <p>If your sponsor isn't happy at week six, <strong>we don't get paid.</strong> If we succeed, <strong>$20,000 of your engagement fee carries forward as your first Continuum month</strong> &mdash; so the transition to the ongoing partnership is already funded.</p>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <div class="pricing-band">
+    <div class="price">$48,000<span class="unit">USD · Fixed</span></div>
+    <div class="qualifier">One invoice at kickoff. Six weeks of work. Two to three deployed agents. The Agentic Readiness Map. The working-session presentation. The guarantee.</div>
+  </div>
+
+  <!-- THREE PATHS -->
+  <section>
+    <div class="section-label">After Week Six</div>
+    <h2>Three honest paths <em>forward</em>.</h2>
+    <p class="lead" style="margin-top: 24px; max-width: 60ch;">At the end of the Foundation, you choose. There's no pressure to continue with us, and every path leaves you better off than when you started.</p>
+
+    <div class="paths">
+      <div class="path">
+        <span class="label">Path One</span>
+        <h4>The Agentic <em>Continuum</em></h4>
+        <p>The ongoing partnership that executes the roadmap. New agents on cadence, governance maturation, workforce coaching, and quarterly board-ready reporting. $20,000 per month, with your first month already funded from the Foundation fee.</p>
+      </div>
+      <div class="path">
+        <span class="label">Path Two</span>
+        <h4>Harbour, <em>kept running</em></h4>
+        <p>You take the Map and run the roadmap yourself. We keep the agents running on Harbour infrastructure at $2,000 per month. Changes and repairs billed at $200 per hour.</p>
+      </div>
+      <div class="path">
+        <span class="label">Path Three</span>
+        <h4>Walk away, <em>fully equipped</em></h4>
+        <p>You take the Map, the agents, and the documentation. We help you migrate to your own infrastructure during a two-week transition window included in the engagement. Everything we built is yours.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+  <div class="section-label accent">To Begin</div>
+  <h2>A forty-five-minute call to scope the <em>work</em>.</h2>
+  <p class="sub">No pitch deck. We ask about the work your team does, where AI has and hasn't stuck, and where the natural first agents would live. If The Foundation fits, we draft the SOW within forty-eight hours.</p>
+  <a href="/book.html" class="cta-button">Book the call</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/index.html" class="wordmark">Agentic<span class="dot">.</span>Standard</a>
+        <div class="tagline">We make agentic AI work inside your organization &mdash; not just in a demo.</div>
+      </div>
+      <div class="footer-col">
+        <div class="heading">The Work</div>
+        <a href="/foundation.html">The Foundation</a>
+        <a href="/map.html">The Readiness Map</a>
+        <a href="/continuum.html">The Continuum</a>
+      </div>
+      <div class="footer-col">
+        <div class="heading">The Firm</div>
+        <a href="/standard.html">The Standard</a>
+        <a href="/book.html">Book a Call</a>
+      </div>
+      <div class="footer-col">
+        <div class="heading">Contact</div>
+        <a href="mailto:hello@agenticstandard.ca">hello@agenticstandard.ca</a>
+        <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted-dim); margin-top: 6px; line-height: 1.6;">Canada<br>Remote-capable</div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>agenticstandard.ca</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

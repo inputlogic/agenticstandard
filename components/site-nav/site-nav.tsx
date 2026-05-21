@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import s from './site-nav.module.scss'
+
+const CALENDLY_URL =
+  'https://calendly.com/jordanmichealeckersley/agenticstandard'
 
 const navLinks = [
   { href: '/foundation', label: 'Foundation' },
@@ -16,6 +19,21 @@ export function SiteNav() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
+  const close = useCallback(() => setOpen(false), [])
+
+  useEffect(() => {
+    if (!open) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+    }
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [open, close])
+
   return (
     <nav className={s.nav} aria-label="Main navigation">
       <Link href="/" className={s.wordmark}>
@@ -27,18 +45,20 @@ export function SiteNav() {
             key={href}
             href={href}
             className={`${s.link} ${pathname === href ? s['link-active'] : ''}`}
-            onClick={() => setOpen(false)}
+            onClick={close}
           >
             {label}
           </Link>
         ))}
-        <Link
-          href="/book"
-          className={`${s.cta} ${pathname === '/book' ? s['link-active'] : ''}`}
-          onClick={() => setOpen(false)}
+        <a
+          href={CALENDLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={s.cta}
+          onClick={close}
         >
           Book a Call
-        </Link>
+        </a>
       </div>
       <button
         className={s.toggle}

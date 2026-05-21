@@ -4,10 +4,10 @@ import { SectionLabel } from 'components/section-label'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'Agentic Standard -- We make agentic AI work inside your organization',
+  title: 'Agentic Standard | We make agentic AI work inside your organization',
   description: 'A specialized consulting firm that closes the gap between AI technology and the operating model that has to meet it. Six weeks. Fixed fee. Operating AI, not strategy decks.',
   openGraph: {
-    title: 'Agentic Standard -- We make agentic AI work inside your organization',
+    title: 'Agentic Standard | We make agentic AI work inside your organization',
     description: 'A specialized consulting firm that closes the gap between AI technology and the operating model that has to meet it. Six weeks. Fixed fee.',
   },
 }
@@ -29,7 +29,7 @@ export default function HomePage() {
             Most enterprises have tried AI. Few have made it stick. We&apos;re a specialized firm that closes that gap by preparing your people, instrumenting your workflows, and deploying agents that measurably give time back.
           </p>
           <div className={s['hero-actions']}>
-            <Link href="/book" className={s['btn-primary']}>Book a 45-minute call</Link>
+            <a href="https://calendly.com/jordanmichealeckersley/agenticstandard" target="_blank" rel="noopener noreferrer" className={s['btn-primary']}>Book a 45-minute call</a>
             <Link href="/standard" className={s['btn-secondary']}>Read what we believe →</Link>
           </div>
         </section>
@@ -88,7 +88,7 @@ export default function HomePage() {
           <div className={s['journey-grid']}>
             <div className={s['journey-step']}>
               <div className={s['journey-num']}>1</div>
-              <span className={s['journey-label']}>Weeks 1--6</span>
+              <span className={s['journey-label']}>Weeks 1–6</span>
               <h4>The Agentic Foundation</h4>
               <p>Two to three deployed agents on workflows we observe and agree on, plus The Agentic Readiness Map: a year-long roadmap scored against six dimensions of organizational readiness.</p>
               <Link href="/foundation" className={s['journey-link']}>See the Foundation →</Link>
@@ -102,7 +102,7 @@ export default function HomePage() {
             </div>
             <div className={s['journey-step']}>
               <div className={s['journey-num']}>3</div>
-              <span className={s['journey-label']}>Months 2--12+</span>
+              <span className={s['journey-label']}>Months 2–12+</span>
               <h4>The Agentic Continuum</h4>
               <p>The ongoing partnership that executes the roadmap. New agents on cadence, governance maturation, workforce coaching, and quarterly board-ready reporting. The retainer you renew because you want to.</p>
               <Link href="/continuum" className={s['journey-link']}>See the Continuum →</Link>
@@ -187,7 +187,7 @@ export default function HomePage() {
               <span className={s['offer-tier']}>Entry · 6 weeks · Fixed fee</span>
               <h4>The Agentic Foundation</h4>
               <div className={s['offer-price']}>$48,000<span className={s['offer-unit']}>USD</span></div>
-              <p>2--3 deployed agents, The Agentic Readiness Map, working-session presentation. One invoice at kickoff.</p>
+              <p>2–3 deployed agents, The Agentic Readiness Map, working-session presentation. One invoice at kickoff.</p>
             </div>
             <div className={s['offer-cell']}>
               <span className={s['offer-tier']}>Ongoing partnership</span>

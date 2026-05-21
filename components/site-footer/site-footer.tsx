@@ -24,7 +24,7 @@ export function SiteFooter() {
           <div>
             <div className={s['col-heading']}>The Firm</div>
             <Link href="/standard" className={s['col-link']}>The Standard</Link>
-            <Link href="/book" className={s['col-link']}>Book a Call</Link>
+            <a href="https://calendly.com/jordanmichealeckersley/agenticstandard" target="_blank" rel="noopener noreferrer" className={s['col-link']}>Book a Call</a>
           </div>
           <div>
             <div className={s['col-heading']}>Contact</div>

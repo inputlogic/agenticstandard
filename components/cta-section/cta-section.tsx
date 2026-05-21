@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 import s from './cta-section.module.scss'
 
+const CALENDLY_URL =
+  'https://calendly.com/jordanmichealeckersley/agenticstandard'
+
 type CtaSectionProps = {
   label?: string
   heading: ReactNode
@@ -15,16 +18,29 @@ export function CtaSection({
   heading,
   sub,
   buttonText = 'Book the call',
-  buttonHref = '/book',
+  buttonHref = CALENDLY_URL,
 }: CtaSectionProps) {
+  const isExternal = buttonHref.startsWith('http')
+
   return (
     <section className={s.section}>
       <div className={s.label}>{label}</div>
       <h2 className={s.heading}>{heading}</h2>
       <p className={s.sub}>{sub}</p>
-      <Link href={buttonHref} className={s.button}>
-        {buttonText}
-      </Link>
+      {isExternal ? (
+        <a
+          href={buttonHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={s.button}
+        >
+          {buttonText}
+        </a>
+      ) : (
+        <Link href={buttonHref} className={s.button}>
+          {buttonText}
+        </Link>
+      )}
     </section>
   )
 }

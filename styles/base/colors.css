@@ -1,0 +1,35 @@
+:root {
+  /* Background */
+  --bg: #100D0A;
+  --bg-soft: #15110D;
+
+  /* Foreground */
+  --fg: #E8E1D4;
+  --fg-dim: #C4BCAC;
+
+  /* Muted */
+  --muted: #918A80;
+  --muted-dim: #635C52;
+
+  /* Borders */
+  --border: rgba(232, 225, 212, 0.08);
+  --border-strong: rgba(232, 225, 212, 0.14);
+
+  /* Accent */
+  --accent: #D27A3F;
+  --accent-soft: #E89968;
+
+  /* Cream (inverted surface) */
+  --cream: #ECE5D5;
+  --cream-text: #2A241C;
+
+  /* Accent on cream */
+  --accent-on-cream: #B85A20;
+
+  /* Semantic aliases */
+  --body-color: var(--bg);
+  --text-color: var(--fg);
+  --text-color-alt: var(--fg-dim);
+  --heading-color: var(--fg);
+  --border-color: var(--border);
+}

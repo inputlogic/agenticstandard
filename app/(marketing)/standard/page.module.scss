@@ -1,0 +1,210 @@
+@use 'styles/base/variables' as *;
+
+/* Hero
+=================================================== */
+.hero {
+  padding: clamp(80px, 12vw, 140px) var(--gutter) clamp(70px, 10vw, 120px);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-title {
+  max-width: 14ch;
+  margin-bottom: clamp(32px, 4vw, 44px);
+  animation: rise 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: 0.2s;
+}
+
+.hero-subtitle {
+  font-family: var(--font-display, #{$font-display});
+  font-size: clamp(22px, 2.4vw, 30px);
+  color: var(--fg-dim);
+  font-style: italic;
+  max-width: 36ch;
+  line-height: 1.35;
+  font-weight: 400;
+  animation: rise 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: 0.45s;
+}
+
+/* Sections
+=================================================== */
+.section {
+  border-bottom: 1px solid var(--border);
+  padding: clamp(60px, 9vw, 110px) var(--gutter);
+}
+
+/* Reading column
+=================================================== */
+.reading {
+  max-width: $container-width-reading;
+
+  p {
+    max-width: $container-width-reading;
+    font-size: clamp(16px, 1.4vw, 18px);
+    line-height: 1.7;
+  }
+
+  em {
+    font-style: italic;
+    color: var(--accent-soft);
+    font-family: var(--font-display, #{$font-display});
+    font-weight: 400;
+  }
+}
+
+.reading-heading {
+  margin-bottom: clamp(28px, 3.5vw, 42px);
+  max-width: 18ch;
+}
+
+.lead {
+  font-size: clamp(18px, 1.8vw, 22px) !important;
+  color: var(--fg-dim);
+  line-height: 1.55 !important;
+}
+
+/* Tenets intro
+=================================================== */
+.tenets-intro {
+  padding: clamp(60px, 9vw, 110px) var(--gutter) clamp(40px, 6vw, 72px);
+  border-bottom: 1px solid var(--border);
+}
+
+.tenets-intro-heading {
+  max-width: 16ch;
+  margin-bottom: 32px;
+}
+
+.tenets-intro-lead {
+  font-family: var(--font-display, #{$font-display});
+  font-size: clamp(20px, 2vw, 24px) !important;
+  color: var(--fg-dim);
+  max-width: 50ch;
+  font-style: italic;
+  line-height: 1.45 !important;
+}
+
+/* Individual tenet
+=================================================== */
+.tenet {
+  padding: clamp(64px, 10vw, 120px) var(--gutter);
+  border-bottom: 1px solid var(--border);
+
+  &:last-of-type {
+    border-bottom: 1px solid var(--border-strong);
+  }
+
+  p {
+    font-size: clamp(16px, 1.4vw, 18px);
+    line-height: 1.7;
+    color: var(--fg-dim);
+    margin-bottom: 1.2em;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    em {
+      color: var(--accent-soft);
+      font-style: italic;
+      font-family: var(--font-display, #{$font-display});
+      font-weight: 400;
+    }
+  }
+}
+
+.tenet-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: clamp(28px, 4vw, 60px);
+  align-items: start;
+
+  @media #{$phone-tablet} {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.tenet-num {
+  font-family: var(--font-display, #{$font-display});
+  font-size: clamp(72px, 10vw, 140px);
+  line-height: 0.85;
+  color: var(--accent);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+
+  @media #{$phone-tablet} {
+    font-size: 68px;
+  }
+}
+
+.tenet-tag {
+  font-family: var(--font-body, #{$font-body});
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
+.tenet-body {
+  max-width: 56ch;
+}
+
+.tenet-heading {
+  font-family: var(--font-display, #{$font-display});
+  font-size: clamp(32px, 4.4vw, 56px);
+  line-height: 1.05;
+  color: var(--fg);
+  font-weight: 500;
+  margin-bottom: clamp(24px, 3vw, 36px);
+  letter-spacing: -0.01em;
+}
+
+/* Promise
+=================================================== */
+.promise {
+  padding: clamp(80px, 12vw, 140px) var(--gutter);
+  border-bottom: 1px solid var(--border);
+
+  .reading p {
+    font-family: var(--font-display, #{$font-display});
+    font-size: clamp(20px, 2vw, 26px) !important;
+    line-height: 1.45 !important;
+    color: var(--fg-dim);
+    font-style: italic;
+    font-weight: 400;
+    margin-bottom: 1.5em;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: var(--fg);
+      font-style: normal;
+      font-weight: 500;
+      font-family: var(--font-display, #{$font-display});
+    }
+  }
+}
+
+.promise-heading {
+  max-width: 18ch;
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+/* Animation
+=================================================== */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

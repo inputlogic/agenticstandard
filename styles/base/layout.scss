@@ -1,0 +1,20 @@
+/* =============================================================================
+Layout
+============================================================================= */
+@use 'variables' as *;
+
+.container {
+  width: min($container-width, 92vw);
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.container--reading {
+  max-width: $container-width-reading;
+}
+
+.frame {
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}

@@ -1,0 +1,67 @@
+@use 'styles/base/variables' as *;
+
+.section {
+  background: var(--cream);
+  color: var(--cream-text);
+  padding: clamp(80px, 11vw, 140px) clamp(20px, 4vw, 60px);
+  text-align: center;
+  border-bottom: none;
+}
+
+.label {
+  font-family: var(--font-body, #{$font-body});
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-on-cream);
+  margin-bottom: 32px;
+}
+
+.heading {
+  color: var(--cream-text);
+  font-family: var(--font-display, #{$font-display});
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.08;
+  font-weight: 500;
+  max-width: 22ch;
+  margin: 0 auto clamp(28px, 3.5vw, 40px);
+  letter-spacing: -0.01em;
+}
+
+.heading em {
+  color: var(--accent-on-cream);
+  font-style: italic;
+}
+
+.sub {
+  font-family: var(--font-display, #{$font-display});
+  font-style: italic;
+  font-size: clamp(18px, 1.9vw, 22px);
+  color: rgba(42, 36, 28, 0.7);
+  max-width: 44ch;
+  margin: 0 auto clamp(40px, 5vw, 60px);
+  line-height: 1.45;
+}
+
+.button {
+  display: inline-block;
+  padding: 20px 44px;
+  background: var(--cream-text);
+  color: var(--cream);
+  text-decoration: none;
+  font-family: var(--font-body, #{$font-body});
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--accent-on-cream);
+  }
+
+  &:focus-visible {
+    outline-offset: 4px;
+  }
+}

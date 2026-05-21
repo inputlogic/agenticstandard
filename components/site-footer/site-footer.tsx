@@ -28,8 +28,8 @@ export function SiteFooter() {
           </div>
           <div>
             <div className={s['col-heading']}>Contact</div>
-            <a href="mailto:hello@agenticstandard.ca" className={s['col-link']}>
-              hello@agenticstandard.ca
+            <a href="mailto:hello@theagenticstandard.com" className={s['col-link']}>
+              hello@theagenticstandard.com
             </a>
             <div className={s['contact-detail']}>
               Canada<br />Remote-capable

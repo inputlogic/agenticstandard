@@ -4,14 +4,14 @@ Layout
 @use 'variables' as *;
 
 .container {
-  width: min($container-width, 92vw);
+  width: var(--container);
   margin: 0 auto;
   position: relative;
   z-index: 2;
 }
 
 .container--reading {
-  max-width: $container-width-reading;
+  max-width: var(--reading);
 }
 
 .frame {

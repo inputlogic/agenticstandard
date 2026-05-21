@@ -26,6 +26,11 @@
   /* Accent on cream */
   --accent-on-cream: #B85A20;
 
+  /* Layout */
+  --container: min(1180px, 92vw);
+  --gutter: clamp(20px, 4vw, 60px);
+  --reading: min(720px, 92vw);
+
   /* Semantic aliases */
   --body-color: var(--bg);
   --text-color: var(--fg);

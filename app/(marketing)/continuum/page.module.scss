@@ -3,8 +3,7 @@
 /* Hero
 =================================================== */
 .hero {
-  padding-top: clamp(80px, 12vw, 140px);
-  padding-bottom: clamp(70px, 10vw, 120px);
+  padding: clamp(80px, 12vw, 140px) var(--gutter) clamp(70px, 10vw, 120px);
   border-bottom: 1px solid var(--border);
 }
 

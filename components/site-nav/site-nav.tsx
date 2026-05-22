@@ -46,6 +46,13 @@ export function SiteNav() {
         <span>Agentic<span className={s.dot}>.</span>Standard</span>
       </Link>
       <div className={`${s.links} ${open ? s['links-open'] : ''}`}>
+        <Link
+          href="/"
+          className={`${s.link} ${pathname === '/' ? s['link-active'] : ''}`}
+          onClick={close}
+        >
+          Home
+        </Link>
         {navLinks.map(({ href, label }) => (
           <Link
             key={href}

@@ -206,7 +206,7 @@ export default function ContinuumPage() {
           $20,000<span className={s['price-unit']}>Per month</span>
         </div>
         <div className={s.qualifier}>
-          From. Heavier roadmap phases or larger fleets may scope higher. Quoted at the start of each quarter, fixed for that quarter, reviewed honestly at the next.
+          Heavier roadmap phases or larger fleets may scope higher. Quoted at the start of each quarter, fixed for that quarter, reviewed honestly at the next.
         </div>
       </div>
 

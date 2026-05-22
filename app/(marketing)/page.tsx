@@ -171,43 +171,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* The Offer */}
-        <section className={s.section}>
-          <SectionLabel>The Offer</SectionLabel>
-          <h2>Fixed fees. Real outcomes. <em>One commitment</em> to begin.</h2>
-
-          <div className={s['offer-grid']}>
-            <div className={`${s['offer-cell']} ${s.featured}`}>
-              <span className={s['offer-tier']}>Entry · 6 weeks · Fixed fee</span>
-              <h4>The Agentic Foundation</h4>
-              <div className={s['offer-price']}>$48,000<span className={s['offer-unit']}>USD</span></div>
-              <p>2–3 deployed agents, The Agentic Readiness Map, working-session presentation. One invoice at kickoff.</p>
-            </div>
-            <div className={s['offer-cell']}>
-              <span className={s['offer-tier']}>Ongoing partnership</span>
-              <h4>The Agentic Continuum</h4>
-              <div className={s['offer-price']}>$20,000<span className={s['offer-unit']}>/month</span></div>
-              <p>Roadmap execution, agent stewardship, governance, and quarterly board-ready reporting.</p>
-            </div>
-            <div className={s['offer-cell']}>
-              <span className={s['offer-tier']}>Infrastructure only</span>
-              <h4>Harbour, kept running</h4>
-              <div className={s['offer-price']}>$2,000<span className={s['offer-unit']}>/month</span></div>
-              <p>Hosted infrastructure for the agents we deployed. Changes and repairs at $200/hour.</p>
-            </div>
-          </div>
-
-          <div className={s['offer-stakes']}>
-            <span className={s['offer-stakes-label']}>Our Stakes</span>
-            <p>
-              If your sponsor isn&apos;t happy with the work, the process, or the result at week six, <strong>we don&apos;t get paid.</strong> If we succeed, <strong>$20,000 of your engagement fee carries forward as your first Continuum month.</strong>
-            </p>
-          </div>
-
-          <div className={s['offer-link']}>
-            <Link href="/foundation">See the full Foundation offer &nbsp;→</Link>
-          </div>
-        </section>
 
       </div>
 

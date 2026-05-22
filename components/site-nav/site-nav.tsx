@@ -10,7 +10,6 @@ const CALENDLY_URL =
 
 const navLinks = [
   { href: '/foundation', label: 'Foundation' },
-  { href: '/map', label: 'Map' },
   { href: '/continuum', label: 'Continuum' },
   { href: '/standard', label: 'Standard' },
 ]

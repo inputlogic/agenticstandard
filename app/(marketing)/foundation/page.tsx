@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { SectionLabel } from 'components/section-label'
 import { CtaSection } from 'components/cta-section'
 import s from './page.module.scss'
@@ -90,9 +89,6 @@ export default function FoundationPage() {
               <p>
                 The Map is yours. If you walk away from us with the document and never call back, it's good enough to run on. That is part of the value.
               </p>
-              <Link href="/map" className={s['map-link']}>
-                Read the full methodology &rarr;
-              </Link>
             </div>
           </div>
         </article>
@@ -220,7 +216,7 @@ export default function FoundationPage() {
         {/* Pricing Band */}
         <div className={s['pricing-band']}>
           <div className={s.price}>
-            $48,000<span className={s['price-unit']}>USD · Fixed</span>
+            $48,000<span className={s['price-unit']}>Fixed</span>
           </div>
           <div className={s.qualifier}>
             One invoice at kickoff. Six weeks of work. Two to three deployed agents. The Agentic Readiness Map. The working-session presentation. The guarantee.

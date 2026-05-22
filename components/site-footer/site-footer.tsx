@@ -18,7 +18,6 @@ export function SiteFooter() {
           <div>
             <div className={s['col-heading']}>The Work</div>
             <Link href="/foundation" className={s['col-link']}>The Foundation</Link>
-            <Link href="/map" className={s['col-link']}>The Readiness Map</Link>
             <Link href="/continuum" className={s['col-link']}>The Continuum</Link>
           </div>
           <div>

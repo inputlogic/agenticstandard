@@ -98,7 +98,7 @@ export default function HomePage() {
               <span className={s['journey-label']}>Week 6</span>
               <h4>The Working Session</h4>
               <p>Your sponsor sees the agents running, the Map presented, the inventory of every automation opportunity we surfaced. If the work hasn&apos;t landed, you don&apos;t pay. If it has, we keep going together.</p>
-              <Link href="/map" className={s['journey-link']}>See the Map →</Link>
+              <Link href="/foundation" className={s['journey-link']}>See the Foundation →</Link>
             </div>
             <div className={s['journey-step']}>
               <div className={s['journey-num']}>3</div>
@@ -155,12 +155,6 @@ export default function HomePage() {
               <h4>The Agentic <em>Standard</em></h4>
               <p>Seven tenets that anchor every engagement. The worldview the firm operates from.</p>
               <span className={s['doc-arrow']}>Read the manifesto →</span>
-            </Link>
-            <Link href="/map" className={s['doc-card']}>
-              <span className={s['doc-tag']}>The Methodology</span>
-              <h4>The Agentic Readiness <em>Map</em></h4>
-              <p>Six dimensions of agentic readiness, scored on observation. The framework that produces your roadmap.</p>
-              <span className={s['doc-arrow']}>Read the methodology →</span>
             </Link>
             <Link href="/foundation" className={s['doc-card']}>
               <span className={s['doc-tag']}>The Entry Offer</span>

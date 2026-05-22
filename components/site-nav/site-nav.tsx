@@ -9,9 +9,9 @@ const CALENDLY_URL =
   'https://calendly.com/jordanmichealeckersley/agenticstandard'
 
 const navLinks = [
+  { href: '/standard', label: 'Standard' },
   { href: '/foundation', label: 'Foundation' },
   { href: '/continuum', label: 'Continuum' },
-  { href: '/standard', label: 'Standard' },
 ]
 
 export function SiteNav() {

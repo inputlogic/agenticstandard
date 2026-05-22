@@ -15,7 +15,7 @@ export function SiteFooter() {
                 </g>
                 <circle cx="60" cy="60" r="8" fill="#D27A3F"/>
               </svg>
-              Agentic<span className={s.dot}>.</span>Standard
+              <span>Agentic<span className={s.dot}>.</span>Standard</span>
             </Link>
             <div className={s.tagline}>
               We make agentic AI work inside your organization, not just in a

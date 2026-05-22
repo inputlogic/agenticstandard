@@ -8,6 +8,13 @@ export function SiteFooter() {
         <div className={s.grid}>
           <div>
             <Link href="/" className={s['brand-wordmark']}>
+              <svg className={s.mark} viewBox="0 0 120 120" fill="none">
+                <g stroke="currentColor" strokeLinecap="square" strokeWidth="9">
+                  <path d="M 22 58 L 22 22 L 58 22"/>
+                  <path d="M 98 62 L 98 98 L 62 98"/>
+                </g>
+                <circle cx="60" cy="60" r="8" fill="#D27A3F"/>
+              </svg>
               Agentic<span className={s.dot}>.</span>Standard
             </Link>
             <div className={s.tagline}>

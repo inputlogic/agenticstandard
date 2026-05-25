@@ -107,7 +107,7 @@ export default function BookPage() {
             {/* Calendly embed */}
             <div className={s['calendar-embed']} id="calendly-embed">
               <iframe
-                src="https://calendly.com/jordanmichealeckersley/agenticstandard"
+                src="https://calendly.com/jordanmichealeckersley/agenticstandard?background_color=100d0a&text_color=ffffff&primary_color=d27a3f"
                 title="Book a discovery call"
                 width="100%"
                 height="700"

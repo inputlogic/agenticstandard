@@ -29,7 +29,7 @@ export default function HomePage() {
             Most enterprises have tried AI. Few have made it stick. We&apos;re a specialized firm that closes that gap by preparing your people, instrumenting your workflows, and deploying agents that measurably give time back.
           </p>
           <div className={s['hero-actions']}>
-            <a href="https://calendly.com/jordanmichealeckersley/agenticstandard" target="_blank" rel="noopener noreferrer" className={s['btn-primary']}>Book a 45-minute call</a>
+            <Link href="/book" className={s['btn-primary']}>Book a 45-minute call</Link>
             <Link href="/standard" className={s['btn-secondary']}>Read what we believe →</Link>
           </div>
         </section>

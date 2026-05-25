@@ -5,9 +5,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import s from './site-nav.module.scss'
 
-const CALENDLY_URL =
-  'https://calendly.com/jordanmichealeckersley/agenticstandard'
-
 const navLinks = [
   { href: '/standard', label: 'Standard' },
   { href: '/foundation', label: 'Foundation' },
@@ -63,15 +60,13 @@ export function SiteNav() {
             {label}
           </Link>
         ))}
-        <a
-          href={CALENDLY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/book"
           className={s.cta}
           onClick={close}
         >
           Book a Call
-        </a>
+        </Link>
       </div>
       <button
         className={s.toggle}

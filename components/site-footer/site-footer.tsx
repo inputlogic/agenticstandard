@@ -30,7 +30,7 @@ export function SiteFooter() {
           <div>
             <div className={s['col-heading']}>The Firm</div>
             <Link href="/standard" className={s['col-link']}>The Standard</Link>
-            <a href="https://calendly.com/jordanmichealeckersley/agenticstandard" target="_blank" rel="noopener noreferrer" className={s['col-link']}>Book a Call</a>
+            <Link href="/book" className={s['col-link']}>Book a Call</Link>
           </div>
           <div>
             <div className={s['col-heading']}>Contact</div>
@@ -44,7 +44,7 @@ export function SiteFooter() {
         </div>
         <div className={s.bottom}>
           <div>&copy; 2026 Agentic Standard Inc.</div>
-          <div>agenticstandard.ca</div>
+          <div>theagenticstandard.com</div>
         </div>
       </div>
     </footer>

@@ -104,14 +104,15 @@ export default function BookPage() {
               there for the engagement decision, ideally the sponsor.
             </p>
 
-            {/* Calendly embed placeholder */}
+            {/* Calendly embed */}
             <div className={s['calendar-embed']} id="calendly-embed">
-              <div className={s['calendar-placeholder']}>
-                Calendly inline widget goes here.
-                <br /><br />
-                Replace this placeholder with your scheduling embed
-                (Calendly, SavvyCal, Cal.com).
-              </div>
+              <iframe
+                src="https://calendly.com/jordanmichealeckersley/agenticstandard"
+                title="Book a discovery call"
+                width="100%"
+                height="700"
+                frameBorder="0"
+              />
             </div>
 
             {/* Alternate contact */}

@@ -1,6 +1,4 @@
-const CALENDLY_URL =
-  'https://calendly.com/jordanmichealeckersley/agenticstandard'
-
+import Link from 'next/link'
 import s from './page.module.scss'
 
 export const metadata = {
@@ -43,15 +41,13 @@ export default function FoundationPage() {
             </p>
 
             <div className={s['hero-cta-wrap']}>
-              <a
-                href={CALENDLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/book"
                 className={s['hero-cta']}
               >
                 Book a <span className={s['cta-detail']}>45-Minute </span>Call{' '}
                 <span className={s.arrow}>→</span>
-              </a>
+              </Link>
               <div className={s['hero-fud']}>
                 <span className={s['fud-item']}>
                   <span className={s.check}>✓</span> Free call
@@ -771,14 +767,12 @@ export default function FoundationPage() {
             further. If The Foundation fits, the SOW is in your inbox within
             forty-eight hours.
           </p>
-          <a
-            href={CALENDLY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/book"
             className={s['final-cta-btn']}
           >
             Book the Call <span className={s.arrow}>→</span>
-          </a>
+          </Link>
           <div className={s['fc-fud']}>
             <span className={s['fud-item']}>
               <span className={s['fc-check']}>✓</span> Free

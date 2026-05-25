@@ -193,12 +193,13 @@ Booking wrap (two-column)
   min-height: 580px;
   border: 1px solid var(--border-strong);
   background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 48px;
   position: relative;
+  padding: 0;
+
+  iframe {
+    display: block;
+    border: none;
+  }
 }
 
 .calendar-placeholder {

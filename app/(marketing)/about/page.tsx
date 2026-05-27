@@ -47,28 +47,6 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* Why We Got Together */}
-        <section className={s.section}>
-          <div className={s.reading}>
-            <SectionLabel>Why We Got Together</SectionLabel>
-            <h2 className={s['reading-heading']}>
-              The technology arrives. The <em>organization</em> doesn&apos;t.
-            </h2>
-            <p className={s.lead}>
-              Between us, the last decade-plus has been spent inside AI and data
-              work: designing the tools, architecting the pipelines, shipping the
-              agents. Sitting in the meetings where a seven-figure pilot gets
-              quietly shelved. Watching capable models fail because the org around
-              them wasn&apos;t built to use them. Watching big consulting firms
-              charge a fortune to leave behind a slide deck.
-            </p>
-            <p className={s['muted-lead']}>
-              The pattern is always the same. So the firm was built with one job:
-              close that gap, then leave.
-            </p>
-          </div>
-        </section>
-
         {/* The Founders */}
         <section className={s.section}>
           <SectionLabel accent>The Founders</SectionLabel>
@@ -103,6 +81,28 @@ export default function AboutPage() {
                 </a>
               </article>
             ))}
+          </div>
+        </section>
+
+        {/* Why We Got Together */}
+        <section className={s.section}>
+          <div className={s.reading}>
+            <SectionLabel>Why We Got Together</SectionLabel>
+            <h2 className={s['reading-heading']}>
+              The technology arrives. The <em>organization</em> doesn&apos;t.
+            </h2>
+            <p className={s.lead}>
+              Between us, the last decade-plus has been spent inside AI and data
+              work: designing the tools, architecting the pipelines, shipping the
+              agents. Sitting in the meetings where a seven-figure pilot gets
+              quietly shelved. Watching capable models fail because the org around
+              them wasn&apos;t built to use them. Watching big consulting firms
+              charge a fortune to leave behind a slide deck.
+            </p>
+            <p className={s['muted-lead']}>
+              The pattern is always the same. So the firm was built with one job:
+              close that gap, then leave.
+            </p>
           </div>
         </section>
 

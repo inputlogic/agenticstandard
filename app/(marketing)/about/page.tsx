@@ -24,7 +24,7 @@ const founders = [
   {
     name: 'Jordan Eckersley',
     role: 'Founder',
-    bio: 'Years inside enterprise analytics and automation, helping organizations move from dashboards nobody opens to workflows that actually run. Led partnerships at Capitalize Analytics and Alteryx, watching firsthand what happens when capable technology meets an unprepared organization. Brings the client-side pattern recognition that shapes every Foundation engagement.',
+    bio: 'Years inside enterprise AI and automation, helping organizations move from dashboards nobody opens to workflows that actually run. Led partnerships across North America, watching firsthand what happens when capable technology meets an unprepared organization. Brings the client-side pattern recognition that shapes every Foundation engagement.',
     linkedin: 'https://www.linkedin.com/in/jordan-eckersley-7867a459/',
   },
 ]

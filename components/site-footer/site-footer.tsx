@@ -30,6 +30,7 @@ export function SiteFooter() {
           <div>
             <div className={s['col-heading']}>The Firm</div>
             <Link href="/standard" className={s['col-link']}>The Standard</Link>
+            <Link href="/about" className={s['col-link']}>About</Link>
             <Link href="/book" className={s['col-link']}>Book a Call</Link>
           </div>
           <div>

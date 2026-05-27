@@ -75,7 +75,8 @@ const tenets = [
 
 export default function StandardPage() {
   return (
-    <div className="container frame" id="main">
+    <>
+      <div className="container frame" id="main">
       {/* Hero */}
       <section className={s.hero}>
         <SectionLabel accent>The Beliefs</SectionLabel>
@@ -145,11 +146,13 @@ export default function StandardPage() {
         </div>
       </section>
 
+      </div>
+
       {/* CTA */}
       <CtaSection
         heading={<>If this is how you think about AI inside your organization, <em>we should talk</em>.</>}
         sub="A forty-five-minute call. No pitch deck. The conversation covers the work your team does, where AI has and hasn't stuck, and whether The Foundation fits. The SOW arrives within forty-eight hours if it does."
       />
-    </div>
+    </>
   )
 }

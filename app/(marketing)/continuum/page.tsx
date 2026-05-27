@@ -90,7 +90,8 @@ const outOfScope = [
 
 export default function ContinuumPage() {
   return (
-    <div className="container frame" id="main">
+    <>
+      <div className="container frame" id="main">
 
       {/* Hero */}
       <section className={s.hero}>
@@ -211,11 +212,13 @@ export default function ContinuumPage() {
         </div>
       </div>
 
+      </div>
+
       {/* CTA */}
       <CtaSection
         heading={<>The retainer that <em>compounds</em>. The relationship you renew because you want to.</>}
         sub="Every Continuum engagement begins with The Agentic Foundation. A forty-five-minute call to scope the work. The SOW arrives within forty-eight hours if it fits."
       />
-    </div>
+    </>
   )
 }

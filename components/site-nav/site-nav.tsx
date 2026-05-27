@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/standard', label: 'Standard' },
   { href: '/foundation', label: 'Foundation' },
   { href: '/continuum', label: 'Continuum' },
+  { href: '/about', label: 'About' },
 ]
 
 export function SiteNav() {

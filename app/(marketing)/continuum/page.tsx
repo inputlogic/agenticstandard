@@ -13,7 +13,7 @@ const includes = [
     tag: 'The Build',
     title: <>Roadmap <em>execution</em>.</>,
     body: [
-      'We work through the Phase 1 candidates from your Map. New agents ship on the cadence the roadmap calls for. That\'s typically one to two per quarter, more in heavy phases, fewer when the work is plumbing. Each deployment includes the same workflow shadowing, tuning, and stabilization rigor as your Foundation agents.',
+      'Phase 1 candidates from your Map ship on the cadence the roadmap calls for. That\'s typically one to two per quarter, more in heavy phases, fewer when the work is plumbing. Each deployment includes the same workflow shadowing, tuning, and stabilization rigor as your Foundation agents.',
       'The Map itself stays alive. New candidates surface; phasing shifts as reality unfolds; the roadmap you\'re working from at month nine is sharper than the one delivered at week six.',
     ],
   },
@@ -22,8 +22,8 @@ const includes = [
     tag: 'The Fleet',
     title: <>Agent <em>stewardship</em>.</>,
     body: [
-      'Every agent we\'ve ever deployed for you is monitored, tuned, and evolved: the originals from the Foundation and every one that lands afterward. Production-grade Harbour hosting is included, with the failure handling, audit trails, and observability that a serious operator expects.',
-      'When something breaks, our team fixes it. You don\'t get the bug report; you get the resolution. The fleet is our responsibility, not yours.',
+      'Every agent ever deployed for you is monitored, tuned, and evolved: the originals from the Foundation and every one that lands afterward. Production-grade Harbour hosting is included, with the failure handling, audit trails, and observability that a serious operator expects.',
+      'When something breaks, the fix lands without a bug report on your end. The fleet is the firm\'s responsibility, not yours.',
     ],
   },
   {
@@ -40,8 +40,8 @@ const includes = [
     tag: 'The People',
     title: <>Workforce <em>coaching</em>.</>,
     body: [
-      'The habitual work doesn\'t end at week six. We continue role-specific enablement like prompt library development, internal training-of-trainers, prompting evaluation, and coaching for the champions who own AI inside each department.',
-      'The end state is a workforce that doesn\'t need us anymore; not because we left, but because the organization has internalized what it means to work with AI as a default rather than an exception.',
+      'The habitual work doesn\'t end at week six. Role-specific enablement continues: prompt library development, internal training-of-trainers, prompting evaluation, and coaching for the champions who own AI inside each department.',
+      'The end state is a workforce that doesn\'t need the firm anymore; not because the engagement ended, but because the organization has internalized what it means to work with AI as a default rather than an exception.',
     ],
   },
   {
@@ -50,7 +50,7 @@ const includes = [
     title: <>Governance <em>maturation</em>.</>,
     body: [
       'Active work moving you up the governance dimension. Skills like risk-tiered policy authoring, audit infrastructure, scoped-credential design, incident response playbooks, and the periodic agent reviews that make agentic AI defensible to your board, your legal team, and your auditors.',
-      'This is where most consulting engagements stop short. We lean into it, because bounded autonomy is the only autonomy that scales.',
+      'This is where most consulting engagements stop short. Continuum leans into it, because bounded autonomy is the only autonomy that scales.',
     ],
   },
   {
@@ -67,7 +67,7 @@ const includes = [
     tag: 'The Plan',
     title: <>Roadmap <em>evolution</em>.</>,
     body: [
-      'The Map is a living document. Every quarter we refresh it: candidates that have shipped move to a track record; new candidates surface from the work; phases may shift as reality (and your priorities) change. Your roadmap at the end of year one is built on a year of grounded observation, not a single week of interviews.',
+      'The Map is a living document. Every quarter the Map is refreshed: candidates that have shipped move to a track record; new candidates surface from the work; phases may shift as reality (and your priorities) change. Your roadmap at the end of year one is built on a year of grounded observation, not a single week of interviews.',
       'If you ever choose to leave, the roadmap you leave with is sharper than anything a strategy firm could produce, because it\'s been refined by the work itself.',
     ],
   },
@@ -76,16 +76,16 @@ const includes = [
 const cadence = [
   { freq: 'Weekly', title: 'Tactical channel', desc: 'Slack or equivalent. Agent monitoring, day-to-day questions, decisions that can\'t wait. Open async.' },
   { freq: 'Bi-weekly', title: 'Working session', desc: '60\u201390 minutes with the operational owner. Roadmap progress, current candidates, blockers to clear.' },
-  { freq: 'Monthly', title: 'Sponsor review', desc: 'Executive-level alignment with the sponsor. What shipped, what\'s next, what they need from us.' },
+  { freq: 'Monthly', title: 'Sponsor review', desc: 'Executive-level alignment with the sponsor. What shipped, what\'s next, what they need from the firm.' },
   { freq: 'Quarterly', title: 'Board-ready report', desc: 'Refreshed Map, scorecard, and one-page executive summary. The artifact the sponsor takes to the board.' },
 ]
 
 const outOfScope = [
   'Net-new platform builds outside the agent fleet. Custom software, internal tools, or systems integration projects are scoped and quoted separately.',
   'Deep industry research, market analysis, or competitive intelligence engagements not directly tied to your active roadmap.',
-  'After-hours, weekend, or holiday response. We are a business-hours team. Genuinely urgent failures are handled at our discretion.',
-  'Cloud, API, and third-party software costs; these are your accounts, your bill. We recommend, you authorize.',
-  'Compliance certifications (SOC2, ISO, HIPAA) that require dedicated audit work outside our standard governance practice.',
+  'After-hours, weekend, or holiday response. Continuum is a business-hours practice. Genuinely urgent failures are handled at the firm\'s discretion.',
+  'Cloud, API, and third-party software costs; these are your accounts, your bill. Recommendations from the firm; authorization from you.',
+  'Compliance certifications (SOC2, ISO, HIPAA) that require dedicated audit work outside the standard governance practice.',
 ]
 
 export default function ContinuumPage() {
@@ -169,7 +169,7 @@ export default function ContinuumPage() {
           <SectionLabel>What it is not</SectionLabel>
           <h2 className={s['reading-heading']}>What the Continuum <em>does not</em> include.</h2>
           <p className={s.lead}>
-            Some things sit outside The Agentic Continuum because they're either out of pattern or genuinely separate work. We tell you that up front, not in an invoice.
+            Some things sit outside The Agentic Continuum because they're either out of pattern or genuinely separate work. Said up front, not in an invoice.
           </p>
         </div>
 
@@ -189,10 +189,10 @@ export default function ContinuumPage() {
           <SectionLabel accent>The Exit</SectionLabel>
           <h2 className={s['reading-heading']}>You can <em>fire us</em>.</h2>
           <p className={s.lead}>
-            Sixty days notice in writing. No penalty or clawback. The agents stay running on your infrastructure or migrate to a Harbour-only retainer at $2,000 per month. The Map is yours. Everything we've built for you is yours.
+            Sixty days notice in writing. No penalty or clawback. The agents stay running on your infrastructure or migrate to a Harbour-only retainer at $2,000 per month. The Map is yours. Everything built for you is yours.
           </p>
           <p>
-            The freedom to leave is what makes the Continuum real. A retainer that traps you is a retainer that won't compound, because it's been optimized for your imprisonment rather than your progress. Ours is the opposite.
+            The freedom to leave is what makes the Continuum real. A retainer that traps you is a retainer that won't compound, because it's been optimized for your imprisonment rather than your progress. The Continuum is the opposite.
           </p>
           <p>
             If the Continuum stops earning its keep, you should end it. If it keeps earning, you'll renew. That's the deal.
@@ -202,6 +202,7 @@ export default function ContinuumPage() {
 
       {/* Pricing Band */}
       <div className={s['pricing-band']}>
+        <SectionLabel accent>From</SectionLabel>
         <div className={s.price}>
           $20,000<span className={s['price-unit']}>Per month</span>
         </div>

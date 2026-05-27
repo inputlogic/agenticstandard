@@ -4,10 +4,10 @@ import { SectionLabel } from 'components/section-label'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'Agentic Standard | We make agentic AI work inside your organization',
+  title: 'Agentic Standard | Agentic AI that works inside your organization',
   description: 'A specialized consulting firm that closes the gap between AI technology and the operating model that has to meet it. Six weeks. Fixed fee. Operating AI, not strategy decks.',
   openGraph: {
-    title: 'Agentic Standard | We make agentic AI work inside your organization',
+    title: 'Agentic Standard | Agentic AI that works inside your organization',
     description: 'A specialized consulting firm that closes the gap between AI technology and the operating model that has to meet it. Six weeks. Fixed fee.',
   },
 }
@@ -23,20 +23,20 @@ export default function HomePage() {
             <SectionLabel accent>Agentic Standard · 2026</SectionLabel>
           </div>
           <h1 className={s['hero-heading']}>
-            We make agentic AI <em>work</em> inside your organization, not just in a demo.
+            Agentic AI that <em>works</em> inside your organization, not just in a demo.
           </h1>
           <p className={`${s.lead} ${s['hero-lead']}`}>
-            Most enterprises have tried AI. Few have made it stick. We&apos;re a specialized firm that closes that gap by preparing your people, instrumenting your workflows, and deploying agents that measurably give time back.
+            Most enterprises have tried AI. Few have made it stick. A specialized firm built to close that gap by preparing your people, instrumenting your workflows, and deploying agents that measurably give time back.
           </p>
           <div className={s['hero-actions']}>
             <Link href="/book" className={s['btn-primary']}>Book a 45-minute call</Link>
-            <Link href="/standard" className={s['btn-secondary']}>Read what we believe →</Link>
+            <Link href="/standard" className={s['btn-secondary']}>Read the beliefs →</Link>
           </div>
         </section>
 
         {/* The Pattern */}
         <section className={s.section}>
-          <SectionLabel>Why We Exist</SectionLabel>
+          <SectionLabel>Why This Exists</SectionLabel>
           <h2 className={s['pattern-heading']}>Most enterprise AI fails to <em>stick</em>.</h2>
           <p className={`${s.lead} ${s['pattern-lead']}`}>
             We&apos;ve watched big consulting firms burn millions and leave clients with a chatbot nobody uses. We&apos;ve watched data teams ship models that produce reports &amp; dashboards nobody reads. We&apos;ve seen executives on stage describing an AI strategy in unbroken detail though they&apos;ve never run a prompt themselves.
@@ -45,34 +45,34 @@ export default function HomePage() {
             This pattern is uncomfortable, but consistent: the technology arrives, the organization doesn&apos;t.
           </p>
           <p className={s.lead}>
-            Agentic Standard exists to do the work nobody else is doing. To close the gap between the technology and the operating model that has to meet it. We deliver operating AI, a workforce that uses it, and a roadmap your team can run on its own.
+            Agentic Standard exists to do the work nobody else is doing. To close the gap between the technology and the operating model that has to meet it. Agentic Standard delivers operating AI, a workforce that uses it, and a roadmap your team can run on its own.
           </p>
         </section>
 
         {/* What We Do */}
         <section className={s.section}>
-          <SectionLabel>Our Practice</SectionLabel>
+          <SectionLabel>The Practice</SectionLabel>
           <h2>Four disciplines, run together.</h2>
           <div className={s.disciplines}>
             <div className={s.discipline}>
               <span className={s['discipline-num']}>01</span>
               <h3>Workforce readiness</h3>
-              <p>Before any automation runs, we build the daily AI habit role by role: prompting, evaluation, safe use.</p>
+              <p>Before any automation runs, the daily AI habit is built role by role: prompting, evaluation, safe use.</p>
             </div>
             <div className={s.discipline}>
               <span className={s['discipline-num']}>02</span>
               <h3>Workflow instrumentation</h3>
-              <p>We embed AI where work already happens. Intelligence in Slack, email, CRMs, and data platforms, not in a separate tab.</p>
+              <p>AI embedded where work already happens. Intelligence in Slack, email, CRMs, and data platforms, not in a separate tab.</p>
             </div>
             <div className={s.discipline}>
               <span className={s['discipline-num']}>03</span>
               <h3>Agentic deployment</h3>
-              <p>We deploy async and multi-step agents with bounded authority, audit trails, and champions who own day-2 operations.</p>
+              <p>Async and multi-step agents deployed with bounded authority, audit trails, and champions who own day-2 operations.</p>
             </div>
             <div className={s.discipline}>
               <span className={s['discipline-num']}>04</span>
               <h3>Governance &amp; handoff</h3>
-              <p>We leave behind a policy framework, eval suite, and trained internal team so you don&apos;t depend on us forever.</p>
+              <p>A policy framework, eval suite, and trained internal team left behind, so the dependency ends when you say so.</p>
             </div>
           </div>
         </section>
@@ -90,14 +90,14 @@ export default function HomePage() {
               <div className={s['journey-num']}>1</div>
               <span className={s['journey-label']}>Weeks 1–6</span>
               <h4>The Agentic Foundation</h4>
-              <p>Two to three deployed agents on workflows we observe and agree on, plus The Agentic Readiness Map: a year-long roadmap scored against six dimensions of organizational readiness.</p>
+              <p>Two to three deployed agents on workflows observed and agreed on, plus The Agentic Readiness Map: a year-long roadmap scored against six dimensions of organizational readiness.</p>
               <Link href="/foundation" className={s['journey-link']}>See the Foundation →</Link>
             </div>
             <div className={s['journey-step']}>
               <div className={s['journey-num']}>2</div>
               <span className={s['journey-label']}>Week 6</span>
               <h4>The Working Session</h4>
-              <p>Your sponsor sees the agents running, the Map presented, the inventory of every automation opportunity we surfaced. If the work hasn&apos;t landed, you don&apos;t pay. If it has, we keep going together.</p>
+              <p>Your sponsor sees the agents running, the Map presented, the inventory of every automation opportunity surfaced during the engagement. If the work hasn&apos;t landed, you don&apos;t pay. If it has, the path forward is obvious.</p>
               <Link href="/foundation" className={s['journey-link']}>See the Foundation →</Link>
             </div>
             <div className={s['journey-step']}>
@@ -112,17 +112,17 @@ export default function HomePage() {
 
         {/* The Standard */}
         <section className={s.section}>
-          <SectionLabel accent>Our Standard</SectionLabel>
-          <h2>What we believe.</h2>
+          <SectionLabel accent>The Standard</SectionLabel>
+          <h2>The beliefs.</h2>
           <p className={`${s.lead} ${s.narrow}`}>
-            These are a few of our seven tenets. Each one rejects a common failure mode in the consulting industry, and filters who we work with as much as how we work.
+            Three of seven tenets that anchor every engagement under this name. Each one rejects a common failure mode in the consulting industry, and filters who fits as much as how the work runs.
           </p>
 
           <div className={s['standard-grid']}>
             <div className={s['standard-tenet']}>
               <span className={s['tenet-num']}>01</span>
               <h4>The gap is human, <em>not technological</em>.</h4>
-              <p>The model isn&apos;t the bottleneck. The workflow is. The habit is. The governance is. We don&apos;t sell technology. We build the bridge between technology and the operating model that has to meet it.</p>
+              <p>The model isn&apos;t the bottleneck. The workflow is. The habit is. The governance is. Technology isn&apos;t the product, the bridge between technology and the operating model that has to meet it is.</p>
             </div>
             <div className={s['standard-tenet']}>
               <span className={s['tenet-num']}>03</span>
@@ -132,7 +132,7 @@ export default function HomePage() {
             <div className={s['standard-tenet']}>
               <span className={s['tenet-num']}>06</span>
               <h4>You should be able to <em>fire us</em>.</h4>
-              <p>Every engagement ends asking: could the client run this themselves now? If the answer is no, we haven&apos;t done our job. The freedom to leave is what makes the relationship real.</p>
+              <p>Every engagement ends asking: could the client run this themselves now? If the answer is no, the job isn&apos;t done. The freedom to leave is what makes the relationship real.</p>
             </div>
           </div>
 
@@ -144,9 +144,9 @@ export default function HomePage() {
         {/* Read Deeper */}
         <section className={s.section}>
           <SectionLabel accent>Discover the Firm</SectionLabel>
-          <h2 className={s['docs-heading']}>We give the work <em>away</em>.</h2>
+          <h2 className={s['docs-heading']}>The work, given <em>away</em>.</h2>
           <p className={s.lead}>
-            Everything you&apos;d want to read before signing a six-figure contract. The methodology, the principles, the contract terms, the way we run the engagement. If you decide to do this without us, you&apos;ll have what you need.
+            Everything you&apos;d want to read before signing a six-figure contract. The methodology, the principles, the contract terms, the way the engagement runs. If you decide to do this without the firm, you&apos;ll have what you need.
           </p>
 
           <div className={s['docs-grid']}>
@@ -176,7 +176,7 @@ export default function HomePage() {
 
       <CtaSection
         heading={<>A forty-five-minute call to scope the <em>work</em>.</>}
-        sub="No pitch deck. We ask about the work your team does, where AI has and hasn't stuck, and where the natural first agents would live. If The Foundation fits, we draft the SOW within forty-eight hours."
+        sub="No pitch deck. The call is about the work your team does, where AI has and hasn't stuck, and where the natural first agents would live. If The Foundation fits, the SOW arrives within forty-eight hours."
       />
     </>
   )

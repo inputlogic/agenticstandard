@@ -3,7 +3,7 @@ import s from './page.module.scss'
 
 export const metadata = {
   title: 'The Agentic Foundation',
-  description: 'Beyond the chat window. We deploy 2-3 autonomous agents acting inside your stack in six weeks. Fixed fee, sponsor satisfaction guaranteed.',
+  description: 'Beyond the chat window. Two to three autonomous agents acting inside your stack in six weeks. Fixed fee, sponsor satisfaction guaranteed.',
 }
 
 export default function FoundationPage() {
@@ -33,8 +33,8 @@ export default function FoundationPage() {
                   <span className={s.sep}>·</span>&nbsp;End the era of AI that doesn{"'"}t act.
                 </span>
               </span>
-              We deploy two to three autonomous agents inside your stack, acting on
-              workflows we observe, posting in Slack while your team sleeps, completing
+              Two to three autonomous agents deployed inside your stack, acting on
+              workflows observed in your environment, posting in Slack while your team sleeps, completing
               tasks on their own. Score your readiness across six dimensions, hand your
               sponsor a year-long board-ready roadmap, and finish in one six-week,
               fixed-fee sprint.
@@ -160,7 +160,7 @@ export default function FoundationPage() {
       <div className={s['pattern-strip']}>
         <div className={s.container}>
           <div className={s['pat-quote']}>
-            Most enterprises have AI. <em>Few have agents.</em> We exist to make the
+            Most enterprises have AI. <em>Few have agents.</em> Agentic Standard exists to make the
             leap, in six weeks.
           </div>
           <div className={s['pat-attribution']}>
@@ -189,8 +189,7 @@ export default function FoundationPage() {
                 Agents working in your <em>stack</em>.
               </h3>
               <p className={s['deliv-desc']}>
-                Two to three autonomous agents deployed on workflows we observe and
-                agree on. Acting on their own inside your environment, posting where
+                Two to three autonomous agents deployed on workflows observed and agreed on. Acting on their own inside your environment, posting where
                 your team already works, executing real tasks by week six.
               </p>
               <ul className={s['deliv-list']}>
@@ -209,7 +208,7 @@ export default function FoundationPage() {
               </h3>
               <p className={s['deliv-desc']}>
                 A diagnostic of your organization across six dimensions of agentic
-                readiness, an inventory of every automation opportunity we surface,
+                readiness, an inventory of every automation opportunity surfaced during the engagement,
                 and a phased 90/180/365-day roadmap.
               </p>
               <ul className={s['deliv-list']}>
@@ -228,8 +227,7 @@ export default function FoundationPage() {
               </h3>
               <p className={s['deliv-desc']}>
                 Coaching for your internal champion and the team around them. By week
-                six, someone inside your organization owns day-2 operations. You
-                don{"'"}t need us forever.
+                six, someone inside your organization owns day-2 operations. The dependency ends when you say so.
               </p>
               <ul className={s['deliv-list']}>
                 <li>Internal champion training</li>
@@ -270,8 +268,7 @@ export default function FoundationPage() {
               <div className={s['sprint-phase']}>Discovery</div>
               <h4 className={s['sprint-title']}>Shadowing &amp; data probe</h4>
               <p className={s['sprint-desc']}>
-                Three to five workflow shadowing sessions. We attempt to pull three
-                specific data sets ourselves. Real friction is named.
+                Three to five workflow shadowing sessions. Three specific data sets pulled directly, hands-on. Real friction is named.
               </p>
             </div>
             <div className={s['sprint-cell']}>
@@ -321,11 +318,11 @@ export default function FoundationPage() {
             Why this works when other engagements don{"'"}t
           </div>
           <h2 className={s['sect-headline']}>
-            Three reasons we <em>land</em> when other firms stall.
+            Three reasons this <em>lands</em> when other firms stall.
           </h2>
           <p className={s['sect-sub']}>
             The reasons most enterprise AI engagements fail are not technical.
-            They{"'"}re structural. Here{"'"}s what we do differently.
+            They{"'"}re structural. Here{"'"}s what{"'"}s different.
           </p>
 
           <div className={s['method-grid']}>
@@ -335,7 +332,7 @@ export default function FoundationPage() {
               </svg>
               <div className={s['mt-num']}>01</div>
               <h3 className={s['mt-title']}>
-                We <em>deploy</em>. Others advise.
+                <em>Deployment</em>. Not advice.
               </h3>
               <p className={s['mt-desc']}>
                 A strategy deck is not an outcome. Agents acting on your behalf is.
@@ -354,12 +351,12 @@ export default function FoundationPage() {
               </svg>
               <div className={s['mt-num']}>02</div>
               <h3 className={s['mt-title']}>
-                We <em>measure</em>. Others guess.
+                <em>Measurement</em>. Not guesswork.
               </h3>
               <p className={s['mt-desc']}>
                 The Readiness Map scores your organization across six dimensions on
                 observation, not survey. Your roadmap is defensible to your board
-                because it{"'"}s grounded in what we actually saw.
+                because it{"'"}s grounded in what was actually observed.
               </p>
               <svg className={s['mt-corner-br']} viewBox="0 0 60 60" fill="none">
                 <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
@@ -372,7 +369,7 @@ export default function FoundationPage() {
               </svg>
               <div className={s['mt-num']}>03</div>
               <h3 className={s['mt-title']}>
-                We back ourselves <em>with a guarantee</em>.
+                <em>Backed</em> by a guarantee.
               </h3>
               <p className={s['mt-desc']}>
                 If your sponsor isn{"'"}t satisfied with the work, the process, or
@@ -424,9 +421,7 @@ export default function FoundationPage() {
                     Discovery &amp; <em>workflow shadowing</em>
                   </div>
                   <div className={s['item-desc']}>
-                    Three to five sessions inside your environment. We watch your
-                    team work and identify the agents that produce the highest
-                    leverage.
+                    Three to five sessions inside your environment. Your team is shadowed at work to identify the agents with the highest leverage.
                   </div>
                 </div>
                 <div className={s['item-value']}>
@@ -507,8 +502,7 @@ export default function FoundationPage() {
                     90-day <em>post-engagement support</em>
                   </div>
                   <div className={s['item-desc']}>
-                    Questions answered. Agents tuned. Slack channel direct to our
-                    team. We{"'"}re not gone the day the check clears.
+                    Questions answered. Agents tuned. Slack channel direct to the firm. The relationship doesn{"'"}t end the day the check clears.
                   </div>
                 </div>
                 <div className={s['item-value']}>
@@ -615,7 +609,7 @@ export default function FoundationPage() {
             <div className={`${s['qual-col']} ${s.bad}`}>
               <span className={s['qual-tag']}>Not our fit</span>
               <h3 className={s['qual-headline']}>
-                We{"'"}ll send you elsewhere if <em>this</em> is you.
+                The referral goes elsewhere if <em>this</em> is you.
               </h3>
               <ul className={s['qual-list']}>
                 <li>You want a strategy deck without deployment</li>
@@ -624,10 +618,9 @@ export default function FoundationPage() {
                   work first, elsewhere
                 </li>
                 <li>
-                  A failed implementation with vendor blame is in flight. We don
-                  {"'"}t litigate other firms{"'"} work
+                  A failed implementation with vendor blame is in flight (this firm doesn{"'"}t litigate other firms{"'"} work)
                 </li>
-                <li>Decision involves 6+ stakeholders we haven{"'"}t met</li>
+                <li>Decision involves 6+ stakeholders not yet in the room</li>
                 <li>Sub-$40k budget with no flexibility</li>
                 <li>
                   Heavily regulated environment (HIPAA, PCI primary) needs deeper
@@ -650,7 +643,7 @@ export default function FoundationPage() {
           </h2>
           <p className={`${s['sect-sub']} ${s['sect-sub-center']}`}>
             Six weeks, $48k, and a satisfaction guarantee raises real questions.
-            Here{"'"}s what we hear most.
+            Here are the most common.
           </p>
 
           <div className={s['faq-list']}>
@@ -665,7 +658,7 @@ export default function FoundationPage() {
                 <em>agent</em> is what happens when that AI is wired up to act on its
                 own, running on a schedule or a trigger, observing your systems,
                 posting in Slack, drafting reports, calling tools, completing tasks
-                while your team sleeps. We deploy agents. The chat-window era was the
+                while your team sleeps. Agentic Standard deploys agents. The chat-window era was the
                 warm-up.
               </p>
             </div>
@@ -689,11 +682,10 @@ export default function FoundationPage() {
                 How do you choose <em>which agents to deploy</em>?
               </h4>
               <p className={s['faq-a']}>
-                During weeks one and two, we shadow three to five real workflows
-                inside your organization. We don{"'"}t pick agents from a catalog. We
-                observe what{"'"}s happening, identify the highest-leverage automation
-                candidates, and align with your sponsor before any code is written.
-                The agents we build are specific to your workflows, not generic
+                During weeks one and two, three to five real workflows
+                inside your organization are shadowed. The agents aren{"'"}t picked from a catalog. Observation comes first; the highest-leverage automation
+                candidates are identified, alignment with your sponsor happens before any code is written.
+                The agents built are specific to your workflows, not generic
                 templates.
               </p>
             </div>
@@ -703,12 +695,11 @@ export default function FoundationPage() {
                 What happens if our <em>IT department blocks this</em>?
               </h4>
               <p className={s['faq-a']}>
-                Week one includes IT and security introductions. We work within your
+                Week one includes IT and security introductions. The work lives within your
                 existing security posture. The agents are deployed to your
-                infrastructure (or ours, your choice), respect your existing data
+                infrastructure (or the firm{"'"}s, your choice), respect your existing data
                 boundaries, and pass through any review your team needs. If your
-                environment makes deployment impossible by week four, we say so and
-                refund the engagement.
+                environment makes deployment impossible by week four, the engagement is paused and refunded.
               </p>
             </div>
 
@@ -742,12 +733,11 @@ export default function FoundationPage() {
                 What happens <em>after week six</em>?
               </h4>
               <p className={s['faq-a']}>
-                Three paths. (1) You continue with The Agentic Continuum, our ongoing
+                Three paths. (1) You continue with The Agentic Continuum, the ongoing
                 partnership starting at $20k/month, with the first month included if
-                you choose this within thirty days. (2) You take the work in-house and
-                we host the infrastructure at $2k/month with break-fix at $200/hour.
+                you choose this within thirty days. (2) You take the work in-house, with Harbour hosting the infrastructure at $2k/month and break-fix at $200/hour.
                 (3) You run it yourselves entirely. Every path leaves you better than
-                when we started.
+                the day the engagement started.
               </p>
             </div>
           </div>
@@ -762,7 +752,7 @@ export default function FoundationPage() {
             Forty-five minutes. <em>No pitch deck</em>.
           </h2>
           <p className={s['fc-sub']}>
-            The only sales call we run. We ask about the work your team does, where
+            The only sales call. The conversation covers the work your team does, where
             AI has stuck, where it hasn{"'"}t, and where agents would take you
             further. If The Foundation fits, the SOW is in your inbox within
             forty-eight hours.

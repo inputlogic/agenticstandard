@@ -10,22 +10,22 @@ const expectSteps = [
   {
     num: 1,
     title: 'The first three minutes',
-    body: 'We set the frame: no pitch, no deck. The goal is mutual fit. Either outcome is fine.',
+    body: 'The frame is set: no pitch, no deck. The goal is mutual fit. Either outcome is fine.',
   },
   {
     num: 2,
     title: 'The next thirty',
-    body: 'You walk us through your work, your team, what\u2019s broken, what you\u2019ve tried. We listen and probe specifics.',
+    body: 'You walk through your work, your team, what\u2019s broken, what you\u2019ve tried. The call listens and probes specifics.',
   },
   {
     num: 3,
     title: 'The last ten',
-    body: 'We tell you what we\u2019d do, or share that we\u2019re not the right fit. No follow-up calls to qualify further.',
+    body: 'A straight answer on what would be done, or that this isn\u2019t the right fit. No follow-up calls to qualify further.',
   },
   {
     num: 4,
     title: 'Within forty-eight hours',
-    body: 'If The Foundation fits, the SOW arrives in your inbox. If it doesn\u2019t, a kind note explaining why, with a referral if we have one.',
+    body: 'If The Foundation fits, the SOW arrives in your inbox. If it doesn\u2019t, a kind note explaining why, with a referral where one fits.',
   },
 ]
 
@@ -41,10 +41,10 @@ const strongFit = [
 const notFit = [
   'You want a strategy deck without deployment',
   '"Tell us what AI to use" framing; this means you need readiness work first',
-  'A failed implementation with vendor blame in flight; we are careful not to litigate other firms\u2019 work',
-  'Decision involves 6+ stakeholders we haven\u2019t met',
+  'A failed implementation with vendor blame in flight (this firm does not litigate other firms\u2019 work)',
+  'Decision involves 6+ stakeholders not yet in the room',
   'Sub-$40k budget with no flexibility',
-  'Heavily regulated environment (HIPAA, PCI primary) requiring compliance work beyond our practice',
+  'Heavily regulated environment (HIPAA, PCI primary) requiring compliance work beyond this firm\u2019s practice',
 ]
 
 export default function BookPage() {
@@ -58,8 +58,8 @@ export default function BookPage() {
           Forty-five minutes. <em>No pitch deck.</em>
         </h1>
         <p className={s.subtitle}>
-          The only sales call we run. We ask about your work, where AI has
-          stuck and where it hasn't, and whether we're the right fit. By
+          The only sales call. The conversation covers your work, where AI has
+          stuck and where it hasn't, and whether this is the right fit. By
           the end you'll know.
         </p>
       </section>
@@ -76,8 +76,7 @@ export default function BookPage() {
             </h2>
             <p className={s['side-body']}>
               If The Agentic Foundation fits, the SOW is in your inbox within
-              forty-eight hours. If it doesn't fit, we say so, and where we'd
-              send you instead.
+              forty-eight hours. If it doesn't fit, the call says so, and where to look instead.
             </p>
 
             <div className={s.expect}>
@@ -139,8 +138,7 @@ export default function BookPage() {
         </h2>
         <p className={s['disq-intro']}>
           A consulting firm that doesn't disqualify is one that takes work it
-          shouldn't. So before you book, here's what we're looking for and
-          what we're not.
+          shouldn't. So before you book, here's what fits and what doesn't.
         </p>
 
         <div className={s['disqualifier-grid']}>
@@ -159,7 +157,7 @@ export default function BookPage() {
           <div className={`${s['disq-col']} ${s.bad}`}>
             <span className={s['disq-label']}>Not our fit</span>
             <h3 className={s['disq-col-heading']}>
-              If you're here for these, we'll send you elsewhere.
+              If you're here for these, the referral goes elsewhere.
             </h3>
             <ul>
               {notFit.map((item, i) => (
@@ -172,7 +170,7 @@ export default function BookPage() {
         <p className={s['disq-coda']}>
           If you're somewhere in the middle, please book a call. The
           conversation will resolve it faster than reading more pages of
-          our site.
+          this site.
         </p>
       </section>
     </div>

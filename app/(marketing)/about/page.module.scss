@@ -53,13 +53,26 @@
   margin-top: 28px;
 }
 
+/* Founders photo (full-width)
+=================================================== */
+.founders-photo {
+  margin-bottom: 0;
+  border-top: 1px solid var(--border-strong);
+  overflow: hidden;
+}
+
+.founders-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Founders grid
 =================================================== */
 .founders-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0;
-  border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border-strong);
 
   @media #{$phone-tablet} {
@@ -70,6 +83,7 @@
 .founder {
   padding: clamp(36px, 4.5vw, 56px) clamp(28px, 3vw, 40px);
   border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border-strong);
   display: flex;
   flex-direction: column;
 
@@ -84,87 +98,16 @@
 
   @media #{$phone-tablet} {
     border-left: none;
-    border-top: 1px solid var(--border);
     padding: 36px 0;
 
     &:first-child {
-      border-top: none;
-      padding-top: 0;
+      padding-top: 36px;
     }
 
     &:last-child {
       padding-bottom: 0;
     }
   }
-}
-
-/* Founder photo with smoky bloom effect
-=================================================== */
-.founder-photo {
-  width: clamp(104px, 9vw, 128px);
-  height: clamp(104px, 9vw, 128px);
-  border-radius: 50%;
-  overflow: hidden;
-  position: relative;
-  background: var(--bg-soft);
-  border: 1px solid var(--border-strong);
-  margin-bottom: clamp(24px, 2.5vw, 32px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: border-color 0.3s ease;
-
-  &:hover {
-    border-color: var(--accent);
-  }
-}
-
-.founder-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  position: relative;
-  z-index: 2;
-  filter: grayscale(1) brightness(0.62) contrast(1.55);
-}
-
-/* Vignette: dark edges */
-.founder-photo::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(16, 13, 10, 0.78) 100%);
-  pointer-events: none;
-  z-index: 3;
-}
-
-/* Orange key light (positioned via --glow-x / --glow-y per founder) */
-.founder-photo::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at var(--glow-x) var(--glow-y),
-    rgba(210, 122, 63, 0.55) 0%,
-    rgba(210, 122, 63, 0.22) 28%,
-    transparent 60%
-  );
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 4;
-}
-
-.initials {
-  position: absolute;
-  z-index: 1;
-  font-family: var(--font-display, #{$font-display});
-  font-size: clamp(30px, 3.4vw, 40px);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--accent);
-  line-height: 1;
 }
 
 /* Founder text */
@@ -195,6 +138,36 @@
   color: var(--accent);
   display: block;
   line-height: 1.3;
+  margin-bottom: clamp(18px, 2vw, 24px);
+}
+
+.bio {
+  font-size: 14.5px;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: none;
+  margin-bottom: clamp(16px, 2vw, 20px);
+}
+
+.linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body, #{$font-body});
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.linkedin-icon {
+  width: 14px;
+  height: 14px;
 }
 
 /* Animation

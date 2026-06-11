@@ -2,7 +2,7 @@ import Link from 'next/link'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'The Agentic Foundation',
+  title: 'The Agentic Foundation · Agentic Standard',
   description: 'Beyond the chat window. Two to three autonomous agents acting inside your stack in six weeks. Fixed fee, sponsor satisfaction guaranteed.',
 }
 

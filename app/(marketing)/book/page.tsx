@@ -2,7 +2,7 @@ import { SectionLabel } from 'components/section-label'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'Book a Call',
+  title: 'Book a Call · Agentic Standard',
   description: 'A forty-five-minute discovery call. No pitch deck. By the end, you will know whether The Agentic Foundation fits.',
 }
 

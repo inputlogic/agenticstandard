@@ -3,7 +3,7 @@ import { CtaSection } from 'components/cta-section'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'The Agentic Continuum',
+  title: 'The Agentic Continuum · Agentic Standard',
   description: 'The ongoing partnership that turns The Agentic Foundation into a year of compounding operating capacity.',
 }
 

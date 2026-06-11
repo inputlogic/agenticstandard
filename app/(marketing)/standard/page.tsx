@@ -3,7 +3,7 @@ import { CtaSection } from 'components/cta-section'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'The Agentic Standard — The Beliefs',
+  title: 'The Agentic Standard · The Beliefs',
   description: 'Seven tenets that anchor every engagement. The worldview the firm operates from.',
 }
 

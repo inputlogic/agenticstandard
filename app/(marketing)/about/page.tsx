@@ -4,7 +4,7 @@ import { CtaSection } from 'components/cta-section'
 import s from './page.module.scss'
 
 export const metadata = {
-  title: 'About — Agentic Standard',
+  title: 'About · Agentic Standard',
   description: 'Three operators. One thesis. The founders behind Agentic Standard and why they got together to close the gap between AI technology and the operating model that has to meet it.',
 }
 

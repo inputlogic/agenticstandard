@@ -1,0 +1,137 @@
+@use 'styles/base/variables' as *;
+
+.terminal {
+  position: relative;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-soft);
+  padding: clamp(24px, 3vw, 36px);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--fg-dim);
+}
+
+.live {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 13px;
+  height: 340px;
+  overflow: hidden;
+
+  @media #{$phone-tablet} {
+    height: 280px;
+  }
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 12px;
+}
+
+.fading {
+  opacity: 0.4;
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted-dim);
+  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+}
+
+.content {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fg-dim);
+}
+
+.agentName {
+  margin-right: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.85em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.6s steps(2) infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.statusPending {
+  white-space: nowrap;
+  color: var(--muted-dim);
+}
+
+.statusReview {
+  white-space: nowrap;
+  color: var(--accent-soft);
+}
+
+.statusDone {
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot {
+    animation: none;
+  }
+  .caret {
+    display: none;
+  }
+}

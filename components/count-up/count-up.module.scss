@@ -1,0 +1,15 @@
+.wrap {
+  display: inline-grid;
+  font-variant-numeric: tabular-nums;
+}
+
+.sizer {
+  visibility: hidden;
+  white-space: nowrap;
+  grid-area: 1 / 1;
+}
+
+.value {
+  white-space: nowrap;
+  grid-area: 1 / 1;
+}

@@ -1,4 +1,10 @@
 import Link from 'next/link'
+import { ScrollReveal } from 'components/scroll-reveal'
+import { HeroDrift } from 'components/hero-drift'
+import { Parallax } from 'components/parallax'
+import { CornerBrackets } from 'components/corner-brackets'
+import { CountUp } from 'components/count-up'
+import { FaqAccordion } from 'components/faq-accordion'
 import s from './page.module.scss'
 
 export const metadata = {
@@ -11,180 +17,188 @@ export default function FoundationPage() {
     <>
       {/* ============ HERO ============ */}
       <section className={s.hero}>
-        <div className={s['hero-grid']}>
+        <HeroDrift>
+          <div className={s['hero-grid']}>
 
-          <div className={s['hero-content']}>
-            <div className={s['hero-eyebrow']}>
-              Agentic AI · Beyond the Chat Window · 2026
-            </div>
-
-            <h1>
-              Your team operates agents in six weeks,{' '}
-              <em>so they get their week back</em>.
-            </h1>
-
-            <p className={s['hero-sub']}>
-              <span className={s.pain}>
-                <span className={s['pain-item']}>Stop typing prompts into chat windows</span>
-                <span className={s['pain-item']}>
-                  <span className={s.sep}>·</span>&nbsp;No more copilots gathering dust
-                </span>
-                <span className={s['pain-item']}>
-                  <span className={s.sep}>·</span>&nbsp;End the era of AI that doesn{"'"}t act.
-                </span>
-              </span>
-              Two to three autonomous agents deployed inside your stack, acting on
-              workflows observed in your environment, posting in Slack while your team sleeps, completing
-              tasks on their own. Score your readiness across six dimensions, hand your
-              sponsor a year-long board-ready roadmap, and finish in one six-week,
-              fixed-fee sprint.
-            </p>
-
-            <div className={s['hero-cta-wrap']}>
-              <Link
-                href="/book"
-                className={s['hero-cta']}
-              >
-                Book a <span className={s['cta-detail']}>45-Minute </span>Call{' '}
-                <span className={s.arrow}>→</span>
-              </Link>
-              <div className={s['hero-fud']}>
-                <span className={s['fud-item']}>
-                  <span className={s.check}>✓</span> Free call
-                </span>
-                <span className={s['fud-item']}>
-                  <span className={s.check}>✓</span> No pitch deck
-                </span>
-                <span className={s['fud-item']}>
-                  <span className={s.check}>✓</span> No follow-up pressure
-                </span>
+            <div className={s['hero-content']}>
+              <div className={`${s['hero-eyebrow']} rise`} style={{ animationDelay: '0.05s' }}>
+                Agentic AI · Beyond the Chat Window · 2026
               </div>
-            </div>
-          </div>
 
-          {/* HERO PROOF VISUAL */}
-          <div className={s['hero-visual']}>
-            <svg className={s['hv-corner-tl']} viewBox="0 0 60 60" fill="none">
-              <path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-            </svg>
+              <h1 className="rise" style={{ animationDelay: '0.12s' }}>
+                Your team operates agents in six weeks,{' '}
+                <em>so they get their week back</em>.
+              </h1>
 
-            <div className={s['hv-status']}>
-              <div className={s['hv-status-label']}>Week Six · Delivered</div>
-              <div className={s['hv-status-time']}>
-                <span className={s['live-dot']} />
-                <span>Live</span>
-              </div>
-            </div>
+              <p className={`${s['hero-sub']} rise`} style={{ animationDelay: '0.20s' }}>
+                <span className={s.pain}>
+                  <span className={s['pain-item']}>Stop typing prompts into chat windows</span>
+                  <span className={s['pain-item']}>
+                    <span className={s.sep}>·</span>&nbsp;No more copilots gathering dust
+                  </span>
+                  <span className={s['pain-item']}>
+                    <span className={s.sep}>·</span>&nbsp;End the era of AI that doesn{"'"}t act.
+                  </span>
+                </span>
+                Two to three autonomous agents deployed inside your stack, acting on
+                workflows observed in your environment, posting in Slack while your team sleeps, completing
+                tasks on their own. Score your readiness across six dimensions, hand your
+                sponsor a year-long board-ready roadmap, and finish in one six-week,
+                fixed-fee sprint.
+              </p>
 
-            {/* Agents Running */}
-            <div className={s['hv-section']}>
-              <div className={s['hv-section-label']}>Agents Running In Production</div>
-              <div className={s['hv-agent']}>
-                <div className={s['ag-dot']} />
-                <div className={s['ag-text']}>
-                  <div className={s['ag-name']}>The Inbox Sentinel</div>
-                  <div className={s['ag-desc']}>
-                    Triages, routes, and drafts responses to the shared inbox daily.
-                  </div>
-                </div>
-              </div>
-              <div className={s['hv-agent']}>
-                <div className={s['ag-dot']} />
-                <div className={s['ag-text']}>
-                  <div className={s['ag-name']}>Weekly KPI Synthesizer</div>
-                  <div className={s['ag-desc']}>
-                    Auto-drafts the executive Monday briefing from seven data sources.
-                  </div>
-                </div>
-              </div>
-              <div className={s['hv-agent']}>
-                <div className={s['ag-dot']} />
-                <div className={s['ag-text']}>
-                  <div className={s['ag-name']}>Competitive Scan Sentinel</div>
-                  <div className={s['ag-desc']}>
-                    Monitors six competitors, flags meaningful moves in Slack.
-                  </div>
+              <div className={`${s['hero-cta-wrap']} rise`} style={{ animationDelay: '0.28s' }}>
+                <Link
+                  href="/book"
+                  className={s['hero-cta']}
+                >
+                  Book a <span className={s['cta-detail']}>45-Minute </span>Call{' '}
+                  <span className={s.arrow}>→</span>
+                </Link>
+                <div className={s['hero-fud']}>
+                  <span className={s['fud-item']}>
+                    <span className={s.check}>✓</span> Free call
+                  </span>
+                  <span className={s['fud-item']}>
+                    <span className={s.check}>✓</span> No pitch deck
+                  </span>
+                  <span className={s['fud-item']}>
+                    <span className={s.check}>✓</span> No follow-up pressure
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Map Score */}
-            <div className={s['hv-section']}>
-              <div className={s['hv-section-label']}>The Agentic Readiness Map</div>
-              <div className={s['hv-map']}>
-                {[
-                  { name: 'Workforce readiness', score: 4 },
-                  { name: 'Workflow integration', score: 4 },
-                  { name: 'Agentic deployment', score: 5 },
-                  { name: 'Governance & risk', score: 3 },
-                  { name: 'Data & infrastructure', score: 4 },
-                  { name: 'Strategic alignment', score: 5 },
-                ].map((row) => (
-                  <div className={s['hv-map-row']} key={row.name}>
-                    <div className={s['hv-map-name']}>{row.name}</div>
-                    <div className={s['hv-map-score']}>
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <div
-                          key={i}
-                          className={`${s['hv-map-dot']}${i <= row.score ? ` ${s.on}` : ''}`}
-                        />
-                      ))}
+            {/* HERO PROOF VISUAL */}
+            <div className={`${s['hero-visual']} rise`} style={{ animationDelay: '0.35s' }}>
+              <svg className={s['hv-corner-tl']} viewBox="0 0 60 60" fill="none">
+                <path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
+              </svg>
+
+              <div className={s['hv-status']}>
+                <div className={s['hv-status-label']}>Week Six · Delivered</div>
+                <div className={s['hv-status-time']}>
+                  <span className={s['live-dot']} />
+                  <span>Live</span>
+                </div>
+              </div>
+
+              {/* Agents Running */}
+              <div className={s['hv-section']}>
+                <div className={s['hv-section-label']}>Agents Running In Production</div>
+                <div className={s['hv-agent']}>
+                  <div className={s['ag-dot']} />
+                  <div className={s['ag-text']}>
+                    <div className={s['ag-name']}>The Inbox Sentinel</div>
+                    <div className={s['ag-desc']}>
+                      Triages, routes, and drafts responses to the shared inbox daily.
                     </div>
                   </div>
-                ))}
+                </div>
+                <div className={s['hv-agent']}>
+                  <div className={s['ag-dot']} />
+                  <div className={s['ag-text']}>
+                    <div className={s['ag-name']}>Weekly KPI Synthesizer</div>
+                    <div className={s['ag-desc']}>
+                      Auto-drafts the executive Monday briefing from seven data sources.
+                    </div>
+                  </div>
+                </div>
+                <div className={s['hv-agent']}>
+                  <div className={s['ag-dot']} />
+                  <div className={s['ag-text']}>
+                    <div className={s['ag-name']}>Competitive Scan Sentinel</div>
+                    <div className={s['ag-desc']}>
+                      Monitors six competitors, flags meaningful moves in Slack.
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* Map Score */}
+              <div className={s['hv-section']}>
+                <div className={s['hv-section-label']}>The Agentic Readiness Map</div>
+                <div className={s['hv-map']}>
+                  {[
+                    { name: 'Workforce readiness', score: 4 },
+                    { name: 'Workflow integration', score: 4 },
+                    { name: 'Agentic deployment', score: 5 },
+                    { name: 'Governance & risk', score: 3 },
+                    { name: 'Data & infrastructure', score: 4 },
+                    { name: 'Strategic alignment', score: 5 },
+                  ].map((row) => (
+                    <div className={s['hv-map-row']} key={row.name}>
+                      <div className={s['hv-map-name']}>{row.name}</div>
+                      <div className={s['hv-map-score']}>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <div
+                            key={i}
+                            className={`${s['hv-map-dot']}${i <= row.score ? ` ${s.on}` : ''}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Deliverables */}
+              <div className={s['hv-deliverables']}>
+                <div className={s['hv-deliv-item']}>
+                  <span className={s['hv-deliv-check']}>✓</span> Year-long roadmap delivered
+                </div>
+                <div className={s['hv-deliv-item']}>
+                  <span className={s['hv-deliv-check']}>✓</span> Sponsor working session (today)
+                </div>
+                <div className={s['hv-deliv-item']}>
+                  <span className={s['hv-deliv-check']}>✓</span> Map handoff (complete)
+                </div>
+              </div>
+
+              <svg className={s['hv-corner-br']} viewBox="0 0 60 60" fill="none">
+                <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
+              </svg>
             </div>
 
-            {/* Deliverables */}
-            <div className={s['hv-deliverables']}>
-              <div className={s['hv-deliv-item']}>
-                <span className={s['hv-deliv-check']}>✓</span> Year-long roadmap delivered
-              </div>
-              <div className={s['hv-deliv-item']}>
-                <span className={s['hv-deliv-check']}>✓</span> Sponsor working session (today)
-              </div>
-              <div className={s['hv-deliv-item']}>
-                <span className={s['hv-deliv-check']}>✓</span> Map handoff (complete)
-              </div>
-            </div>
-
-            <svg className={s['hv-corner-br']} viewBox="0 0 60 60" fill="none">
-              <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-            </svg>
           </div>
-
-        </div>
+        </HeroDrift>
       </section>
 
       {/* ============ PATTERN STRIP ============ */}
       <div className={s['pattern-strip']}>
         <div className={s.container}>
-          <div className={s['pat-quote']}>
-            Most enterprises have AI. <em>Few have agents.</em> Agentic Standard exists to make the
-            leap, in six weeks.
-          </div>
-          <div className={s['pat-attribution']}>
-            Agentic Standard<br />The Firm Manifesto · 01 of 07
-          </div>
+          <ScrollReveal>
+            <div className={s['pat-quote']}>
+              Most enterprises have AI. <em>Few have agents.</em> Agentic Standard exists to make the
+              leap, in six weeks.
+            </div>
+            <div className={s['pat-attribution']}>
+              Agentic Standard<br />The Firm Manifesto · 01 of 07
+            </div>
+          </ScrollReveal>
         </div>
       </div>
 
       {/* ============ WHAT YOU GET ============ */}
       <section className={s.block}>
         <div className={s.container}>
-          <div className={s['sect-label']}>What you walk away with</div>
-          <h2 className={s['sect-headline']}>
-            Three deliverables, <em>one engagement</em>.
-          </h2>
-          <p className={s['sect-sub']}>
-            By the end of week six you have agents acting in your stack, a roadmap
-            your board will recognize, and a workforce that knows how to keep them
-            running.
-          </p>
+          <ScrollReveal>
+            <div className={s['sect-label']}>What you walk away with</div>
+            <h2 className={s['sect-headline']}>
+              Three deliverables, <em>one engagement</em>.
+            </h2>
+            <p className={s['sect-sub']}>
+              By the end of week six you have agents acting in your stack, a roadmap
+              your board will recognize, and a workforce that knows how to keep them
+              running.
+            </p>
+          </ScrollReveal>
 
           <div className={s['deliverables-grid']}>
-            <div className={s['deliv-cell']}>
-              <div className={s['deliv-num']}>01</div>
+            <ScrollReveal className={s['deliv-cell']} delay={0}>
+              <Parallax speed={-0.06} maxShift={32}>
+                <div className={s['deliv-num']}>01</div>
+              </Parallax>
               <h3 className={s['deliv-name']}>
                 Agents working in your <em>stack</em>.
               </h3>
@@ -199,10 +213,12 @@ export default function FoundationPage() {
                 <li>Customer response drafting</li>
                 <li>Internal report generation</li>
               </ul>
-            </div>
+            </ScrollReveal>
 
-            <div className={s['deliv-cell']}>
-              <div className={s['deliv-num']}>02</div>
+            <ScrollReveal className={s['deliv-cell']} delay={100}>
+              <Parallax speed={-0.06} maxShift={32}>
+                <div className={s['deliv-num']}>02</div>
+              </Parallax>
               <h3 className={s['deliv-name']}>
                 The Agentic <em>Readiness Map</em>.
               </h3>
@@ -218,10 +234,12 @@ export default function FoundationPage() {
                 <li>Quarterly success scorecard</li>
                 <li>Board-ready presentation</li>
               </ul>
-            </div>
+            </ScrollReveal>
 
-            <div className={s['deliv-cell']}>
-              <div className={s['deliv-num']}>03</div>
+            <ScrollReveal className={s['deliv-cell']} delay={200}>
+              <Parallax speed={-0.06} maxShift={32}>
+                <div className={s['deliv-num']}>03</div>
+              </Parallax>
               <h3 className={s['deliv-name']}>
                 A workforce that <em>can run it</em>.
               </h3>
@@ -236,7 +254,7 @@ export default function FoundationPage() {
                 <li>Evaluation framework</li>
                 <li>Governance handoff doc</li>
               </ul>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -244,69 +262,83 @@ export default function FoundationPage() {
       {/* ============ THE SPRINT ============ */}
       <section className={`${s.block} ${s.alt}`}>
         <div className={s.container}>
-          <div className={s['sect-label']}>How the six weeks unfold</div>
-          <h2 className={s['sect-headline']}>
-            Not a year-long transformation. <em>A six-week sprint</em>.
-          </h2>
-          <p className={s['sect-sub']}>
-            Every week has a deliverable. Every week has a checkpoint. By the end,
-            you have working agents, not a roadmap to working AI.
-          </p>
+          <ScrollReveal>
+            <div className={s['sect-label']}>How the six weeks unfold</div>
+            <h2 className={s['sect-headline']}>
+              Not a year-long transformation. <em>A six-week sprint</em>.
+            </h2>
+            <p className={s['sect-sub']}>
+              Every week has a deliverable. Every week has a checkpoint. By the end,
+              you have working agents, not a roadmap to working AI.
+            </p>
+          </ScrollReveal>
 
           <div className={s['sprint-grid']}>
-            <div className={s['sprint-cell']}>
-              <div className={s['sprint-num']}>1</div>
+            <ScrollReveal className={s['sprint-cell']} delay={0}>
+              <Parallax speed={-0.05} maxShift={24}>
+                <div className={s['sprint-num']}>1</div>
+              </Parallax>
               <div className={s['sprint-phase']}>Kickoff</div>
               <h4 className={s['sprint-title']}>Sponsor alignment</h4>
               <p className={s['sprint-desc']}>
                 Sponsor interview. System inventory. Workflow shadow candidates
                 identified. Security and IT introductions.
               </p>
-            </div>
-            <div className={s['sprint-cell']}>
-              <div className={s['sprint-num']}>2</div>
+            </ScrollReveal>
+            <ScrollReveal className={s['sprint-cell']} delay={60}>
+              <Parallax speed={-0.05} maxShift={24}>
+                <div className={s['sprint-num']}>2</div>
+              </Parallax>
               <div className={s['sprint-phase']}>Discovery</div>
               <h4 className={s['sprint-title']}>Shadowing &amp; data probe</h4>
               <p className={s['sprint-desc']}>
                 Three to five workflow shadowing sessions. Three specific data sets pulled directly, hands-on. Real friction is named.
               </p>
-            </div>
-            <div className={s['sprint-cell']}>
-              <div className={s['sprint-num']}>3</div>
+            </ScrollReveal>
+            <ScrollReveal className={s['sprint-cell']} delay={120}>
+              <Parallax speed={-0.05} maxShift={24}>
+                <div className={s['sprint-num']}>3</div>
+              </Parallax>
               <div className={s['sprint-phase']}>Build</div>
               <h4 className={s['sprint-title']}>First deploys</h4>
               <p className={s['sprint-desc']}>
                 First one or two agents ship into production. Observation continues.
                 Map dimension scoring begins.
               </p>
-            </div>
-            <div className={s['sprint-cell']}>
-              <div className={s['sprint-num']}>4</div>
+            </ScrollReveal>
+            <ScrollReveal className={s['sprint-cell']} delay={180}>
+              <Parallax speed={-0.05} maxShift={24}>
+                <div className={s['sprint-num']}>4</div>
+              </Parallax>
               <div className={s['sprint-phase']}>Build</div>
               <h4 className={s['sprint-title']}>Stabilize</h4>
               <p className={s['sprint-desc']}>
                 Agents tuned against real use. Candidate inventory grows. Each
                 automation is sorted into Q1–Q4 phases.
               </p>
-            </div>
-            <div className={s['sprint-cell']}>
-              <div className={s['sprint-num']}>5</div>
+            </ScrollReveal>
+            <ScrollReveal className={s['sprint-cell']} delay={240}>
+              <Parallax speed={-0.05} maxShift={24}>
+                <div className={s['sprint-num']}>5</div>
+              </Parallax>
               <div className={s['sprint-phase']}>Govern</div>
               <h4 className={s['sprint-title']}>Governance review</h4>
               <p className={s['sprint-desc']}>
                 Final agents ship. Security and compliance scored. Champion trained.
                 Map draft complete.
               </p>
-            </div>
-            <div className={s['sprint-cell']}>
-              <div className={s['sprint-num']}>6</div>
+            </ScrollReveal>
+            <ScrollReveal className={s['sprint-cell']} delay={300}>
+              <Parallax speed={-0.05} maxShift={24}>
+                <div className={s['sprint-num']}>6</div>
+              </Parallax>
               <div className={s['sprint-phase']}>Present</div>
               <h4 className={s['sprint-title']}>Synthesis &amp; handoff</h4>
               <p className={s['sprint-desc']}>
                 Sixty to ninety minute working session with your sponsor. The Map is
                 left behind. Agents are in production.
               </p>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -314,22 +346,22 @@ export default function FoundationPage() {
       {/* ============ WHY THIS WORKS ============ */}
       <section className={s.block}>
         <div className={s.container}>
-          <div className={s['sect-label']}>
-            Why this works when other engagements don{"'"}t
-          </div>
-          <h2 className={s['sect-headline']}>
-            Three reasons this <em>lands</em> when other firms stall.
-          </h2>
-          <p className={s['sect-sub']}>
-            The reasons most enterprise AI engagements fail are not technical.
-            They{"'"}re structural. Here{"'"}s what{"'"}s different.
-          </p>
+          <ScrollReveal>
+            <div className={s['sect-label']}>
+              Why this works when other engagements don{"'"}t
+            </div>
+            <h2 className={s['sect-headline']}>
+              Three reasons this <em>lands</em> when other firms stall.
+            </h2>
+            <p className={s['sect-sub']}>
+              The reasons most enterprise AI engagements fail are not technical.
+              They{"'"}re structural. Here{"'"}s what{"'"}s different.
+            </p>
+          </ScrollReveal>
 
           <div className={s['method-grid']}>
-            <div className={s['method-tile']}>
-              <svg className={s['mt-corner-tl']} viewBox="0 0 60 60" fill="none">
-                <path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-              </svg>
+            <ScrollReveal className={s['method-tile']} delay={0}>
+              <CornerBrackets />
               <div className={s['mt-num']}>01</div>
               <h3 className={s['mt-title']}>
                 <em>Deployment</em>. Not advice.
@@ -340,15 +372,10 @@ export default function FoundationPage() {
                 observing, posting, executing on their own. The deliverable is
                 production, not a presentation.
               </p>
-              <svg className={s['mt-corner-br']} viewBox="0 0 60 60" fill="none">
-                <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-              </svg>
-            </div>
+            </ScrollReveal>
 
-            <div className={s['method-tile']}>
-              <svg className={s['mt-corner-tl']} viewBox="0 0 60 60" fill="none">
-                <path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-              </svg>
+            <ScrollReveal className={s['method-tile']} delay={100}>
+              <CornerBrackets />
               <div className={s['mt-num']}>02</div>
               <h3 className={s['mt-title']}>
                 <em>Measurement</em>. Not guesswork.
@@ -358,15 +385,10 @@ export default function FoundationPage() {
                 observation, not survey. Your roadmap is defensible to your board
                 because it{"'"}s grounded in what was actually observed.
               </p>
-              <svg className={s['mt-corner-br']} viewBox="0 0 60 60" fill="none">
-                <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-              </svg>
-            </div>
+            </ScrollReveal>
 
-            <div className={s['method-tile']}>
-              <svg className={s['mt-corner-tl']} viewBox="0 0 60 60" fill="none">
-                <path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-              </svg>
+            <ScrollReveal className={s['method-tile']} delay={200}>
+              <CornerBrackets />
               <div className={s['mt-num']}>03</div>
               <h3 className={s['mt-title']}>
                 <em>Backed</em> by a guarantee.
@@ -376,10 +398,7 @@ export default function FoundationPage() {
                 the result, you don{"'"}t pay. Full refund. No clawbacks, no clauses.
                 This is the only B2B engagement you{"'"}ll find with this guarantee.
               </p>
-              <svg className={s['mt-corner-br']} viewBox="0 0 60 60" fill="none">
-                <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
-              </svg>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -387,18 +406,20 @@ export default function FoundationPage() {
       {/* ============ THE OFFER ============ */}
       <section className={`${s.block} ${s.alt}`} id="offer">
         <div className={s.container}>
-          <div className={`${s['sect-label']} ${s['sect-label-center']}`}>
-            The Offer
-          </div>
-          <h2 className={`${s['sect-headline']} ${s['sect-headline-center']}`}>
-            What{"'"}s <em>in the box</em>.
-          </h2>
-          <p className={`${s['sect-sub']} ${s['sect-sub-center']}`}>
-            Every line below is included in the fixed-fee engagement. One invoice.
-            One outcome. One accountable team.
-          </p>
+          <ScrollReveal>
+            <div className={`${s['sect-label']} ${s['sect-label-center']}`}>
+              The Offer
+            </div>
+            <h2 className={`${s['sect-headline']} ${s['sect-headline-center']}`}>
+              What{"'"}s <em>in the box</em>.
+            </h2>
+            <p className={`${s['sect-sub']} ${s['sect-sub-center']}`}>
+              Every line below is included in the fixed-fee engagement. One invoice.
+              One outcome. One accountable team.
+            </p>
+          </ScrollReveal>
 
-          <div className={s['offer-card']}>
+          <ScrollReveal className={s['offer-card']} delay={100}>
             <svg className={s['oc-corner-tl']} viewBox="0 0 60 60" fill="none">
               <path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
             </svg>
@@ -414,7 +435,7 @@ export default function FoundationPage() {
             </div>
 
             <ul className={s['stack-list']}>
-              <li className={s['stack-item']}>
+              <ScrollReveal as="li" className={s['stack-item']} delay={0}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Week 1–2</div>
                   <div className={s['item-name']}>
@@ -427,9 +448,9 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $15,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
 
-              <li className={s['stack-item']}>
+              <ScrollReveal as="li" className={s['stack-item']} delay={60}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Week 3–5</div>
                   <div className={s['item-name']}>
@@ -444,9 +465,9 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $35,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
 
-              <li className={s['stack-item']}>
+              <ScrollReveal as="li" className={s['stack-item']} delay={120}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Week 5–6</div>
                   <div className={s['item-name']}>
@@ -461,9 +482,9 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $20,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
 
-              <li className={s['stack-item']}>
+              <ScrollReveal as="li" className={s['stack-item']} delay={180}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Week 6</div>
                   <div className={s['item-name']}>
@@ -477,9 +498,9 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $5,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
 
-              <li className={s['stack-item']}>
+              <ScrollReveal as="li" className={s['stack-item']} delay={240}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Week 6</div>
                   <div className={s['item-name']}>
@@ -493,9 +514,9 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $10,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
 
-              <li className={s['stack-item']}>
+              <ScrollReveal as="li" className={s['stack-item']} delay={300}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Weeks 7–19</div>
                   <div className={s['item-name']}>
@@ -508,9 +529,9 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $8,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
 
-              <li className={`${s['stack-item']} ${s.bonus}`}>
+              <ScrollReveal as="li" className={`${s['stack-item']} ${s.bonus}`} delay={360}>
                 <div className={s['stack-item-left']}>
                   <div className={s.tag}>Bonus · If You Continue</div>
                   <div className={s['item-name']}>
@@ -525,7 +546,7 @@ export default function FoundationPage() {
                 <div className={s['item-value']}>
                   $20,000<span className={s.label}>Value</span>
                 </div>
-              </li>
+              </ScrollReveal>
             </ul>
 
             <div className={`${s['total-row']} ${s.strike}`}>
@@ -539,7 +560,7 @@ export default function FoundationPage() {
             </div>
 
             {/* GUARANTEE */}
-            <div className={s['guarantee-card']}>
+            <ScrollReveal className={s['guarantee-card']}>
               <div className={s['guarantee-badge']}>Our Stakes</div>
               <h4 className={s['guarantee-title']}>
                 Sponsor satisfaction, <em>or we don{"'"}t get paid</em>.
@@ -555,29 +576,31 @@ export default function FoundationPage() {
                 No clauses. No clawbacks. No {'"'}let us try one more thing.{'"'} Just
                 clean. This is what we mean by The Agentic Standard.
               </p>
-            </div>
+            </ScrollReveal>
 
             <svg className={s['oc-corner-br']} viewBox="0 0 60 60" fill="none">
               <path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" strokeLinecap="square" strokeWidth="6" />
             </svg>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ============ QUALIFIER ============ */}
       <section className={s.block}>
         <div className={s.container}>
-          <div className={s['sect-label']}>Honest fit</div>
-          <h2 className={s['sect-headline']}>
-            Who this is for, and who <em>it isn{"'"}t</em>.
-          </h2>
-          <p className={s['sect-sub']}>
-            A firm that won{"'"}t disqualify is a firm that takes work it shouldn
-            {"'"}t. Before you book, here{"'"}s the honest version.
-          </p>
+          <ScrollReveal>
+            <div className={s['sect-label']}>Honest fit</div>
+            <h2 className={s['sect-headline']}>
+              Who this is for, and who <em>it isn{"'"}t</em>.
+            </h2>
+            <p className={s['sect-sub']}>
+              A firm that won{"'"}t disqualify is a firm that takes work it shouldn
+              {"'"}t. Before you book, here{"'"}s the honest version.
+            </p>
+          </ScrollReveal>
 
           <div className={s['qualifier-grid']}>
-            <div className={`${s['qual-col']} ${s.good}`}>
+            <ScrollReveal className={`${s['qual-col']} ${s.good}`} delay={0}>
               <span className={s['qual-tag']}>Strong fit</span>
               <h3 className={s['qual-headline']}>
                 Book the call if <em>this</em> is you.
@@ -605,8 +628,8 @@ export default function FoundationPage() {
                   tools
                 </li>
               </ul>
-            </div>
-            <div className={`${s['qual-col']} ${s.bad}`}>
+            </ScrollReveal>
+            <ScrollReveal className={`${s['qual-col']} ${s.bad}`} delay={120}>
               <span className={s['qual-tag']}>Not our fit</span>
               <h3 className={s['qual-headline']}>
                 The referral goes elsewhere if <em>this</em> is you.
@@ -627,7 +650,7 @@ export default function FoundationPage() {
                   compliance work
                 </li>
               </ul>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -635,147 +658,151 @@ export default function FoundationPage() {
       {/* ============ FAQ ============ */}
       <section className={`${s.block} ${s.alt}`}>
         <div className={s.container}>
-          <div className={`${s['sect-label']} ${s['sect-label-center']}`}>
-            Frequently Asked
-          </div>
-          <h2 className={`${s['sect-headline']} ${s['sect-headline-center']}`}>
-            Common questions, <em>answered honestly</em>.
-          </h2>
-          <p className={`${s['sect-sub']} ${s['sect-sub-center']}`}>
-            Six weeks, $48k, and a satisfaction guarantee raises real questions.
-            Here are the most common.
-          </p>
-
-          <div className={s['faq-list']}>
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                What{"'"}s the difference between AI <em>and agents</em>?
-              </h4>
-              <p className={s['faq-a']}>
-                AI is the model: Claude, GPT, the engine that generates language and
-                reasoning. Most enterprises {'"'}have AI{'"'} in the form of a chat
-                window or a copilot that waits for someone to type a prompt. An{' '}
-                <em>agent</em> is what happens when that AI is wired up to act on its
-                own, running on a schedule or a trigger, observing your systems,
-                posting in Slack, drafting reports, calling tools, completing tasks
-                while your team sleeps. Agentic Standard deploys agents. The chat-window era was the
-                warm-up.
-              </p>
+          <ScrollReveal>
+            <div className={`${s['sect-label']} ${s['sect-label-center']}`}>
+              Frequently Asked
             </div>
+            <h2 className={`${s['sect-headline']} ${s['sect-headline-center']}`}>
+              Common questions, <em>answered honestly</em>.
+            </h2>
+            <p className={`${s['sect-sub']} ${s['sect-sub-center']}`}>
+              Six weeks, $48k, and a satisfaction guarantee raises real questions.
+              Here are the most common.
+            </p>
+          </ScrollReveal>
 
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                What if we{"'"}re <em>not ready for agents</em>?
-              </h4>
-              <p className={s['faq-a']}>
-                If you{"'"}re asking that question, you{"'"}re more ready than you
-                think. {'"'}Ready for AI{'"'} usually means {'"'}ready to deploy
-                agents on real workflows{'"'}, and that readiness is what the
-                engagement builds. By week six, the readiness is no longer an open
-                question; you have agents running and a Map showing exactly where the
-                next dimension of readiness needs work.
-              </p>
-            </div>
+          <ScrollReveal className={s['faq-list']}>
+            <FaqAccordion
+              question={<>What{"'"}s the difference between AI <em>and agents</em>?</>}
+              answer={
+                <p>
+                  AI is the model: Claude, GPT, the engine that generates language and
+                  reasoning. Most enterprises {'"'}have AI{'"'} in the form of a chat
+                  window or a copilot that waits for someone to type a prompt. An{' '}
+                  <em>agent</em> is what happens when that AI is wired up to act on its
+                  own, running on a schedule or a trigger, observing your systems,
+                  posting in Slack, drafting reports, calling tools, completing tasks
+                  while your team sleeps. Agentic Standard deploys agents. The chat-window era was the
+                  warm-up.
+                </p>
+              }
+            />
 
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                How do you choose <em>which agents to deploy</em>?
-              </h4>
-              <p className={s['faq-a']}>
-                During weeks one and two, three to five real workflows
-                inside your organization are shadowed. The agents aren{"'"}t picked from a catalog. Observation comes first; the highest-leverage automation
-                candidates are identified, alignment with your sponsor happens before any code is written.
-                The agents built are specific to your workflows, not generic
-                templates.
-              </p>
-            </div>
+            <FaqAccordion
+              question={<>What if we{"'"}re <em>not ready for agents</em>?</>}
+              answer={
+                <p>
+                  If you{"'"}re asking that question, you{"'"}re more ready than you
+                  think. {'"'}Ready for AI{'"'} usually means {'"'}ready to deploy
+                  agents on real workflows{'"'}, and that readiness is what the
+                  engagement builds. By week six, the readiness is no longer an open
+                  question; you have agents running and a Map showing exactly where the
+                  next dimension of readiness needs work.
+                </p>
+              }
+            />
 
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                What happens if our <em>IT department blocks this</em>?
-              </h4>
-              <p className={s['faq-a']}>
-                Week one includes IT and security introductions. The work lives within your
-                existing security posture. The agents are deployed to your
-                infrastructure (or the firm{"'"}s, your choice), respect your existing data
-                boundaries, and pass through any review your team needs. If your
-                environment makes deployment impossible by week four, the engagement is paused and refunded.
-              </p>
-            </div>
+            <FaqAccordion
+              question={<>How do you choose <em>which agents to deploy</em>?</>}
+              answer={
+                <p>
+                  During weeks one and two, three to five real workflows
+                  inside your organization are shadowed. The agents aren{"'"}t picked from a catalog. Observation comes first; the highest-leverage automation
+                  candidates are identified, alignment with your sponsor happens before any code is written.
+                  The agents built are specific to your workflows, not generic
+                  templates.
+                </p>
+              }
+            />
 
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                Why <em>six weeks</em>, specifically?
-              </h4>
-              <p className={s['faq-a']}>
-                Long enough to observe real work, build production-ready agents, and
-                produce a defensible Map. Short enough that your sponsor has a date on
-                the calendar and a result to show. Six-month transformations create
-                the conditions for stalling. Six-week sprints create accountability.
-              </p>
-            </div>
+            <FaqAccordion
+              question={<>What happens if our <em>IT department blocks this</em>?</>}
+              answer={
+                <p>
+                  Week one includes IT and security introductions. The work lives within your
+                  existing security posture. The agents are deployed to your
+                  infrastructure (or the firm{"'"}s, your choice), respect your existing data
+                  boundaries, and pass through any review your team needs. If your
+                  environment makes deployment impossible by week four, the engagement is paused and refunded.
+                </p>
+              }
+            />
 
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                What{"'"}s the <em>guarantee actually cover</em>?
-              </h4>
-              <p className={s['faq-a']}>
-                Sponsor satisfaction, evaluated at the week six working session. If
-                your sponsor isn{"'"}t satisfied (with the work, the process, or the
-                result) you don{"'"}t pay, or you{"'"}re refunded if you already did.
-                No clauses about {'"'}good faith effort{'"'} or {'"'}partial
-                completion.{'"'} It{"'"}s binary: sponsor satisfied, or refund.
-              </p>
-            </div>
+            <FaqAccordion
+              question={<>Why <em>six weeks</em>, specifically?</>}
+              answer={
+                <p>
+                  Long enough to observe real work, build production-ready agents, and
+                  produce a defensible Map. Short enough that your sponsor has a date on
+                  the calendar and a result to show. Six-month transformations create
+                  the conditions for stalling. Six-week sprints create accountability.
+                </p>
+              }
+            />
 
-            <div className={s['faq-item']}>
-              <h4 className={s['faq-q']}>
-                What happens <em>after week six</em>?
-              </h4>
-              <p className={s['faq-a']}>
-                Three paths. (1) You continue with The Agentic Continuum, the ongoing
-                partnership starting at $20k/month, with the first month included if
-                you choose this within thirty days. (2) You take the work in-house, with Harbour hosting the infrastructure at $2k/month and break-fix at $200/hour.
-                (3) You run it yourselves entirely. Every path leaves you better than
-                the day the engagement started.
-              </p>
-            </div>
-          </div>
+            <FaqAccordion
+              question={<>What{"'"}s the <em>guarantee actually cover</em>?</>}
+              answer={
+                <p>
+                  Sponsor satisfaction, evaluated at the week six working session. If
+                  your sponsor isn{"'"}t satisfied (with the work, the process, or the
+                  result) you don{"'"}t pay, or you{"'"}re refunded if you already did.
+                  No clauses about {'"'}good faith effort{'"'} or {'"'}partial
+                  completion.{'"'} It{"'"}s binary: sponsor satisfied, or refund.
+                </p>
+              }
+            />
+
+            <FaqAccordion
+              question={<>What happens <em>after week six</em>?</>}
+              answer={
+                <p>
+                  Three paths. (1) You continue with The Agentic Continuum, the ongoing
+                  partnership starting at $20k/month, with the first month included if
+                  you choose this within thirty days. (2) You take the work in-house, with Harbour hosting the infrastructure at $2k/month and break-fix at $200/hour.
+                  (3) You run it yourselves entirely. Every path leaves you better than
+                  the day the engagement started.
+                </p>
+              }
+            />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ============ FINAL CTA ============ */}
       <section className={`${s.block} ${s.cream}`} id="book">
-        <div className={`${s.container} ${s['final-cta']}`}>
-          <div className={s['fc-eyebrow']}>To Begin</div>
-          <h2>
-            Forty-five minutes. <em>No pitch deck</em>.
-          </h2>
-          <p className={s['fc-sub']}>
-            The only sales call. The conversation covers the work your team does, where
-            AI has stuck, where it hasn{"'"}t, and where agents would take you
-            further. If The Foundation fits, the SOW is in your inbox within
-            forty-eight hours.
-          </p>
-          <Link
-            href="/book"
-            className={s['final-cta-btn']}
-          >
-            Book the Call <span className={s.arrow}>→</span>
-          </Link>
-          <div className={s['fc-fud']}>
-            <span className={s['fud-item']}>
-              <span className={s['fc-check']}>✓</span> Free
-            </span>
-            <span className={s['fud-item']}>
-              <span className={s['fc-check']}>✓</span> 45 minutes
-            </span>
-            <span className={s['fud-item']}>
-              <span className={s['fc-check']}>✓</span> Sponsor satisfaction
-              guaranteed
-            </span>
+        <ScrollReveal>
+          <div className={`${s.container} ${s['final-cta']}`}>
+            <div className={s['fc-eyebrow']}>To Begin</div>
+            <h2>
+              Forty-five minutes. <em>No pitch deck</em>.
+            </h2>
+            <p className={s['fc-sub']}>
+              The only sales call. The conversation covers the work your team does, where
+              AI has stuck, where it hasn{"'"}t, and where agents would take you
+              further. If The Foundation fits, the SOW is in your inbox within
+              forty-eight hours.
+            </p>
+            <Link
+              href="/book"
+              className={s['final-cta-btn']}
+            >
+              Book the Call <span className={s.arrow}>→</span>
+            </Link>
+            <div className={s['fc-fud']}>
+              <span className={s['fud-item']}>
+                <span className={s['fc-check']}>✓</span> Free
+              </span>
+              <span className={s['fud-item']}>
+                <span className={s['fc-check']}>✓</span> 45 minutes
+              </span>
+              <span className={s['fud-item']}>
+                <span className={s['fc-check']}>✓</span> Sponsor satisfaction
+                guaranteed
+              </span>
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
     </>
   )

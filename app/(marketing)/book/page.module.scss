@@ -59,8 +59,11 @@ Booking wrap (two-column)
 /* Left column: What to expect */
 
 .booking-side {
+  position: relative;
   padding: clamp(50px, 6vw, 80px) clamp(30px, 4vw, 60px) clamp(50px, 6vw, 80px) var(--gutter);
-  border-right: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-soft);
+  align-self: start;
 
   @media #{$phone-tablet} {
     border-right: none;

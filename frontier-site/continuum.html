@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Agentic Continuum · Agentic Standard — Agentic Standard</title>
+<meta name="description" content="The ongoing partnership that turns The Agentic Foundation into a year of compounding operating capacity.">
+<meta property="og:title" content="The Agentic Continuum · Agentic Standard — Agentic Standard">
+<meta property="og:description" content="The ongoing partnership that turns The Agentic Foundation into a year of compounding operating capacity.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Agentic Continuum · Agentic Standard — Agentic Standard">
+<meta name="twitter:description" content="The ongoing partnership that turns The Agentic Foundation into a year of compounding operating capacity.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+<style>
+/* ==== continuum.html page styles (only what site.css lacks) ============= */
+
+/* -- hero ---------------------------------------------------------------- */
+.hero { padding-block: clamp(5rem, 13vw, 9.5rem) clamp(4rem, 10vw, 7rem); }
+.hero h1 { max-width: 16ch; }
+.hero .lead { margin-block-start: clamp(1.2rem, 3vw, 1.8rem); max-width: 52ch; }
+
+/* time-based entrance rise (hero only) */
+.rise { animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.21, 1) both; }
+@keyframes rise {
+  from { opacity: 0; translate: 0 1.4rem; }
+  to   { opacity: 1; translate: 0 0; }
+}
+.hero .kicker.rise { animation-delay: 0.06s; }
+.hero h1.rise      { animation-delay: 0.18s; }
+.hero .lead.rise   { animation-delay: 0.36s; }
+
+/* scroll()-driven parallax drift: hero content eases up as you scroll away */
+@supports (animation-timeline: scroll(root)) {
+  .hero-drift {
+    animation: hero-drift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px 90vh;
+  }
+}
+@keyframes hero-drift { to { translate: 0 -2.5rem; opacity: 0.3; } }
+
+/* -- the seven include cards --------------------------------------------- */
+.include-stack {
+  display: grid;
+  gap: clamp(0.9rem, 2vw, 1.4rem);
+  margin-block-start: clamp(2.25rem, 5vw, 3.25rem);
+}
+
+/* editorial body copy inside these cards (system default is small+muted) */
+.include-card > p { color: var(--fg-body); font-size: var(--text-body); max-width: 62ch; }
+.include-card h3 { max-width: 24ch; }
+
+/* OKLCH color-mix derived hover states (hex fallbacks declared first) */
+.include-card { transition: border-color 0.25s ease, background-color 0.25s ease; }
+.include-card .card-num { transition: color 0.25s ease; }
+.include-card:hover {
+  border-color: var(--hairline-strong);
+  background-color: #1D1610;
+  background-color: color-mix(in oklch, var(--accent) 5%, var(--panel));
+}
+.include-card:hover .card-num {
+  color: #8A6E52;
+  color: color-mix(in oklch, var(--accent) 40%, var(--muted-dim));
+}
+
+/* view()-driven parallax on the big numbers; alternating drift depth */
+@supports (animation-timeline: view()) {
+  .include-card .card-num {
+    --drift: 24px;
+    animation: num-drift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+  .include-stack > :nth-child(even) .card-num { --drift: 14px; }
+}
+@keyframes num-drift {
+  from { translate: 0 var(--drift, 24px); }
+  to   { translate: 0 calc(-1 * var(--drift, 24px)); }
+}
+
+/* -- operating cadence grid ---------------------------------------------- */
+.cadence-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 clamp(1.5rem, 3vw, 2.5rem);
+  margin-block-start: clamp(2rem, 4.5vw, 3rem);
+}
+@media (min-width: 760px) { .cadence-grid { grid-template-columns: repeat(4, 1fr); } }
+.cadence-cell { border-top: 1px solid var(--hairline); padding-block: 1.4rem 1.6rem; }
+.cadence-freq { display: block; margin-block-end: 0.85rem; }
+.cadence-cell p { color: var(--muted); font-size: var(--text-small); }
+
+/* staggered view() reveals across the row (base .reveal range: entry 0-45%) */
+@supports (animation-timeline: view()) {
+  .cadence-grid > :nth-child(2) { animation-range: entry 6% entry 51%; }
+  .cadence-grid > :nth-child(3) { animation-range: entry 12% entry 57%; }
+  .cadence-grid > :nth-child(4) { animation-range: entry 18% entry 63%; }
+}
+html.no-scroll-timeline .cadence-grid > :nth-child(2) { transition-delay: 80ms; }
+html.no-scroll-timeline .cadence-grid > :nth-child(3) { transition-delay: 160ms; }
+html.no-scroll-timeline .cadence-grid > :nth-child(4) { transition-delay: 240ms; }
+
+/* -- not-included scope list --------------------------------------------- */
+.scope-list {
+  list-style: none;
+  padding: 0;
+  margin-block-start: clamp(1.75rem, 4vw, 2.5rem);
+  max-width: var(--reading);
+}
+.scope-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.1rem;
+  padding-block: 1.15rem;
+  border-top: 1px solid var(--hairline);
+}
+.scope-list li:last-child { border-bottom: 1px solid var(--hairline); }
+.scope-mark {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.25;
+  color: var(--muted-dim);
+}
+.scope-list p { margin: 0; }
+
+/* -- pricing band --------------------------------------------------------- */
+.price-band { text-align: center; }
+.price-band .framed { max-width: 46rem; margin-inline: auto; }
+.price {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(3.4rem, 2.4rem + 5vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-block-start: 0.35em;
+}
+.price-stack { display: inline-grid; justify-items: start; }
+.price-stack > span { grid-area: 1 / 1; }
+.price-sizer { visibility: hidden; }
+.price-unit {
+  margin-block-start: 0.9rem;
+  font-size: var(--text-kicker);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+.price-qualifier { margin: 1.5rem auto 0; max-width: 48ch; color: var(--muted); }
+
+/* view()-driven drift on the price block */
+@supports (animation-timeline: view()) {
+  .price-drift {
+    animation: price-drift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+}
+@keyframes price-drift {
+  from { translate: 0 16px; }
+  to   { translate: 0 -16px; }
+}
+
+/* -- CTA (inverted) ------------------------------------------------------- */
+.cta-final { text-align: center; }
+.cta-final h2 { max-width: 24ch; margin-inline: auto; }
+.cta-final .cta-sub { max-width: 52ch; margin: 0 auto clamp(1.75rem, 4vw, 2.5rem); }
+
+/* -- utilities ------------------------------------------------------------ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* reduced motion: kill page-level motion (scroll timelines ignore duration) */
+@media (prefers-reduced-motion: reduce) {
+  .rise, .hero-drift, .price-drift, .include-card .card-num { animation: none !important; }
+}
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="index.html" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="standard.html">Standard</a>
+      <a href="foundation.html">Foundation</a>
+      <a href="continuum.html" aria-current="page">Continuum</a>
+      <a href="about.html">About</a>
+      <a href="industries.html">Industries</a>
+      <a class="nav-cta" href="book.html">Book a Call</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+
+  <!-- 1. Hero -->
+  <section class="section hero">
+    <div class="container">
+      <div class="hero-drift">
+        <div class="kicker accent rise">The Ongoing Partnership</div>
+        <div class="page-title"><h1 class="rise">The Agentic <em>Continuum</em>.</h1></div>
+        <p class="lead rise">The ongoing partnership that turns The Agentic Foundation into a year of compounding operating capacity.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. What it is -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">What it is</div>
+        <h2>A partnership that executes the <em>roadmap</em>.</h2>
+      </div>
+      <p class="lead reveal reveal-late">The Agentic Foundation gives you operating AI and the Map. The Continuum is the work that turns the Map's roadmap into ongoing reality. This means new agents on the schedule the roadmap calls for, the workforce becoming AI-fluent quarter by quarter, the governance framework maturing into something your board can defend.</p>
+      <div class="reading reveal reveal-late" style="margin-block-start: 1.5rem;">
+        <p>It is not a maintenance contract or strategy advisor. It is the operating partner that handles the work of becoming AI-native, without you having to build that capability internally before you're ready, and without the lock-in of a transformation engagement that lasts forever.</p>
+        <p>The Continuum compounds. Month three looks meaningfully different from month one. Month twelve looks like a different organization.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. What's included: intro + the seven cards -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">What's included</div>
+        <h2>Seven things that happen every month.</h2>
+      </div>
+      <p class="lead reveal reveal-late">Not a menu. Not "up to X hours." Seven concrete bodies of work that run continuously, with deliverables you can point to at the end of each quarter.</p>
+
+      <div class="include-stack">
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">01</div>
+            <div class="card-tag">The Build</div>
+            <h3>Roadmap <em>execution</em>.</h3>
+            <p>Phase 1 candidates from your Map ship on the cadence the roadmap calls for. That's typically one to two per quarter, more in heavy phases, fewer when the work is plumbing. Each deployment includes the same workflow shadowing, tuning, and stabilization rigor as your Foundation agents.</p>
+            <p>The Map itself stays alive. New candidates surface; phasing shifts as reality unfolds; the roadmap you're working from at month nine is sharper than the one delivered at week six.</p>
+          </article>
+        </div>
+
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">02</div>
+            <div class="card-tag">The Fleet</div>
+            <h3>Agent <em>stewardship</em>.</h3>
+            <p>Every agent ever deployed for you is monitored, tuned, and evolved: the originals from the Foundation and every one that lands afterward. Production-grade Harbour hosting is included, with the failure handling, audit trails, and observability that a serious operator expects.</p>
+            <p>When something breaks, the fix lands without a bug report on your end. The fleet is our responsibility, not yours.</p>
+          </article>
+        </div>
+
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">03</div>
+            <div class="card-tag">The Counsel</div>
+            <h3>Strategic <em>advisory</em>.</h3>
+            <p>A named senior practitioner is your partner for the entire relationship. Regular working sessions with your sponsor and operational owner. A direct Slack channel (or equivalent) for the in-between moments when a decision can't wait for the next meeting.</p>
+            <p>This is the relationship that lets your sponsor make AI-related decisions with conviction, because there's someone they trust who has seen the room before.</p>
+          </article>
+        </div>
+
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">04</div>
+            <div class="card-tag">The People</div>
+            <h3>Workforce <em>coaching</em>.</h3>
+            <p>The habitual work doesn't end at week six. Role-specific enablement continues: prompt library development, internal training-of-trainers, prompting evaluation, and coaching for the champions who own AI inside each department.</p>
+            <p>The end state is a workforce that doesn't need us anymore; not because the engagement ended, but because your organization has internalized what it means to work with AI as a default rather than an exception.</p>
+          </article>
+        </div>
+
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">05</div>
+            <div class="card-tag">The Fences</div>
+            <h3>Governance <em>maturation</em>.</h3>
+            <p>Active work moving you up the governance dimension. Skills like risk-tiered policy authoring, audit infrastructure, scoped-credential design, incident response playbooks, and the periodic agent reviews that make agentic AI defensible to your board, your legal team, and your auditors.</p>
+            <p>This is where most consulting engagements stop short. Continuum leans into it, because bounded autonomy is the only autonomy that scales.</p>
+          </article>
+        </div>
+
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">06</div>
+            <div class="card-tag">The Reporting</div>
+            <h3>Quarterly <em>board-ready</em> reporting.</h3>
+            <p>Your Map scorecard, updated and narrated, with a one-page executive summary your sponsor can place on a board agenda without rewriting. Hours saved, capacity unlocked, agents shipped, dimensions advanced, incidents handled.</p>
+            <p>Designed to be shown to your board without you having to assemble it yourself. The quarterly report is the artifact that proves the retainer is paying for itself, every quarter, in language your board already speaks.</p>
+          </article>
+        </div>
+
+        <div class="card-slot reveal">
+          <article class="card card-split include-card">
+            <div class="card-num">07</div>
+            <div class="card-tag">The Plan</div>
+            <h3>Roadmap <em>evolution</em>.</h3>
+            <p>The Map is a living document. Every quarter the Map is refreshed: candidates that have shipped move to a track record; new candidates surface from the work; phases may shift as reality (and your priorities) change. Your roadmap at the end of year one is built on a year of grounded observation, not a single week of interviews.</p>
+            <p>If you ever choose to leave, the roadmap you leave with is sharper than anything a strategy firm could produce, because it's been refined by the work itself.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. The Operating Cadence -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">The Operating Cadence</div>
+        <h2>A rhythm your team can rely on.</h2>
+      </div>
+      <div class="cadence-grid">
+        <div class="cadence-cell reveal">
+          <span class="card-tag cadence-freq">Weekly</span>
+          <h4>Tactical channel</h4>
+          <p>Slack or equivalent. Agent monitoring, day-to-day questions, decisions that can't wait. Open async.</p>
+        </div>
+        <div class="cadence-cell reveal">
+          <span class="card-tag cadence-freq">Bi-weekly</span>
+          <h4>Working session</h4>
+          <p>60&#8211;90 minutes with the operational owner. Roadmap progress, current candidates, blockers to clear.</p>
+        </div>
+        <div class="cadence-cell reveal">
+          <span class="card-tag cadence-freq">Monthly</span>
+          <h4>Sponsor review</h4>
+          <p>Executive-level alignment with the sponsor. What shipped, what's next, what they need from us.</p>
+        </div>
+        <div class="cadence-cell reveal">
+          <span class="card-tag cadence-freq">Quarterly</span>
+          <h4>Board-ready report</h4>
+          <p>Refreshed Map, scorecard, and one-page executive summary. The artifact the sponsor takes to the board.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. What it is not -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">What it is not</div>
+        <h2>What the Continuum <em>does not</em> include.</h2>
+      </div>
+      <p class="lead reveal reveal-late">Some things sit outside The Agentic Continuum because they're either out of pattern or genuinely separate work. Said up front, not in an invoice.</p>
+      <ul class="scope-list">
+        <li class="reveal">
+          <span class="scope-mark" aria-hidden="true">&#215;</span>
+          <p>Net-new platform builds outside the agent fleet. Custom software, internal tools, or systems integration projects are scoped and quoted separately.</p>
+        </li>
+        <li class="reveal">
+          <span class="scope-mark" aria-hidden="true">&#215;</span>
+          <p>Deep industry research, market analysis, or competitive intelligence engagements not directly tied to your active roadmap.</p>
+        </li>
+        <li class="reveal">
+          <span class="scope-mark" aria-hidden="true">&#215;</span>
+          <p>After-hours, weekend, or holiday response. Continuum is a business-hours practice. Genuinely urgent failures are handled at our discretion.</p>
+        </li>
+        <li class="reveal">
+          <span class="scope-mark" aria-hidden="true">&#215;</span>
+          <p>Cloud, API, and third-party software costs; these are your accounts, your bill. Recommendations from us; authorization from you.</p>
+        </li>
+        <li class="reveal">
+          <span class="scope-mark" aria-hidden="true">&#215;</span>
+          <p>Compliance certifications (SOC2, ISO, HIPAA) that require dedicated audit work outside the standard governance practice.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. The Exit -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Exit</div>
+        <h2>You can <em>fire us</em>.</h2>
+      </div>
+      <p class="lead reveal reveal-late">Sixty days notice in writing. No penalty or clawback. The agents stay running on your infrastructure or migrate to a Harbour-only retainer at $2,000 per month. The Map is yours. Everything built for you is yours.</p>
+      <div class="reading reveal reveal-late" style="margin-block-start: 1.5rem;">
+        <p>The freedom to leave is what makes the Continuum real. A retainer that traps you is a retainer that won't compound, because it's been optimized for your imprisonment rather than your progress. The Continuum is the opposite.</p>
+        <p>If the Continuum stops earning its keep, you should end it. If it keeps earning, you'll renew. That's the deal.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Pricing band -->
+  <section class="section section-rule price-band">
+    <div class="container">
+      <div class="framed reveal">
+        <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+        <div class="price-drift">
+          <div class="kicker accent" style="margin-block-end: 0.4rem;">From</div>
+          <div class="price">
+            <span class="price-stack" aria-hidden="true"><span id="price-count" data-countup="20000" data-prefix="$">$20,000</span><span class="price-sizer">$20,000</span></span>
+            <span class="sr-only">$20,000</span>
+          </div>
+          <div class="price-unit">Per month</div>
+        </div>
+        <p class="price-qualifier">Heavier roadmap phases or larger fleets may scope higher. Quoted at the start of each quarter, fixed for that quarter, reviewed honestly at the next.</p>
+        <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. CTA -->
+  <section class="section inverted cta-final">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">To Begin</div>
+        <h2>The retainer that <em>compounds</em>. The relationship you renew because you want to.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead cta-sub">Every Continuum engagement begins with The Agentic Foundation. A forty-five-minute call to scope the work. The SOW arrives within forty-eight hours if it fits.</p>
+        <a class="btn" href="book.html">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="index.html">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We make agentic AI work inside your organization, not just in a demo.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="foundation.html">The Foundation</a>
+        <a href="continuum.html">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="standard.html">The Standard</a>
+        <a href="about.html">About</a>
+        <a href="industries.html">Industries</a>
+        <a href="book.html">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:hello@theagenticstandard.com">hello@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* CountUp for the pricing band: static markup already reads "$20,000", so
+   no-JS and reduced-motion users see the final value with zero motion. */
+(function () {
+  "use strict";
+  var el = document.getElementById("price-count");
+  if (!el) return;
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!("IntersectionObserver" in window) || !window.requestAnimationFrame) return;
+
+  var target = parseInt(el.getAttribute("data-countup"), 10) || 0;
+  var prefix = el.getAttribute("data-prefix") || "";
+  var duration = 1100;
+  var fmt = function (n) { return prefix + Math.round(n).toLocaleString("en-US"); };
+
+  var run = function () {
+    var t0 = performance.now();
+    el.textContent = fmt(0);
+    var tick = function (now) {
+      var p = Math.min((now - t0) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        io.unobserve(entry.target);
+        run();
+      }
+    });
+  }, { threshold: 0.5 });
+  io.observe(el);
+})();
+</script>
+</body>
+</html>

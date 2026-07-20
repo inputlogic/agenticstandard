@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Agentic Foundation · Agentic Standard — Agentic Standard</title>
+<meta name="description" content="Beyond the chat window. Two to three autonomous agents acting inside your stack in six weeks. Fixed fee, sponsor satisfaction guaranteed.">
+<meta property="og:title" content="The Agentic Foundation · Agentic Standard — Agentic Standard">
+<meta property="og:description" content="Beyond the chat window. Two to three autonomous agents acting inside your stack in six weeks. Fixed fee, sponsor satisfaction guaranteed.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Agentic Foundation · Agentic Standard — Agentic Standard">
+<meta name="twitter:description" content="Beyond the chat window. Two to three autonomous agents acting inside your stack in six weeks. Fixed fee, sponsor satisfaction guaranteed.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* ================= page: foundation ================= */
+
+/* ---- generic helpers ---- */
+.section-alt { background: var(--bg-soft); }
+.center { text-align: center; }
+.center .lead { margin-inline: auto; }
+.sec-head { margin-block-end: clamp(2.25rem, 5vw, 3.5rem); }
+
+/* hero entrance (time-based; top of page, so view() would finish instantly) */
+@media (prefers-reduced-motion: no-preference) {
+  .rise { animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0s); }
+  @keyframes rise-in { from { opacity: 0; translate: 0 1.1rem; } }
+}
+
+/* ---- hero ---- */
+.hero { position: relative; overflow: clip; }
+.hero-inner { position: relative; display: grid; gap: clamp(2.25rem, 5vw, 4.5rem); align-items: center; }
+@media (min-width: 980px) { .hero-inner { grid-template-columns: 1.08fr 0.92fr; } }
+
+.hero-sub { margin-block-start: 1.1rem; }
+.hero-pain { color: var(--fg); font-weight: 500; }
+.pain-sep { color: var(--muted-dim); padding-inline: 0.15em; font-weight: 400; }
+
+.hero-cta { margin-block-start: 1.7rem; }
+@media (max-width: 430px) { .cta-detail { display: none; } }
+
+.fud {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.35rem;
+  margin: 1.25rem 0 0; padding: 0;
+  color: var(--muted); font-size: var(--text-small);
+}
+.check { color: var(--accent); margin-inline-end: 0.35em; }
+
+/* ---- hero visual: dashboard mock ---- */
+.mock-frame { padding: clamp(1.1rem, 3vw, 1.9rem); }
+.mock {
+  background: var(--bg-soft); border: 1px solid var(--hairline); border-radius: 2px;
+  padding: clamp(1.15rem, 3vw, 1.7rem); display: grid; gap: 1.1rem;
+  font-size: var(--text-small);
+}
+.mock-status { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.mock-label {
+  font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--muted-dim);
+}
+.live { display: inline-flex; align-items: center; gap: 0.45em; color: var(--fg-dim); font-weight: 600; font-size: 0.78rem; }
+.live-dot { width: 7px; height: 7px; background: var(--accent); }
+@media (prefers-reduced-motion: no-preference) {
+  .live-dot { animation: pulse 2.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+}
+.mock-block { display: grid; gap: 0.4rem; }
+.agent-row { display: grid; grid-template-columns: auto 1fr; column-gap: 0.55rem; align-items: baseline; padding-block: 0.15rem; }
+.agent-dot { width: 6px; height: 6px; background: var(--accent); align-self: center; }
+.agent-name { color: var(--fg); font-weight: 600; }
+.agent-desc { grid-column: 2; margin: 0; color: var(--muted); font-size: 0.8rem; }
+.score-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-block: 0.4rem; border-top: 1px solid var(--hairline); color: var(--fg-dim);
+}
+.score-dots { display: flex; gap: 4px; flex: none; }
+.score-dots span { width: 6px; height: 6px; border: 1px solid var(--hairline-strong); }
+.score-dots span.on { background: var(--fg-dim); border-color: var(--fg-dim); }
+.mock-checks { display: grid; gap: 0.35rem; color: var(--fg-dim); }
+
+/* ---- reveal stagger (grids of cards) ---- */
+@supports (animation-timeline: view()) {
+  .stagger > :nth-child(2).reveal { animation-range: entry 10% entry 55%; }
+  .stagger > :nth-child(3).reveal { animation-range: entry 20% entry 65%; }
+}
+html.no-scroll-timeline .stagger > :nth-child(2).reveal { transition-delay: 0.12s; }
+html.no-scroll-timeline .stagger > :nth-child(3).reveal { transition-delay: 0.24s; }
+
+/* ---- manifesto quote band ---- */
+.quote-attr { margin-block-start: 1.5rem; font-size: var(--text-small); color: var(--muted); }
+.quote-attr .sub-line { color: var(--muted-dim); }
+
+/* ---- card lists (deliverables, fit columns) ---- */
+.card-list { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.card-list li {
+  position: relative; padding: 0.5rem 0 0.5rem 1.05rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--fg-dim); font-size: clamp(0.875rem, 3cqi, 0.95rem);
+}
+.card-list li::before {
+  content: ""; position: absolute; left: 0; top: 1.15em;
+  width: 0.5rem; border-top: 1px solid var(--muted-dim);
+}
+.card-tag.dim { color: var(--muted); }
+
+/* ---- stat strip (@property-animated counters) ---- */
+.stat-strip { display: grid; gap: clamp(1.25rem, 3vw, 2rem); margin-block-end: clamp(2.75rem, 6vw, 4.5rem); }
+@media (min-width: 640px) { .stat-strip { grid-template-columns: repeat(3, 1fr); } }
+.stat { border-top: 1px solid var(--hairline-strong); padding-block-start: 1rem; }
+.stat-line {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(2.9rem, 5.5vw, 4.3rem); line-height: 1; color: var(--fg);
+}
+.stat-num { display: inline-block; }
+.stat-num::after { content: attr(data-n); }
+.stat-dot { color: var(--accent); }
+.stat-label { margin-block-start: 0.55rem; font-size: var(--text-small); color: var(--muted); max-width: 30ch; }
+
+/* Animate --sn on the element itself (registered inherits:false, so the
+   pseudo would never see the inline --sn values); ::after just prints the
+   counter, which is in scope for the element's own pseudos. */
+@property --sn { syntax: "<integer>"; inherits: false; initial-value: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .stat-num {
+      counter-reset: sn var(--sn);
+      animation: stat-count linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 50%;
+    }
+    .stat-num::after { content: counter(sn); }
+    @keyframes stat-count { from { --sn: 0; } }
+  }
+}
+
+/* ---- sprint timeline ----
+   Base (all browsers, no JS needed): horizontal snap scroller.
+   Enhanced (wide + motion-ok + scroll-timeline support): sticky pin,
+   vertical scroll drives the track horizontally, cells reveal staggered. */
+/* 100% (not 100vw) so the rail ignores the scrollbar and lines up with .container */
+.sprint { --rail-pad: max(calc((100% - var(--container)) / 2), var(--gutter)); }
+.sprint-head { margin-block-end: clamp(2rem, 4.5vw, 3rem); }
+.sprint-track {
+  list-style: none; margin: 0;
+  padding: 0.25rem var(--rail-pad) 1.1rem;
+  display: flex; gap: clamp(0.9rem, 1.6vw, 1.3rem);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--rail-pad);
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-dim) transparent;
+}
+.sprint-cell {
+  scroll-snap-align: start; flex: 0 0 auto; width: min(320px, 82vw);
+  background: var(--panel); border: 1px solid var(--hairline); border-radius: 2px;
+  padding: clamp(1.3rem, 2vw, 1.7rem);
+  display: grid; gap: 0.5rem; align-content: start;
+}
+.sprint-num {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 2.3rem; line-height: 1; color: var(--muted-dim);
+}
+.sprint-phase {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--accent);
+}
+.sprint-cell h3 { font-size: var(--text-h4); margin: 0; }
+.sprint-cell p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+@media (min-width: 920px) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .sprint-wrap { height: 260vh; view-timeline-name: --sprint; }
+    .sprint-pin {
+      position: sticky; top: 0; height: 100svh; overflow: clip;
+      display: grid; align-content: center;
+      /* one viewport-wide column — otherwise the max-content track widens the
+         implicit column and margin-auto children center against ~2270px */
+      grid-template-columns: 100%;
+      container-type: inline-size; /* gives the keyframe scrollbar-free 100cqw */
+      row-gap: clamp(1.5rem, 4vh, 2.75rem);
+      padding-block-start: 64px;
+    }
+    .sprint-head { margin-block-end: 0; }
+    .sprint-track {
+      overflow: visible; width: max-content; padding-block: 0;
+      scroll-snap-type: none;
+      animation: sprint-move linear both;
+      animation-timeline: --sprint;
+      animation-range: contain 0% contain 100%;
+    }
+    @keyframes sprint-move { to { translate: calc(100cqw - 100%) 0; } }
+    .sprint-cell { width: 330px; animation: cell-in linear both; animation-timeline: --sprint; }
+    @keyframes cell-in { from { opacity: 0; translate: 0 1.2rem; } }
+    .sprint-cell:nth-child(1) { animation-range: entry 30% entry 75%; }
+    .sprint-cell:nth-child(2) { animation-range: entry 45% entry 90%; }
+    .sprint-cell:nth-child(3) { animation-range: entry 60% contain 5%; }
+    .sprint-cell:nth-child(4) { animation-range: entry 75% contain 12%; }
+    .sprint-cell:nth-child(5) { animation-range: entry 90% contain 19%; }
+    .sprint-cell:nth-child(6) { animation-range: contain 5% contain 26%; }
+  }
+}
+
+/* ---- method tiles ---- */
+.tile { position: relative; }
+.tile-bracket { position: absolute; width: 34px; height: 34px; color: var(--accent); pointer-events: none; }
+.tile-tl { top: 12px; left: 12px; }
+.tile-br { bottom: 12px; right: 12px; }
+
+/* ---- offer / value stack ---- */
+.offer-frame { max-width: min(880px, 100%); margin-inline: auto; }
+.offer-card {
+  background: var(--panel); border: 1px solid var(--hairline); border-radius: 2px;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+}
+.offer-tagline { color: var(--fg-dim); margin-block: 0.35rem 1.6rem; }
+
+.stack { list-style: none; margin: 0; padding: 0; container-type: inline-size; container-name: stack; }
+.stack-item { display: grid; gap: 0.3rem 1.4rem; padding-block: 1.15rem; border-top: 1px solid var(--hairline); }
+.stack-tag {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--accent);
+  align-self: start; padding-block-start: 0.3rem;
+}
+.stack-item h4 { margin: 0; font-size: 1.2rem; }
+.stack-item p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.92rem; max-width: 52ch; }
+.stack-value { display: grid; justify-items: start; align-content: start; gap: 0.15rem; }
+.value-num { font-family: var(--font-display); font-weight: 500; font-size: 1.45rem; line-height: 1.1; color: var(--fg-dim); }
+.value-label {
+  font-size: 0.66rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--muted-dim);
+}
+@container stack (min-width: 38rem) {
+  .stack-item { grid-template-columns: 7.5rem 1fr auto; }
+  .stack-value { justify-items: end; text-align: right; }
+}
+.stack-item.bonus {
+  background: var(--accent-tint); border: 1px solid var(--accent-ghost); border-radius: 2px;
+  padding: 1.15rem 1.2rem; margin-block-start: 1rem;
+}
+
+.totals { border-top: 1px solid var(--hairline-strong); margin-block-start: 0.5rem; }
+.total-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-block: 0.85rem; }
+.total-row + .total-row { border-top: 1px solid var(--hairline); }
+.total-label {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--muted);
+}
+.total-num { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.6rem, 3vw, 2rem); color: var(--fg); }
+.total-num.strike { color: var(--muted-dim); text-decoration: line-through; text-decoration-thickness: 1px; }
+.total-num.your-price { color: var(--accent); font-size: clamp(2.1rem, 4vw, 2.8rem); }
+
+.guarantee {
+  margin-block-start: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--accent-ghost); background: var(--accent-tint); border-radius: 2px;
+  padding: clamp(1.25rem, 3vw, 1.9rem);
+}
+.guarantee-badge {
+  display: inline-block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--accent);
+  border: 1px solid var(--accent-ghost); border-radius: 2px;
+  padding: 0.35em 0.75em; margin-block-end: 0.9rem;
+}
+.guarantee p { color: var(--fg-dim); font-size: 0.95rem; }
+
+/* ---- faq ---- */
+.faq-wrap { max-width: min(860px, 100%); margin-inline: auto; }
+details.faq summary em { font-style: italic; color: var(--accent); }
+
+/* ---- final cta ---- */
+.cta-final .btn { margin-block-start: 0.5rem; }
+.cta-final .fud { justify-content: center; }
+</style>
+<script src="assets/site.js" defer></script>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="index.html" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="standard.html">Standard</a>
+      <a href="foundation.html" aria-current="page">Foundation</a>
+      <a href="continuum.html">Continuum</a>
+      <a href="about.html">About</a>
+      <a href="industries.html">Industries</a>
+      <a class="nav-cta" href="book.html">Book a Call</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+
+  <!-- 1. HERO -->
+  <section class="section hero">
+    <div class="container hero-inner">
+      <div>
+        <div class="kicker rise" style="--d:.05s">Agentic AI · Beyond the Chat Window · 2026</div>
+        <h1 class="page-title rise" style="--d:.12s">Your team operates agents in six weeks, <em>so one person works like ten</em>.</h1>
+        <p class="lead hero-sub rise" style="--d:.2s"><span class="hero-pain">Stop typing prompts into chat windows <span class="pain-sep">·</span> No more copilots gathering dust <span class="pain-sep">·</span> End the era of AI that doesn't act.</span> Two to three autonomous agents deployed inside your stack, acting on workflows observed in your environment, posting in Slack while your team sleeps, completing tasks on their own. Score your readiness across six dimensions, hand your sponsor a year-long board-ready roadmap, and finish in one six-week, fixed-fee sprint.</p>
+        <div class="hero-cta rise" style="--d:.28s">
+          <a class="btn" href="book.html">Book a <span class="cta-detail">45-Minute </span>Call <span aria-hidden="true">→</span></a>
+        </div>
+        <ul class="fud rise" style="--d:.35s">
+          <li><span class="check">✓</span> Free call</li>
+          <li><span class="check">✓</span> No pitch deck</li>
+          <li><span class="check">✓</span> No follow-up pressure</li>
+        </ul>
+      </div>
+      <div class="rise" style="--d:.28s">
+        <div class="framed mock-frame">
+          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+          <div class="mock">
+            <div class="mock-status">
+              <span class="mock-label">Week Six · Delivered</span>
+              <span class="live"><span class="live-dot"></span>Live</span>
+            </div>
+            <div class="mock-block">
+              <div class="mock-label">Agents Running In Production</div>
+              <div class="agent-row"><span class="agent-dot"></span><span class="agent-name">The Inbox Sentinel</span><p class="agent-desc">Triages, routes, and drafts responses to the shared inbox daily.</p></div>
+              <div class="agent-row"><span class="agent-dot"></span><span class="agent-name">Weekly KPI Synthesizer</span><p class="agent-desc">Auto-drafts the executive Monday briefing from seven data sources.</p></div>
+              <div class="agent-row"><span class="agent-dot"></span><span class="agent-name">Competitive Scan Sentinel</span><p class="agent-desc">Monitors six competitors, flags meaningful moves in Slack.</p></div>
+            </div>
+            <div class="mock-block">
+              <div class="mock-label">The Agentic Readiness Map</div>
+              <div class="score-row"><span>Operating Habit</span><span class="score-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></span></div>
+              <div class="score-row"><span>Workflow Legibility</span><span class="score-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></span></div>
+              <div class="score-row"><span>Data Accessibility</span><span class="score-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></span></div>
+              <div class="score-row"><span>System Surface</span><span class="score-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></span></div>
+              <div class="score-row"><span>Governance Posture</span><span class="score-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></span></div>
+              <div class="score-row"><span>Sponsorship &amp; Ownership</span><span class="score-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></span></div>
+            </div>
+            <div class="mock-checks">
+              <div><span class="check">✓</span> Year-long roadmap delivered</div>
+              <div><span class="check">✓</span> Sponsor working session (today)</div>
+              <div><span class="check">✓</span> Map handoff (complete)</div>
+            </div>
+          </div>
+          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. MANIFESTO QUOTE STRIP -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="framed reveal">
+        <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+        <p class="pull-quote">Most enterprises have AI. <em>Few have agents.</em> We exist to make the leap, in six weeks.</p>
+        <p class="quote-attr">Agentic Standard<br><span class="sub-line">The Firm Manifesto · 01 of 07</span></p>
+        <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. DELIVERABLES -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="kicker">What you walk away with</div>
+        <h2>Three deliverables, <em>one engagement</em>.</h2>
+        <p class="lead">By the end of week six you have agents acting in your stack, a roadmap your board will recognize, and a workforce that knows how to keep them running.</p>
+      </div>
+      <div class="grid-3 stagger">
+        <div class="card-slot reveal">
+          <div class="card">
+            <div class="card-num">01</div>
+            <h3>Agents working in your <em>stack</em>.</h3>
+            <p>Two to three autonomous agents deployed on workflows observed and agreed on. Acting on their own inside your environment, posting where your team already works, executing real tasks by week six.</p>
+            <ul class="card-list">
+              <li>Triaged shared inbox</li>
+              <li>Weekly KPI synthesis</li>
+              <li>Competitive scan automation</li>
+              <li>Customer response drafting</li>
+              <li>Internal report generation</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-slot reveal">
+          <div class="card">
+            <div class="card-num">02</div>
+            <h3>The Agentic <em>Readiness Map</em>.</h3>
+            <p>A diagnostic of your organization across six dimensions of agentic readiness, an inventory of every automation opportunity surfaced during the engagement, and a phased 90/180/365-day roadmap.</p>
+            <ul class="card-list">
+              <li>Six dimensions scored 1–5</li>
+              <li>Opportunity inventory</li>
+              <li>Phased roadmap (Q1–Q4)</li>
+              <li>Quarterly success scorecard</li>
+              <li>Board-ready presentation</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-slot reveal">
+          <div class="card">
+            <div class="card-num">03</div>
+            <h3>A workforce that <em>can run it</em>.</h3>
+            <p>Coaching for your internal champion and the team around them. By week six, someone inside your organization owns day-2 operations. The dependency ends when you say so.</p>
+            <ul class="card-list">
+              <li>Internal champion training</li>
+              <li>Day-2 ops playbook</li>
+              <li>Prompting standards manual</li>
+              <li>Evaluation framework</li>
+              <li>Governance handoff doc</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. SPRINT TIMELINE (scroll-driven horizontal rail) -->
+  <section class="section section-rule section-alt sprint">
+    <div class="container">
+      <div class="stat-strip reveal" aria-label="The engagement in numbers">
+        <div class="stat">
+          <div class="stat-line"><span class="stat-num" data-n="6" style="--sn:6"></span><span class="stat-dot">.</span></div>
+          <div class="stat-label">Weeks, kickoff to handoff</div>
+        </div>
+        <div class="stat">
+          <div class="stat-line"><span class="stat-num" data-n="2" style="--sn:2"></span><span class="stat-dot">.</span></div>
+          <div class="stat-label">Artifacts left behind: live agents and the Map</div>
+        </div>
+        <div class="stat">
+          <div class="stat-line"><span class="stat-num" data-n="1" style="--sn:1"></span><span class="stat-dot">.</span></div>
+          <div class="stat-label">Fixed fee, sponsor-guaranteed</div>
+        </div>
+      </div>
+    </div>
+    <div class="sprint-wrap">
+      <div class="sprint-pin">
+        <div class="container sprint-head">
+          <div class="kicker">How the six weeks unfold</div>
+          <h2>Not a year-long transformation. <em>A six-week sprint</em>.</h2>
+          <p class="lead">Every week has a deliverable. Every week has a checkpoint. By the end, you have working agents, not a roadmap to working AI.</p>
+        </div>
+        <ol class="sprint-track">
+          <li class="sprint-cell">
+            <div class="sprint-num">1</div>
+            <div class="sprint-phase">Kickoff</div>
+            <h3>Sponsor alignment</h3>
+            <p>Sponsor interview. System inventory. Workflow shadow candidates identified. Security and IT introductions.</p>
+          </li>
+          <li class="sprint-cell">
+            <div class="sprint-num">2</div>
+            <div class="sprint-phase">Discovery</div>
+            <h3>Shadowing &amp; data probe</h3>
+            <p>Three to five workflow shadowing sessions. Three specific data sets pulled directly, hands-on. Real friction is named.</p>
+          </li>
+          <li class="sprint-cell">
+            <div class="sprint-num">3</div>
+            <div class="sprint-phase">Build</div>
+            <h3>First deploys</h3>
+            <p>First one or two agents ship into production. Observation continues. Map dimension scoring begins.</p>
+          </li>
+          <li class="sprint-cell">
+            <div class="sprint-num">4</div>
+            <div class="sprint-phase">Build</div>
+            <h3>Stabilize</h3>
+            <p>Agents tuned against real use. Candidate inventory grows. Each automation is sorted into Q1–Q4 phases.</p>
+          </li>
+          <li class="sprint-cell">
+            <div class="sprint-num">5</div>
+            <div class="sprint-phase">Govern</div>
+            <h3>Governance review</h3>
+            <p>Final agents ship. Security and compliance scored. Champion trained. Map draft complete.</p>
+          </li>
+          <li class="sprint-cell">
+            <div class="sprint-num">6</div>
+            <div class="sprint-phase">Present</div>
+            <h3>Synthesis &amp; handoff</h3>
+            <p>Sixty to ninety minute working session with your sponsor. The Map is left behind. Agents are in production.</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. METHOD / WHY THIS WORKS -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="kicker">Why this works when other engagements don't</div>
+        <h2>Three reasons this <em>lands</em> when other firms stall.</h2>
+        <p class="lead">The reasons most enterprise AI engagements fail are not technical. They're structural. Here's what's different.</p>
+      </div>
+      <div class="grid-3 stagger">
+        <div class="card-slot reveal">
+          <div class="card tile">
+            <svg class="tile-bracket tile-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 4 34 L 4 4 L 34 4" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+            <div class="card-num">01</div>
+            <h3><em>Deployment</em>. Not advice.</h3>
+            <p>A strategy deck is not an outcome. Agents acting on your behalf is. By week six, autonomous agents are running in your environment; observing, posting, executing on their own. The deliverable is production, not a presentation.</p>
+            <svg class="tile-bracket tile-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 56 26 L 56 56 L 26 56" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+          </div>
+        </div>
+        <div class="card-slot reveal">
+          <div class="card tile">
+            <svg class="tile-bracket tile-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 4 34 L 4 4 L 34 4" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+            <div class="card-num">02</div>
+            <h3><em>Measurement</em>. Not guesswork.</h3>
+            <p>The Readiness Map scores your organization across six dimensions on observation, not survey. Your roadmap is defensible to your board because it's grounded in what was actually observed.</p>
+            <svg class="tile-bracket tile-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 56 26 L 56 56 L 26 56" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+          </div>
+        </div>
+        <div class="card-slot reveal">
+          <div class="card tile">
+            <svg class="tile-bracket tile-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 4 34 L 4 4 L 34 4" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+            <div class="card-num">03</div>
+            <h3><em>Backed</em> by a guarantee.</h3>
+            <p>If your sponsor isn't satisfied with the work, the process, or the result, you don't pay. Full refund. No clawbacks, no clauses. This is the only B2B engagement you'll find with this guarantee.</p>
+            <svg class="tile-bracket tile-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 56 26 L 56 56 L 26 56" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. THE OFFER -->
+  <section class="section section-rule section-alt" id="offer">
+    <div class="container">
+      <div class="sec-head center reveal">
+        <div class="kicker accent">The Offer</div>
+        <h2>What's <em>in the box</em>.</h2>
+        <p class="lead">Every line below is included in the fixed-fee engagement. One invoice. One outcome. One accountable team.</p>
+      </div>
+      <div class="framed offer-frame reveal reveal-late">
+        <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+        <div class="offer-card">
+          <h3>The Agentic <em>Foundation</em>.</h3>
+          <p class="offer-tagline">Six weeks. Fixed fee. Agents acting on your behalf, and the roadmap for what's next.</p>
+          <ol class="stack">
+            <li class="stack-item">
+              <div class="stack-tag">Week 1–2</div>
+              <div>
+                <h4>Discovery &amp; <em>workflow shadowing</em></h4>
+                <p>Three to five sessions inside your environment. Your team is shadowed at work to identify the agents with the highest leverage.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$15,000</span><span class="value-label">Value</span></div>
+            </li>
+            <li class="stack-item">
+              <div class="stack-tag">Week 3–5</div>
+              <div>
+                <h4>Agent <em>build &amp; deploy</em></h4>
+                <p>Two to three autonomous agents shipped into your stack. Acting on workflows, posting in Slack, executing on their own. Tuned against real use.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$35,000</span><span class="value-label">Value</span></div>
+            </li>
+            <li class="stack-item">
+              <div class="stack-tag">Week 5–6</div>
+              <div>
+                <h4>The Agentic <em>Readiness Map</em></h4>
+                <p>Six-dimension diagnostic. Opportunity inventory. Phased 90/180/365-day roadmap. The document your sponsor presents to the board.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$20,000</span><span class="value-label">Value</span></div>
+            </li>
+            <li class="stack-item">
+              <div class="stack-tag">Week 6</div>
+              <div>
+                <h4>Sponsor <em>working session</em></h4>
+                <p>Sixty to ninety minutes. The Map is presented. The agents are demonstrated running. The path forward is named.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$5,000</span><span class="value-label">Value</span></div>
+            </li>
+            <li class="stack-item">
+              <div class="stack-tag">Week 6</div>
+              <div>
+                <h4>Internal <em>champion coaching</em></h4>
+                <p>Your designated owner trained to run day-2 operations. Prompting standards, evaluation framework, governance handoff doc.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$10,000</span><span class="value-label">Value</span></div>
+            </li>
+            <li class="stack-item">
+              <div class="stack-tag">Weeks 7–19</div>
+              <div>
+                <h4>90-day <em>post-engagement support</em></h4>
+                <p>Questions answered. Agents tuned. Slack channel direct to us. The relationship doesn't end the day the check clears.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$8,000</span><span class="value-label">Value</span></div>
+            </li>
+            <li class="stack-item bonus">
+              <div class="stack-tag">Bonus · If You Continue</div>
+              <div>
+                <h4>First Continuum month, <em>included</em></h4>
+                <p>$20,000 of your engagement fee carries forward as your first month of The Agentic Continuum, the ongoing partnership that compounds the Foundation into a year of operating capacity.</p>
+              </div>
+              <div class="stack-value"><span class="value-num">$20,000</span><span class="value-label">Value</span></div>
+            </li>
+          </ol>
+          <div class="totals">
+            <div class="total-row"><span class="total-label">Total Value</span><span class="total-num strike">$113,000</span></div>
+            <div class="total-row"><span class="total-label">Your Investment</span><span class="total-num your-price">$48,000</span></div>
+          </div>
+          <div class="guarantee">
+            <div class="guarantee-badge">Our Stakes</div>
+            <h4>Sponsor satisfaction, <em>or we don't get paid</em>.</h4>
+            <p>At week six, if your sponsor isn't happy with the work, the process, or the result, you say the word. If your check is still in our hands, <strong>we tear it up in front of you.</strong> If it's been cashed, <strong>you have a refund within five business days.</strong> No clauses. No clawbacks. No "let us try one more thing." Just clean. This is what we mean by The Agentic Standard.</p>
+          </div>
+        </div>
+        <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. HONEST FIT -->
+  <section class="section section-rule">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="kicker">Honest fit</div>
+        <h2>Who this is for, and who <em>it isn't</em>.</h2>
+        <p class="lead">A firm that won't disqualify is a firm that takes work it shouldn't. Before you book, here's the honest version.</p>
+      </div>
+      <div class="grid-2 stagger">
+        <div class="card-slot reveal">
+          <div class="card">
+            <div class="card-tag">Strong fit</div>
+            <h3>Book the call if <em>this</em> is you.</h3>
+            <ul class="card-list">
+              <li>You have an executive sponsor who can approve a $48k commitment</li>
+              <li>You've tried AI in a chat window or copilot. Now you want it to act on its own</li>
+              <li>Your pain is framed as capacity ("we can't take on X without more people")</li>
+              <li>Your decision window is 30–90 days, not 6+ months</li>
+              <li>You operate in Slack or Teams as your primary collaboration layer</li>
+              <li>Your stack is modern enough that agents can read and write to your tools</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-slot reveal">
+          <div class="card">
+            <div class="card-tag dim">Not our fit</div>
+            <h3>The referral goes elsewhere if <em>this</em> is you.</h3>
+            <ul class="card-list">
+              <li>You want a strategy deck without deployment</li>
+              <li>You frame the ask as "tell us what AI to use"; readiness work first, elsewhere</li>
+              <li>A failed implementation with vendor blame is in flight (we don't litigate other firms' work)</li>
+              <li>Decision involves 6+ stakeholders not yet in the room</li>
+              <li>Sub-$40k budget with no flexibility</li>
+              <li>Heavily regulated environment (HIPAA, PCI primary) needs deeper compliance work</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FAQ -->
+  <section class="section section-rule section-alt">
+    <div class="container">
+      <div class="sec-head center reveal">
+        <div class="kicker">Frequently Asked</div>
+        <h2>Common questions, <em>answered honestly</em>.</h2>
+        <p class="lead">Six weeks, $48k, and a satisfaction guarantee raises real questions. Here are the most common.</p>
+      </div>
+      <div class="faq-wrap reveal">
+        <details class="faq">
+          <summary>What's the difference between AI <em>and agents</em>?</summary>
+          <div class="faq-body"><p>AI is the model: Claude, GPT, the engine that generates language and reasoning. Most enterprises "have AI" in the form of a chat window or a copilot that waits for someone to type a prompt. An <em>agent</em> is what happens when that AI is wired up to act on its own, running on a schedule or a trigger, observing your systems, posting in Slack, drafting reports, calling tools, completing tasks while your team sleeps. Agentic Standard deploys agents. The chat-window era was the warm-up.</p></div>
+        </details>
+        <details class="faq">
+          <summary>What if we're <em>not ready for agents</em>?</summary>
+          <div class="faq-body"><p>If you're asking that question, you're more ready than you think. "Ready for AI" usually means "ready to deploy agents on real workflows", and that readiness is what the engagement builds. By week six, the readiness is no longer an open question; you have agents running and a Map showing exactly where the next dimension of readiness needs work.</p></div>
+        </details>
+        <details class="faq">
+          <summary>How do you choose <em>which agents to deploy</em>?</summary>
+          <div class="faq-body"><p>During weeks one and two, three to five real workflows inside your organization are shadowed. The agents aren't picked from a catalog. Observation comes first; the highest-leverage automation candidates are identified, alignment with your sponsor happens before any code is written. The agents built are specific to your workflows, not generic templates.</p></div>
+        </details>
+        <details class="faq">
+          <summary>What happens if our <em>IT department blocks this</em>?</summary>
+          <div class="faq-body"><p>Week one includes IT and security introductions. The work lives within your existing security posture. The agents are deployed to your infrastructure (or ours, your choice), respect your existing data boundaries, and pass through any review your team needs. If your environment makes deployment impossible by week four, the engagement is paused and refunded.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Why <em>six weeks</em>, specifically?</summary>
+          <div class="faq-body"><p>Long enough to observe real work, build production-ready agents, and produce a defensible Map. Short enough that your sponsor has a date on the calendar and a result to show. Six-month transformations create the conditions for stalling. Six-week sprints create accountability.</p></div>
+        </details>
+        <details class="faq">
+          <summary>What's the <em>guarantee actually cover</em>?</summary>
+          <div class="faq-body"><p>Sponsor satisfaction, evaluated at the week six working session. If your sponsor isn't satisfied (with the work, the process, or the result) you don't pay, or you're refunded if you already did. No clauses about "good faith effort" or "partial completion." It's binary: sponsor satisfied, or refund.</p></div>
+        </details>
+        <details class="faq">
+          <summary>What happens <em>after week six</em>?</summary>
+          <div class="faq-body"><p>Three paths. (1) You continue with The Agentic Continuum, the ongoing partnership starting at $20k/month, with the first month included if you choose this within thirty days. (2) You take the work in-house, with Harbour hosting the infrastructure at $2k/month and break-fix at $200/hour. (3) You run it yourselves entirely. Every path leaves you better than the day the engagement started.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FINAL CTA (cream) -->
+  <section class="section inverted cta-final center" id="book">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">To Begin</div>
+        <h2>Forty-five minutes. <em>No pitch deck</em>.</h2>
+        <p class="lead">The only sales call. The conversation covers the work your team does, where AI has stuck, where it hasn't, and where agents would take you further. If The Foundation fits, the SOW is in your inbox within forty-eight hours.</p>
+        <a class="btn" href="book.html">Book the Call <span aria-hidden="true">→</span></a>
+        <ul class="fud">
+          <li><span class="check">✓</span> Free</li>
+          <li><span class="check">✓</span> 45 minutes</li>
+          <li><span class="check">✓</span> Sponsor satisfaction guaranteed</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="index.html">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We make agentic AI work inside your organization, not just in a demo.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="foundation.html">The Foundation</a>
+        <a href="continuum.html">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="standard.html">The Standard</a>
+        <a href="about.html">About</a>
+        <a href="industries.html">Industries</a>
+        <a href="book.html">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:hello@theagenticstandard.com">hello@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

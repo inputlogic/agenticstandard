@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About · Agentic Standard — Agentic Standard</title>
+<meta name="description" content="Three operators. One thesis. The founders behind Agentic Standard and why they got together to close the gap between AI technology and the operating model that has to meet it.">
+<meta property="og:title" content="About · Agentic Standard — Agentic Standard">
+<meta property="og:description" content="Three operators. One thesis. The founders behind Agentic Standard and why they got together to close the gap between AI technology and the operating model that has to meet it.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="About · Agentic Standard — Agentic Standard">
+<meta name="twitter:description" content="Three operators. One thesis. The founders behind Agentic Standard and why they got together to close the gap between AI technology and the operating model that has to meet it.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+<style>
+/* ==== about.html page styles — only what site.css lacks ==== */
+
+/* -- hero: time-based rise on load (spec delays 0.05 / 0.18 / 0.36s) -- */
+.hero { padding-block: clamp(4rem, 11vw, 7.5rem) clamp(3rem, 8vw, 5.5rem); }
+.hero .lead { margin-block-start: 1.4rem; }
+.hero-rise { animation: hero-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.hero-rise:nth-child(1) { animation-delay: 0.05s; }
+.hero-rise:nth-child(2) { animation-delay: 0.18s; }
+.hero-rise:nth-child(3) { animation-delay: 0.36s; }
+@keyframes hero-rise {
+  from { opacity: 0; translate: 0 1.1rem; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise { animation: none; }
+}
+
+/* -- founders grid + cards (container-query split inside each slot) -- */
+.founders-grid { margin-block-start: clamp(1.5rem, 4vw, 2.5rem); }
+
+.founder-card { padding: 0; gap: 0; }
+
+.founder-photo {
+  aspect-ratio: 1;
+  overflow: clip;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--bg-soft);
+}
+.founder-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.82) contrast(1.03);
+  transition: filter 0.35s ease;
+}
+.founder-card:hover .founder-photo img { filter: saturate(1) contrast(1); }
+
+/* per-portrait names for cross-page morphs (unique on this page) */
+#photo-shawn  { view-transition-name: portrait-shawn; }
+#photo-chris  { view-transition-name: portrait-chris; }
+#photo-jordan { view-transition-name: portrait-jordan; }
+
+.founder-info {
+  padding: clamp(1.3rem, 5.5cqi, 2rem);
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+}
+.founder-card .founder-role {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted-dim);
+}
+.founder-card .founder-link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-block-start: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--muted);
+  border-bottom: 1px solid var(--hairline-strong);
+  padding-block-end: 2px;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.founder-card .founder-link:hover { color: var(--accent-soft); border-color: var(--accent); }
+.founder-link svg { width: 14px; height: 14px; flex: none; }
+
+/* wide slot (grid collapsed to one column): photo-left / text-right */
+@container card (min-width: 30rem) {
+  .founder-card { grid-template-columns: clamp(11rem, 38cqi, 16rem) 1fr; }
+  .founder-photo {
+    aspect-ratio: auto;
+    position: relative;
+    min-height: 15rem;
+    height: 100%;
+    border-bottom: 0;
+    border-inline-end: 1px solid var(--hairline);
+  }
+  .founder-photo img { position: absolute; inset: 0; }
+}
+
+/* -- scroll-driven extras (enhancement only; base = visible, still) -- */
+@supports (animation-timeline: view()) {
+  /* stagger beats for reveal groups (cards 2/3, paragraphs 2/3) */
+  .rv-2.reveal { animation-range: entry 10% entry 55%; }
+  .rv-3.reveal { animation-range: entry 20% entry 65%; }
+
+  /* subtle portrait parallax over the element's viewport journey */
+  .founder-photo img {
+    scale: 1.12;
+    animation: photo-drift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+  .founder-photo.drift-rev img { animation-name: photo-drift-rev; }
+}
+@keyframes photo-drift {
+  from { translate: 0 16px; }
+  to   { translate: 0 -16px; }
+}
+@keyframes photo-drift-rev {
+  from { translate: 0 -16px; }
+  to   { translate: 0 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .founder-photo img { animation: none; scale: none; translate: none; }
+}
+
+/* JS-observer fallback path: honor the per-element stagger */
+html.no-scroll-timeline .reveal { transition-delay: var(--stagger, 0ms); }
+
+/* -- CTA band (cream, full-width, outside #main) -- */
+.cta-band { text-align: center; }
+.cta-framed { max-width: min(760px, 92vw); margin-inline: auto; }
+.cta-framed .lead { margin-inline: auto; margin-block: 1.1rem 2rem; }
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="index.html" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="standard.html">Standard</a>
+      <a href="foundation.html">Foundation</a>
+      <a href="continuum.html">Continuum</a>
+      <a href="about.html" aria-current="page">About</a>
+      <a href="industries.html">Industries</a>
+      <a class="nav-cta" href="book.html">Book a Call</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+
+  <!-- 1. HERO -->
+  <section class="section hero">
+    <div class="container">
+      <div class="kicker accent hero-rise">Who We Are</div>
+      <h1 class="page-title hero-rise">Three operators. One <em>thesis</em>.</h1>
+      <p class="lead hero-rise">Agentic AI works when the organization is ready for it. Agentic Standard started because the founders kept ending up on the same projects from different sides, and watching the same thing happen.</p>
+    </div>
+  </section>
+
+  <!-- 2. THE FOUNDERS -->
+  <section class="section section-rule" id="founders">
+    <div class="container">
+      <h2 class="kicker accent">The Founders</h2>
+      <div class="grid-3 founders-grid">
+
+        <div class="card-slot reveal">
+          <article class="card founder-card">
+            <div class="founder-photo" id="photo-shawn">
+              <img src="assets/founders/shawn.jpg" alt="Shawn Adrian" width="800" height="800" loading="lazy" decoding="async">
+            </div>
+            <div class="founder-info">
+              <h3>Shawn Adrian</h3>
+              <p class="founder-role">Founder</p>
+              <p>Fourteen years building software products at Input Logic, an AI-native product lab shipping for brands like NYU, Netgear, and Consumer Reports. Built Harbour, the agent control platform that runs under every Agentic Standard deployment. Brings the engineering discipline that turns agentic AI from a concept into production infrastructure.</p>
+              <a class="founder-link" href="https://www.linkedin.com/in/shawnadrian/" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+                LinkedIn
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="card-slot reveal rv-2" style="--stagger: 80ms">
+          <article class="card founder-card">
+            <div class="founder-photo drift-rev" id="photo-chris">
+              <img src="assets/founders/chris.jpg" alt="Chris Foster" width="800" height="800" loading="lazy" decoding="async">
+            </div>
+            <div class="founder-info">
+              <h3>Chris Foster</h3>
+              <p class="founder-role">Founder</p>
+              <p>Exited Newcomp Analytics, now leading Blueskeye AI across North America. A career spent at the intersection of enterprise data, AI strategy, and go-to-market across energy, construction, manufacturing, and automotive. The strategic mind behind every Agentic Standard engagement, connecting agentic deployment to the business case the board needs to see.</p>
+              <a class="founder-link" href="https://www.linkedin.com/in/chrisfoster5/" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+                LinkedIn
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="card-slot reveal rv-3" style="--stagger: 160ms">
+          <article class="card founder-card">
+            <div class="founder-photo" id="photo-jordan">
+              <img src="assets/founders/jordan.jpg" alt="Jordan Eckersley" width="800" height="800" loading="lazy" decoding="async">
+            </div>
+            <div class="founder-info">
+              <h3>Jordan Eckersley</h3>
+              <p class="founder-role">Founder</p>
+              <p>Years inside enterprise AI and automation, helping organizations move from dashboards nobody opens to workflows that actually run. Led partnerships across North America, watching firsthand what happens when capable technology meets an unprepared organization. Brings the client-side pattern recognition that shapes every Foundation engagement.</p>
+              <a class="founder-link" href="https://www.linkedin.com/in/jordan-eckersley-7867a459/" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+                LinkedIn
+              </a>
+            </div>
+          </article>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. WHY WE GOT TOGETHER -->
+  <section class="section section-rule" id="why">
+    <div class="container">
+      <div class="reading">
+        <div class="kicker">Why We Got Together</div>
+        <h2 class="reveal">The technology arrives. The <em>organization</em> doesn't.</h2>
+        <p class="lead reveal rv-2" style="--stagger: 90ms">Between us, the last decade-plus has been spent inside AI and data work: designing the tools, architecting the pipelines, shipping the agents. Sitting in the meetings where a seven-figure pilot gets quietly shelved. Watching capable models fail because the org around them wasn't built to use them. Watching big consulting firms charge a fortune to leave behind a slide deck.</p>
+        <p class="lead muted reveal rv-3" style="--stagger: 170ms">The pattern is always the same. So we built the firm with one job: close that gap, then leave.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 4. CTA (full-width, outside #main) -->
+<section class="section inverted cta-band">
+  <div class="container">
+    <div class="framed cta-framed reveal">
+      <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+      <div class="kicker accent">To Begin</div>
+      <h2>A forty-five-minute call to scope the <em>work</em>.</h2>
+      <p class="lead">No pitch deck. The call is about the work your team does, where AI has and hasn't stuck, and where the natural first agents would live. If The Foundation fits, the SOW arrives within forty-eight hours.</p>
+      <a class="btn" href="book.html">Book the call</a>
+      <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="index.html">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We make agentic AI work inside your organization, not just in a demo.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="foundation.html">The Foundation</a>
+        <a href="continuum.html">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="standard.html">The Standard</a>
+        <a href="about.html">About</a>
+        <a href="industries.html">Industries</a>
+        <a href="book.html">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:hello@theagenticstandard.com">hello@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

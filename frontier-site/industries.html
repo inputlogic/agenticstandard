@@ -58,19 +58,20 @@
 /* -- selector grid --------------------------------------------------------- */
 .ind-grid { margin-block-start: clamp(1.75rem, 4vw, 2.5rem); }
 
-button.ind-card {
+.ind-card {
   width: 100%;
   text-align: left;
   cursor: pointer;
+  text-decoration: none;
   transition: border-color 0.18s ease, translate 0.18s ease, background-color 0.25s ease;
 }
-button.ind-card:hover,
-button.ind-card:focus-visible {
+.ind-card:hover,
+.ind-card:focus-visible {
   border-color: var(--accent);
   translate: 0 -2px;
 }
 @supports (color: color-mix(in oklch, red, white 10%)) {
-  button.ind-card:hover { background-color: color-mix(in oklch, var(--accent) 4%, var(--panel)); }
+  .ind-card:hover { background-color: color-mix(in oklch, var(--accent) 4%, var(--panel)); }
 }
 
 .ind-icon { display: inline-block; justify-self: start; flex: none; line-height: 0; color: var(--fg-dim); }
@@ -90,171 +91,11 @@ button.ind-card:focus-visible {
 /* wide slot: the icon becomes a left rail. Queries the CARD SLOT, not the
    viewport, so the layout follows wherever the grid puts the card. */
 @container card (min-width: 24rem) {
-  button.ind-card { grid-template-columns: auto 1fr; column-gap: clamp(1.1rem, 4cqi, 1.6rem); }
+  .ind-card { grid-template-columns: auto 1fr; column-gap: clamp(1.1rem, 4cqi, 1.6rem); }
   .ind-card .ind-icon { grid-row: 1 / span 3; }
 }
 
-/* -- detail panels ---------------------------------------------------------- */
-.ind-panel { margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem); }
-
-.ind-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  background: transparent;
-  border: 1px solid var(--hairline-strong);
-  border-radius: 2px;
-  color: var(--fg);
-  font-size: var(--text-small);
-  font-weight: 500;
-  padding: 0.55em 1em;
-  cursor: pointer;
-  transition: border-color 0.18s ease, color 0.18s ease;
-}
-.ind-back:hover { border-color: var(--accent); color: var(--accent-soft); }
-
-.ind-panel-head {
-  display: flex;
-  align-items: center;
-  gap: clamp(1.25rem, 3.5vw, 2.25rem);
-  margin-block-start: clamp(1.9rem, 4.5vw, 2.75rem);
-}
-.ind-panel-head .ind-icon svg { width: clamp(72px, 11vw, 108px); height: auto; }
-.ind-panel-head .kicker { margin-block-end: 0.55rem; }
-.ind-panel-head h2 { margin-block-end: 0; max-width: 24ch; scroll-margin-block-start: 6rem; }
-@media (max-width: 560px) {
-  .ind-panel-head { flex-direction: column; align-items: flex-start; gap: 1.1rem; }
-}
-
-.ind-quote { margin-block-start: clamp(1.5rem, 4vw, 2.5rem); }
-.ind-quote .pull-quote { font-size: clamp(1.4rem, 1.15rem + 1.3vw, 2.1rem); }
-.ind-quote-attr {
-  margin-block-start: 1.1rem;
-  font-size: var(--text-kicker);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--muted);
-}
-
-.ind-agents { margin-block-start: clamp(1.25rem, 3vw, 2rem); }
-
-.agent-stat {
-  border-top: 1px solid var(--hairline);
-  padding-block-start: 0.9rem;
-  margin-block-start: 0.5rem;
-  display: grid;
-  gap: 0.3rem;
-}
-.agent-stat-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--muted);
-}
-.agent-stat-num {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(1.9rem, 9cqi, 2.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: var(--accent);
-}
-.agent-stat-gloss {
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  font-weight: 400;
-  line-height: 1.4;
-  color: var(--muted);
-  margin-block-start: 0.15rem;
-  text-wrap: pretty;
-}
-
-.ind-note {
-  margin-block-start: 1.25rem;
-  color: var(--muted);
-  font-size: var(--text-small);
-  max-width: var(--reading);
-}
-
-.ind-capacity {
-  margin-block-start: clamp(2rem, 5vw, 3rem);
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(1.35rem, 1.15rem + 1vw, 1.8rem);
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  color: var(--fg);
-  max-width: var(--reading);
-  text-wrap: balance;
-}
 .ind-cta { margin-block-start: clamp(1.25rem, 3vw, 1.75rem); }
-
-/* -- per-agent drill-down ---------------------------------------------------
-   Summary is BLOCK with an absolutely positioned + marker, mirroring the
-   fixed details.faq pattern in site.css (flex + space-between scatters a
-   summary's inline children across the row). Smaller scale here. */
-.agent-how { border-top: 1px solid var(--hairline); margin-block-start: 0.5rem; }
-.agent-how summary {
-  list-style: none;
-  cursor: pointer;
-  display: block;
-  position: relative;
-  padding-block: 0.65rem;
-  padding-inline-end: 1.6rem; /* room for the + marker */
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  line-height: 1.6;
-  color: var(--muted);
-  transition: color 0.18s ease;
-}
-.agent-how summary::-webkit-details-marker { display: none; }
-.agent-how summary::after {
-  content: "+";
-  position: absolute;
-  inset-inline-end: 0;
-  top: 0.65rem;
-  font-family: var(--font-sans);
-  font-weight: 400;
-  color: var(--accent);
-  font-size: 1rem;
-  /* line box = the summary's single text line, so the + centers on it */
-  line-height: calc(1.6 * 0.72rem);
-  transition: rotate 0.25s ease;
-}
-.agent-how[open] summary::after { rotate: 45deg; }
-.agent-how summary:hover { color: var(--fg); }
-
-.agent-how::details-content {
-  height: 0;
-  overflow: clip;
-  transition: height 0.25s ease, content-visibility 0.25s allow-discrete;
-}
-.agent-how[open]::details-content { height: auto; }
-
-.agent-how-body { padding-block: 0.15rem 0.9rem; display: grid; gap: 0.55rem; }
-.agent-how-body p { font-size: 0.8rem; line-height: 1.5; color: var(--muted); }
-.agent-how-body strong { color: var(--fg-dim); font-weight: 600; }
-.agent-needs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
-.agent-needs li {
-  position: relative;
-  padding-inline-start: 0.95rem;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: var(--muted);
-}
-.agent-needs li::before {
-  content: "";
-  position: absolute;
-  inset-inline-start: 0;
-  top: 0.48em;
-  width: 5px;
-  height: 5px;
-  background: var(--muted-dim);
-}
 
 /* -- "industry not listed" band --------------------------------------------- */
 .not-listed { text-align: center; margin-block-start: clamp(2.5rem, 6vw, 4rem); }
@@ -262,22 +103,9 @@ button.ind-card:focus-visible {
 .not-listed .not-listed-body { max-width: 54ch; margin: 1rem auto 0; color: var(--fg-body); }
 .not-listed .ind-cta { margin-block-start: 1.4rem; }
 
-/* -- open/close motion ------------------------------------------------------ */
-/* entrance fallback when same-document View Transitions are unavailable */
-@media (prefers-reduced-motion: no-preference) {
-  html.no-view-transitions .ind-panel:not([hidden]) {
-    transition: opacity 0.4s ease, translate 0.4s ease;
-  }
-}
-@starting-style {
-  html.no-view-transitions .ind-panel:not([hidden]) {
-    opacity: 0;
-    translate: 0 0.9rem;
-  }
-}
 
-/* the icon zoom: names are set per element BY SCRIPT at transition time,
-   so no two visible elements ever share an active name */
+/* the icon zoom: each grid icon carries a static per-industry name and
+   pairs with its twin on the landing page via cross-document transitions */
 ::view-transition-group(ind-logistics),
 ::view-transition-group(ind-manufacturing),
 ::view-transition-group(ind-ecommerce),
@@ -302,21 +130,8 @@ button.ind-card:focus-visible {
 /* reduced motion: still page */
 @media (prefers-reduced-motion: reduce) {
   .rise { animation: none !important; }
-  html.no-view-transitions .ind-panel:not([hidden]) { transition: none; }
 }
 </style>
-<noscript>
-<style>
-  /* No JS: the explorer becomes a plain stacked read. Nothing unreachable. */
-  .ind-grid, .ind-back { display: none; }
-  .ind-panel[hidden] { display: block; }
-  .ind-panel {
-    border-top: 1px solid var(--hairline);
-    margin-block-start: clamp(2.5rem, 6vw, 4rem);
-    padding-block-start: clamp(2rem, 5vw, 3rem);
-  }
-</style>
-</noscript>
 </head>
 <body class="grain">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -372,8 +187,8 @@ button.ind-card:focus-visible {
         <div class="ind-grid auto-grid reveal reveal-late">
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-logistics" aria-controls="logistics" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/logistics">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-logistics">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <rect x="10" y="38" width="42" height="24"/>
@@ -388,12 +203,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Logistics &amp; Freight</span>
               <span class="ind-hook">Invoices audited, exceptions caught, carriers chased. Before coffee.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-manufacturing" aria-controls="manufacturing" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/manufacturing">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-manufacturing">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M10 80 V52 l16 12 V52 l16 12 V52 l16 12 v16 z"/>
@@ -406,12 +221,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Manufacturing</span>
               <span class="ind-hook">The morning production picture, assembled before the morning.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-ecommerce" aria-controls="ecommerce" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/ecommerce">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-ecommerce">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <rect x="24" y="42" width="44" height="34"/>
@@ -425,12 +240,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">E-commerce &amp; Retail</span>
               <span class="ind-hook">Returns, chargebacks, price moves, the CX pile. Handled.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-saas" aria-controls="saas" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/saas">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-saas">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <rect x="12" y="20" width="72" height="56"/>
@@ -443,12 +258,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">SaaS &amp; Software</span>
               <span class="ind-hook">PQLs surfaced, renewals briefed, friction mapped.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-services" aria-controls="services" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/services">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-services">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M26 12 h30 l12 12 v60 h-42 z"/>
@@ -463,12 +278,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Professional Services</span>
               <span class="ind-hook">Proposals drafted, Mondays rolled up, your whole book watched.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-agencies" aria-controls="agencies" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/agencies">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-agencies">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M14 40 h14 l24 -16 v48 l-24 -16 h-14 z"/>
@@ -480,12 +295,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Marketing &amp; Agencies</span>
               <span class="ind-hook">Every channel rolled up. Every anomaly flagged. Every brief started.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-property" aria-controls="property" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/property">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-property">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M16 84 h64"/>
@@ -500,12 +315,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Real Estate &amp; Property Management</span>
               <span class="ind-hook">Maintenance triaged, leases watched, owner reports done.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-finops" aria-controls="finops" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/finops">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-finops">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <rect x="14" y="14" width="50" height="64"/>
@@ -518,12 +333,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Financial Services Ops</span>
               <span class="ind-hook">Documents chased, exceptions sorted, board packs built.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-healthops" aria-controls="healthops" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/healthops">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-healthops">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <rect x="26" y="16" width="44" height="68"/>
@@ -536,12 +351,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Healthcare Operations</span>
               <span class="ind-hook">Referrals chased, portals checked, credentials watched. Admin only.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-oilgas" aria-controls="oilgas" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/oilgas">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-oilgas">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M24 66 L38 16 L52 66"/>
@@ -555,12 +370,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Oil &amp; Gas</span>
               <span class="ind-hook">Tickets reconciled, permits watched, production briefed by 7am.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-engineering" aria-controls="engineering" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/engineering">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-engineering">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M30 60 a18 18 0 0 1 36 0"/>
@@ -574,12 +389,12 @@ button.ind-card:focus-visible {
               <span class="ind-name">Engineering &amp; Construction</span>
               <span class="ind-hook">RFIs chased, revisions caught, progress reports drafted.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
           <div class="card-slot">
-            <button class="card ind-card" type="button" id="card-fieldservices" aria-controls="fieldservices" aria-expanded="false">
-              <span class="ind-icon" aria-hidden="true">
+            <a class="card ind-card" href="/industries/fieldservices">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-fieldservices">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
                     <path d="M10 66 V46 h34 l14 10 v10 z"/>
@@ -596,7 +411,7 @@ button.ind-card:focus-visible {
               <span class="ind-name">Field Services &amp; Trades</span>
               <span class="ind-hook">Jobs triaged, quotes chased, warranty money recovered.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
-            </button>
+            </a>
           </div>
 
         </div>
@@ -610,1183 +425,17 @@ button.ind-card:focus-visible {
         </div>
       </div>
 
-      <!-- Panel: Logistics & Freight -->
-      <section class="ind-panel" id="logistics" aria-labelledby="logistics-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <rect x="10" y="38" width="42" height="24"/>
-                <path d="M52 62 V44 h14 l10 10 v8 h-24"/>
-                <rect x="18" y="62" width="9" height="9"/>
-                <rect x="61" y="62" width="9" height="9"/>
-                <path d="M10 24 h30 v-10 h22"/>
-              </g>
-              <rect x="66" y="10" width="8" height="8" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Logistics &amp; Freight</div>
-            <h2 id="logistics-title" tabindex="-1">Freight runs on <em>exceptions</em>. Agents live for them.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;We used to hear about late loads from angry customers. Now the customer hears it from <em>us</em> first.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Operations lead &middot; mid-market freight brokerage</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Rate Auditor</h3>
-              <p>Reads every carrier invoice against the contracted rate. Fuel, accessorials, detention. Variances come to you flagged, with the lane and the paperwork attached.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Checks every invoice, not the tenth a person can spot-check.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs nightly. Reads new invoices from the TMS export. Checks every line against contract rates. Posts variances to the ops channel, paperwork attached. A human approves every dispute.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: nightly TMS invoice export</li>
-                    <li>Post: #freight-audit in Slack</li>
-                    <li>Owner: your ops lead</li>
-                    <li>Spend cap enforced in the request path</li>
-                    <li>Audit log on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Exception Scout</h3>
-              <p>Watches track-and-trace for loads going sideways and posts the exception to Slack, with the carrier and the new ETA, before the customer ever asks.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">12&#215;</span><span class="agent-stat-gloss">Watches every load, every fifteen minutes, all shift.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs every fifteen minutes. Reads the track-and-trace feed. Matches pings against promised windows. Posts exceptions with carrier and new ETA. A human owns the customer call.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: track-and-trace feed, read-only</li>
-                    <li>Post: #load-exceptions in Slack</li>
-                    <li>Owner: your dispatch manager</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every alert logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Onboarding Runner</h3>
-              <p>Chases carrier onboarding paperwork. W-9s, insurance certs, authority letters. Follows up until the packet is complete and filed where it belongs.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Works every onboarding packet to done, and forgets none.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every new carrier packet. Reads the onboarding inbox. Checks W-9s, certs, authority. Sends the follow-up chase itself. A human grants final approval.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: carrier onboarding inbox</li>
-                    <li>Send: chases from a scoped mailbox</li>
-                    <li>Owner: your carrier manager</li>
-                    <li>Budget cap live in the request path</li>
-                    <li>Audit trail from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">Stack the three and the desk runs like a bigger one: every load covered, and room for the freight you used to turn away.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Manufacturing -->
-      <section class="ind-panel" id="manufacturing" aria-labelledby="manufacturing-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M10 80 V52 l16 12 V52 l16 12 V52 l16 12 v16 z"/>
-                <circle cx="72" cy="30" r="11"/>
-                <path d="M72 12 v7 M72 41 v7 M54 30 h7 M83 30 h7"/>
-              </g>
-              <rect x="69" y="27" width="6" height="6" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Manufacturing</div>
-            <h2 id="manufacturing-title" tabindex="-1">Your plant floor already talks. Agents finally <em>listen</em>.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;The morning scrap report used to eat my first ninety minutes. Now it's <em>waiting</em> for me.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Plant operations manager &middot; tier-two automotive supplier</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Shift Reporter</h3>
-              <p>Pulls the overnight MES exports and builds one production and scrap summary. Yield by line, downtime by cause, ready before the stand-up.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Reads every line overnight, not a walk-past glance.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs at 5am. Reads the overnight MES export. Rolls yield, scrap, and downtime by line. Posts one summary to Teams before stand-up. Humans decide what to fix.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the MES report drop folder</li>
-                    <li>Post: the production Teams channel</li>
-                    <li>Owner: your plant ops manager</li>
-                    <li>Hard spend cap per run</li>
-                    <li>Every run logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Supplier Sentinel</h3>
-              <p>Scans supplier on-time-delivery trends, news, and port delays, then flags the purchase orders at risk while you can still do something about it.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Scores every supplier daily, not just the loud ones.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs daily. Reads OTD history, supplier news, and port bulletins. Scores delivery risk by purchase order. Posts the at-risk list to purchasing. A human calls the supplier.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the ERP open-PO view</li>
-                    <li>Post: the purchasing digest inbox</li>
-                    <li>Owner: your supply chain lead</li>
-                    <li>Spend cap enforced in the request path</li>
-                    <li>Audit log on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Maintenance Triager</h3>
-              <p>Sorts incoming maintenance tickets by machine and urgency, then drafts the parts pre-staging list so your techs walk up ready.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Sorts every ticket by machine and urgency, all of them.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every ticket. Reads the CMMS queue. Sorts by machine and urgency, drafts the parts list. Posts the pre-staged plan each shift. A human schedules the work.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the CMMS ticket queue</li>
-                    <li>Post: the maintenance Teams channel</li>
-                    <li>Owner: your maintenance supervisor</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every action logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">Multiplier math is not a smaller crew. It is the same crew holding uptime, because someone finally saw the trouble coming.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: E-commerce & Retail -->
-      <section class="ind-panel" id="ecommerce" aria-labelledby="ecommerce-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <rect x="24" y="42" width="44" height="34"/>
-                <path d="M24 42 l22 -12 22 12"/>
-                <path d="M46 42 v34"/>
-                <path d="M70 14 h16 v16 l-8 8 -8 -8 z"/>
-              </g>
-              <rect x="76" y="19" width="4" height="4" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">E-commerce &amp; Retail</div>
-            <h2 id="ecommerce-title" tabindex="-1">Your margin hides in the <em>follow-up</em>.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;Chargebacks were a shoebox of screenshots. Now the evidence packet is <em>done</em> before I open the case.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Operations manager &middot; DTC home goods brand</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Chargeback Clerk</h3>
-              <p>Assembles the evidence for every dispute. Order record, tracking, delivery confirmation, the full customer thread. One packet, ready to submit.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Builds the packet for every dispute, not just the easy ones.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every new dispute. Reads the order, tracking, and customer thread. Assembles the evidence packet. Files it to the disputes folder. A human clicks submit.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the processor dispute feed</li>
-                    <li>Write: packets to a shared drive</li>
-                    <li>Owner: your ops manager</li>
-                    <li>Spend cap live in the request path</li>
-                    <li>Audit log on day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Shelf Scout</h3>
-              <p>Scans competitor price and stock on your key listings overnight, then drops a morning digest with only the moves that matter.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Scans every tracked SKU overnight, never a spot-check.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs overnight. Reads competitor listings on your tracked SKUs. Diffs price and stock against yesterday. Posts the morning digest to Slack. Humans set the response.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the tracked-SKU watchlist</li>
-                    <li>Post: #pricing in Slack</li>
-                    <li>Owner: your merchandiser</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every scan logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The CX Drafter</h3>
-              <p>Writes a first-draft reply to every support ticket with the order, the tracking, and your policies already in it. Your team reviews and sends.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Drafts a reply to every ticket; you send in one pass.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every ticket. Reads the helpdesk queue plus order context. Drafts the reply in your tone. Saves it as a suggested response. A human reviews and sends.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: helpdesk queue and order lookup</li>
-                    <li>Draft: inside the helpdesk, never auto-send</li>
-                    <li>Owner: your CX lead</li>
-                    <li>Monthly token budget, hard-capped</li>
-                    <li>Audit trail on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">One rep now covers what a room of them used to, and the win shows up downstream: retention, reviews, customers who stay.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: SaaS & Software -->
-      <section class="ind-panel" id="saas" aria-labelledby="saas-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <rect x="12" y="20" width="72" height="56"/>
-                <path d="M12 32 h72"/>
-                <path d="M24 44 l10 9 -10 9"/>
-              </g>
-              <rect x="42" y="59" width="12" height="4" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">SaaS &amp; Software</div>
-            <h2 id="saas-title" tabindex="-1">The signals are already in your stack. Agents <em>surface</em> them.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;My AEs used to dig for hand-raisers. Now the hand-raisers show up in <em>Slack</em>.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">VP of Sales &middot; Series B B2B SaaS</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Signal Spotter</h3>
-              <p>Watches trial and usage data for product-qualified moments, then posts the digest to your AEs in Slack, account by account.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Reads usage on every account, hourly, misses no spike.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs hourly. Reads product usage events. Flags product-qualified moments by account. Posts the digest to the sales channel. AEs pick up the phone.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the product analytics view</li>
-                    <li>Post: #pql-signals in Slack</li>
-                    <li>Owner: your RevOps lead</li>
-                    <li>Spend cap enforced per run</li>
-                    <li>Every query logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Renewal Briefer</h3>
-              <p>Builds a churn-risk brief before every renewal call. Usage trend, open tickets, stakeholder changes, and the one question worth asking.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">5&#215;</span><span class="agent-stat-gloss">Briefs every renewal, not just the big accounts.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs a week before each renewal. Reads usage, tickets, and CRM notes. Drafts the one-page brief. Posts it to the account channel. The CSM leads the call.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the CRM renewal view</li>
-                    <li>Post: per-account Slack channels</li>
-                    <li>Owner: your head of CS</li>
-                    <li>Budget cap live in the request path</li>
-                    <li>Audit log from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Friction Mapper</h3>
-              <p>Clusters the week's support tickets into themes and hands product a ranked friction report every Friday.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">4&#215;</span><span class="agent-stat-gloss">Reads every ticket weekly, not a Friday sample.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs Fridays. Reads the week's support tickets. Clusters them into themes, ranks by volume. Posts the report to product. Humans set the roadmap.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the support ticket export</li>
-                    <li>Post: #product-friction in Slack</li>
-                    <li>Owner: your product ops manager</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every run logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">The multiplier is not the point. Win rate is, when every AE walks into every call already holding the whole picture.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Professional Services -->
-      <section class="ind-panel" id="services" aria-labelledby="services-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M26 12 h30 l12 12 v60 h-42 z"/>
-                <path d="M56 12 v12 h12"/>
-                <path d="M36 38 h22 M36 48 h22"/>
-                <path d="M56 64 L82 38"/>
-                <path d="M50 70 l6 -6"/>
-              </g>
-              <path d="M36 62 h16" stroke="var(--accent)" stroke-width="3" stroke-linecap="square"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Professional Services</div>
-            <h2 id="services-title" tabindex="-1">Bill the <em>thinking</em>, not the typing.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;The proposal that used to cost a partner a weekend now costs a <em>review</em>.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Managing partner &middot; boutique consulting firm</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Proposal Drafter</h3>
-              <p>Turns call notes and your past SOWs into a first-draft proposal in your voice, scoped sections and all. Partners edit instead of assemble.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Drafts in minutes; a partner finishes in one review.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on request. Reads your call notes and past SOWs. Drafts the proposal in firm voice. Saves it to the deal folder. A partner edits and sends.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: call notes and the SOW library</li>
-                    <li>Write: drafts to the deal folder</li>
-                    <li>Owner: your managing partner</li>
-                    <li>Hard spend cap per run</li>
-                    <li>Audit trail on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Utilization Clerk</h3>
-              <p>Rolls utilization and WIP across every engagement into one Monday morning view. No spreadsheet safari required.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">5&#215;</span><span class="agent-stat-gloss">Rolls up every engagement Monday, not the ones you recall.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs Monday at 6am. Reads timesheets and WIP from the PSA. Rolls both up by engagement. Posts one view to leadership. Humans have the conversations.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the PSA timesheet export</li>
-                    <li>Post: the leadership channel</li>
-                    <li>Owner: your operations director</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every run logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Client Watcher</h3>
-              <p>Reads the news across your entire book of business and flags the moves that deserve a partner phone call this week.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Reads news on every client daily, not the top ten.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs daily. Reads news across your client list. Filters for moves that matter. Posts flags with a suggested opener. A partner makes the call.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the client list in your CRM</li>
-                    <li>Post: the partner digest email</li>
-                    <li>Owner: your BD lead</li>
-                    <li>Spend cap live in the request path</li>
-                    <li>Every flag logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">A team that does the work of a bigger one bills like a bigger one: utilization up, because the minds are back on billable work.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Marketing & Agencies -->
-      <section class="ind-panel" id="agencies" aria-labelledby="agencies-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M14 40 h14 l24 -16 v48 l-24 -16 h-14 z"/>
-                <path d="M62 68 v-14 M74 68 v-24"/>
-              </g>
-              <path d="M86 68 v-34" stroke="var(--accent)" stroke-width="3" stroke-linecap="square"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Marketing &amp; Agencies</div>
-            <h2 id="agencies-title" tabindex="-1">Kill the reporting day. Keep the <em>craft</em>.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;Monday was a reporting day. Now it's a <em>making</em> day.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Head of accounts &middot; performance marketing agency</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Rollup Runner</h3>
-              <p>Pulls every channel into one performance rollup and flags the anomalies worth a human look, before the client spots them first.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Pulls every channel at dawn, flags what a scan misses.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs at 6am. Reads every ad platform export. Rolls performance into one sheet, flags anomalies. Posts before the client wakes up. Humans write the story.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: ad platform report exports</li>
-                    <li>Write: the rollup sheet</li>
-                    <li>Owner: your head of accounts</li>
-                    <li>Spend cap enforced in the request path</li>
-                    <li>Every run logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Brief Starter</h3>
-              <p>Turns intake calls into first-draft creative briefs. Audience, angle, mandatories, deadline. Strategists shape instead of type.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">4&#215;</span><span class="agent-stat-gloss">Drafts the brief off every intake call, same day.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs after every intake call. Reads the transcript and the client file. Drafts the creative brief. Posts it to the project board. A strategist shapes it.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the call transcript folder</li>
-                    <li>Post: the project board</li>
-                    <li>Owner: your strategy director</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Audit log on day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Launch Scout</h3>
-              <p>Watches competitor content and launches across your whole client roster and drops a weekly what-moved digest.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Watches every competitor across the whole roster, weekly.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs weekly. Reads competitor channels across the roster. Logs new content and launches. Posts the what-moved digest on Fridays. Humans pick the counterpunch.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the competitor watchlist</li>
-                    <li>Post: #competitive in Slack</li>
-                    <li>Owner: your head of strategy</li>
-                    <li>Hard budget cap per run</li>
-                    <li>Every scan logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">Multiplied capacity buys swings, not layoffs: the same team takes more shots at the work, and each one lands harder.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Real Estate & Property Management -->
-      <section class="ind-panel" id="property" aria-labelledby="property-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M16 84 h64"/>
-                <rect x="24" y="18" width="30" height="66"/>
-                <path d="M54 84 V44 h20 v40"/>
-                <path d="M32 30 h6 M46 30 h6 M32 44 h6 M46 44 h6 M32 58 h6 M46 58 h6"/>
-                <path d="M34 84 v-14 h10 v14"/>
-              </g>
-              <rect x="61" y="58" width="6" height="6" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Real Estate &amp; Property Management</div>
-            <h2 id="property-title" tabindex="-1">Every door wants attention. Agents <em>queue</em> it.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;The maintenance inbox ran my day. Now it's a worklist with the vendor already <em>suggested</em>.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Portfolio manager &middot; 1,200-door management company</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Dispatch Drafter</h3>
-              <p>Triages every maintenance request by urgency and trade, then drafts the vendor dispatch with the unit history attached. You approve, it goes.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Triages every request, drafts every dispatch, misses none.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every request. Reads the maintenance inbox and unit history. Sorts by urgency and trade, drafts the dispatch. Queues it for approval. A human hits send.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the PMS maintenance inbox</li>
-                    <li>Draft: dispatches, approval-gated</li>
-                    <li>Owner: your portfolio manager</li>
-                    <li>Spend cap enforced in the request path</li>
-                    <li>Audit log on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Lease Reader</h3>
-              <p>Abstracts every lease and watches the critical dates. Renewals, escalations, options. Nothing expires quietly on your watch.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Abstracts every lease and watches every critical date.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every new lease. Reads the document, abstracts the terms. Loads critical dates into the calendar. Posts alerts ninety days out. Humans negotiate.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the lease folder on SharePoint</li>
-                    <li>Write: the critical-dates calendar</li>
-                    <li>Owner: your leasing director</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every extraction logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Owner Reporter</h3>
-              <p>Assembles the monthly owner report. Financials, occupancy, work orders, photos. Formatted, narrated, ready to send.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier, per portfolio</span><span class="agent-stat-num">5&#215;</span><span class="agent-stat-gloss">Assembles every owner report, formatted and ready to send.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs monthly. Reads financials, occupancy, and work orders per portfolio. Assembles the owner report. Saves the draft for review. A human sends it.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the PMS financial export</li>
-                    <li>Write: drafts to the owner folder</li>
-                    <li>Owner: your director of PM</li>
-                    <li>Hard spend cap per run</li>
-                    <li>Audit trail from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">One manager now runs the doors that used to need a team, and still sounds calm by Friday. That is the multiplier.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Financial Services Ops -->
-      <section class="ind-panel" id="finops" aria-labelledby="finops-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <rect x="14" y="14" width="50" height="64"/>
-                <path d="M39 14 v64"/>
-                <path d="M14 34 h50 M14 54 h50"/>
-              </g>
-              <path d="M58 62 l10 12 16 -22" stroke="var(--accent)" stroke-width="3" stroke-linecap="square"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Financial Services Ops</div>
-            <h2 id="finops-title" tabindex="-1">The back office is a <em>checklist</em>. Agents love checklists.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;KYC was three systems and a prayer. Now files show up <em>complete</em>.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Operations director &middot; regional lender</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Document Chaser</h3>
-              <p>Chases outstanding KYC and onboarding documents, checks every file for completeness, and keeps the worklist honest. Your people keep the judgment calls.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Chases every KYC file to complete, and forgets none.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs daily. Reads the KYC worklist. Checks each file for completeness, sends the chase. Posts the aging list to ops. Humans make the judgment calls.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the KYC case queue</li>
-                    <li>Send: chases from a scoped mailbox</li>
-                    <li>Owner: your onboarding team lead</li>
-                    <li>Budget cap live in the request path</li>
-                    <li>Every send logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Exception Triager</h3>
-              <p>Reads the daily exception reports out of your core systems, separates noise from signal, and routes what matters with context attached.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Reads every exception daily, separates noise from signal.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs at 7am. Reads the overnight exception reports from core. Separates noise from signal. Routes real items with context attached. A human clears each one.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the core system report drop</li>
-                    <li>Post: the exceptions worklist</li>
-                    <li>Owner: your operations director</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every route logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Pack Builder</h3>
-              <p>Assembles the board and committee packs. Pulls the numbers, drafts the commentary, formats the pages. You review instead of rebuild.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">5&#215;</span><span class="agent-stat-gloss">Builds every board pack; officers review, not rebuild.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on the committee calendar. Reads the source spreadsheets. Drafts numbers and commentary into the template. Saves for review. Officers approve every page.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the finance shared drive</li>
-                    <li>Write: drafts to the board folder</li>
-                    <li>Owner: your finance manager</li>
-                    <li>Hard spend cap per run</li>
-                    <li>Audit log from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">The multiplier lands as cycle time: the same ops team closes files in days, not weeks, and takes on more of them.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Healthcare Operations -->
-      <section class="ind-panel" id="healthops" aria-labelledby="healthops-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <rect x="26" y="16" width="44" height="68"/>
-                <rect x="40" y="10" width="16" height="12"/>
-                <path d="M34 44 h28 M34 56 h28 M34 68 h16"/>
-              </g>
-              <path d="M56 26 v12 M50 32 h12" stroke="var(--accent)" stroke-width="3" stroke-linecap="square"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Healthcare Operations</div>
-            <h2 id="healthops-title" tabindex="-1">Care is human. The <em>paperwork</em> doesn't have to be.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;My intake team used to live in payer portals. Now they're on the <em>phone</em> with patients.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Practice administrator &middot; multi-site specialty clinic</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Referral Runner</h3>
-              <p>Chases referral and intake paperwork. What's missing, who has it, when it's due. Packets get complete without the phone tag.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Chases every referral packet to done, phone tag gone.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every referral. Reads the intake queue, admin documents only. Lists what's missing, sends the chase. Posts packet status daily. Staff handle every patient conversation.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the intake inbox, admin docs only</li>
-                    <li>Post: the intake status worklist</li>
-                    <li>Owner: your practice administrator</li>
-                    <li>Spend cap enforced per run</li>
-                    <li>Audit log on day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Portal Checker</h3>
-              <p>Rolls the status checks across every payer portal into one worklist. Approved, pending, or needs a human call.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">10&#215;</span><span class="agent-stat-gloss">Checks every payer portal each morning, not a sample.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs each morning. Reads status pages across the payer portals. Rolls approvals and pendings into one worklist. Flags what needs a call. Staff make it.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: scoped portal logins, read-only</li>
-                    <li>Post: the daily worklist sheet</li>
-                    <li>Owner: your billing supervisor</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every check logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Credential Keeper</h3>
-              <p>Watches credentialing dates and license renewals across the whole roster and raises a hand months before anything lapses.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Watches every license across the whole roster, weekly.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs weekly. Reads the roster and the license registries. Diffs expiry dates against the calendar. Posts renewals ninety days out. Humans file the paperwork.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the credentialing spreadsheet</li>
-                    <li>Post: the compliance Teams channel</li>
-                    <li>Owner: your credentialing coordinator</li>
-                    <li>Budget cap live in the request path</li>
-                    <li>Every run logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-note">Everything here is administrative operations. No clinical decisions, no diagnosis support, and none of these examples involve patient records.</p>
-        <p class="ind-capacity">Multiplied does not mean fewer people at the desk. It means the desk finally looks up when a patient walks in.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Oil & Gas -->
-      <section class="ind-panel" id="oilgas" aria-labelledby="oilgas-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M24 66 L38 16 L52 66"/>
-                <path d="M28 52 h20 M25 62 h26"/>
-                <path d="M10 78 h76"/>
-                <path d="M24 78 v6 M62 78 v6"/>
-              </g>
-              <rect x="34" y="10" width="8" height="8" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Oil &amp; Gas</div>
-            <h2 id="oilgas-title" tabindex="-1">Run the back office like a <em>pipeline</em>.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;Field tickets used to sit for three weeks. Now variances surface <em>overnight</em>.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Operations controller &middot; mid-cap producer</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Ticket Reconciler</h3>
-              <p>Checks every field ticket against AFE and PO coding. Variances come back flagged, paperwork attached, before they ever hit the JIB.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Checks every field ticket against coding, not a sample.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs nightly. Reads new field tickets from the FDC export. Checks coding against AFE and PO. Posts variances with the paperwork attached. A human settles disputes.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the field data capture export</li>
-                    <li>Post: the ops accounting Teams channel</li>
-                    <li>Owner: your operations controller</li>
-                    <li>Spend cap enforced in the request path</li>
-                    <li>Audit log on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Permit Watch</h3>
-              <p>Watches filing windows, license renewals, and regulator portal status, rolled into one worklist. Nothing lapses quietly.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Watches every filing window and license, nothing lapses.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs daily. Reads regulator portals and the permit register. Diffs filing windows against the calendar. Posts the worklist with due dates. Humans do the filing.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the permit register spreadsheet</li>
-                    <li>Post: the compliance worklist</li>
-                    <li>Owner: your regulatory lead</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every check logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Morning Production Brief</h3>
-              <p>Synthesizes the production and SCADA exports into one daily digest, posted to Teams before the 7am call.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Reads every pad's overnight data, not just the top wells.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs at 5:30am. Reads the overnight production and SCADA exports. Builds the digest by field and pad. Posts to Teams before 7. Engineers decide.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the historian report export</li>
-                    <li>Post: the morning ops Teams channel</li>
-                    <li>Owner: your production superintendent</li>
-                    <li>Hard spend cap per run</li>
-                    <li>Every run logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-note">Ops and back office only. Nothing here touches process control, safety systems, or anything downhole.</p>
-        <p class="ind-capacity">The same back office now carries a bigger one: month-end lands on time, and the scramble is gone.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Engineering & Construction -->
-      <section class="ind-panel" id="engineering" aria-labelledby="engineering-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M30 60 a18 18 0 0 1 36 0"/>
-                <path d="M22 60 h52"/>
-                <rect x="12" y="72" width="72" height="10"/>
-                <path d="M36 72 v10 M60 72 v10"/>
-              </g>
-              <rect x="44" y="50" width="8" height="6" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Engineering &amp; Construction</div>
-            <h2 id="engineering-title" tabindex="-1">The job moves at the speed of <em>answers</em>.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;Our RFI log was always three days stale. Now it's <em>current</em> before the trailer opens.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Project manager &middot; mid-size general contractor</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The RFI Chaser</h3>
-              <p>Logs RFIs and submittals, routes them to the right reviewer, and chases overdue responses until the register is current.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Chases every open RFI hourly, keeps the register current.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs hourly. Reads the project platform's RFI log. Routes new items, chases overdue ones by email. Posts aging to the PM. Engineers write the answers.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the project platform RFI log</li>
-                    <li>Send: chases from the project mailbox</li>
-                    <li>Owner: your project engineer</li>
-                    <li>Spend cap live in the request path</li>
-                    <li>Audit trail on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Revision Watch</h3>
-              <p>Flags changed sheets and spec sections the moment a new set drops, and notifies the right discipline lead with the delta.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Diffs every sheet on every issue, not the ones noticed.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every drawing issue. Reads the new set against the last. Diffs sheets and spec sections. Posts deltas to each discipline lead. Leads assess impact.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the current drawing set folder</li>
-                    <li>Post: discipline Teams channels</li>
-                    <li>Owner: your design manager</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every diff logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Progress Assembler</h3>
-              <p>Pulls daily logs, site photos, and schedule variance into a client-ready weekly draft. The PM polishes instead of compiles.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">5&#215;</span><span class="agent-stat-gloss">Assembles the weekly report; the PM signs, not compiles.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs Thursday night. Reads daily logs, photos, and the schedule. Drafts the weekly progress report. Saves it for the PM. The PM signs.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: daily logs and the photo folder</li>
-                    <li>Write: drafts to the job folder</li>
-                    <li>Owner: your senior PM</li>
-                    <li>Hard spend cap per run</li>
-                    <li>Every draft logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">A multiplied project team keeps answers moving: they land before they become delays, and delays before they become claims.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
-      <!-- Panel: Field Services & Trades -->
-      <section class="ind-panel" id="fieldservices" aria-labelledby="fieldservices-title" hidden>
-        <button class="ind-back" type="button"><span aria-hidden="true">&#8592;</span> All industries</button>
-        <div class="ind-panel-head">
-          <span class="ind-icon" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                <path d="M10 66 V46 h34 l14 10 v10 z"/>
-                <rect x="16" y="66" width="9" height="9"/>
-                <rect x="44" y="66" width="9" height="9"/>
-                <path d="M32 46 v20"/>
-                <path d="M10 24 h16 v-8 h14"/>
-                <path d="M64 14 v12 h18 v-12"/>
-                <path d="M73 26 L62 40"/>
-              </g>
-              <rect x="13" y="42" width="7" height="4" fill="var(--accent)"/>
-            </svg>
-          </span>
-          <div>
-            <div class="kicker accent">Field Services &amp; Trades</div>
-            <h2 id="fieldservices-title" tabindex="-1">Trucks make money. <em>Desks</em> don't.</h2>
-          </div>
-        </div>
-        <figure class="framed ind-quote">
-          <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;Quotes used to die in a spreadsheet. Now every single one gets <em>chased</em> until it answers.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">General manager &middot; commercial HVAC contractor</figcaption>
-          <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-        </figure>
-        <div class="ind-agents auto-grid">
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 01</div>
-              <h3>The Dispatch Triage</h3>
-              <p>Sorts urgent from routine, matches techs to jobs by skill and route, and drafts the customer confirmations. Dispatch approves and sends.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Triages every request, matches every tech, drafts each confirm.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every request. Reads the booking inbox and the FSM board. Sorts urgency, suggests the tech, drafts confirmations. Dispatch approves each one.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the booking inbox</li>
-                    <li>Draft: confirmations, approval-gated</li>
-                    <li>Owner: your dispatch manager</li>
-                    <li>Spend cap enforced in the request path</li>
-                    <li>Audit log on from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 02</div>
-              <h3>The Quote Runner</h3>
-              <p>Chases every aging quote at the right cadence, logs the replies, and drops a close-rate digest every Friday.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Chases every aging quote at cadence, none goes cold.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs daily. Reads open quotes from the FSM system. Sends follow-ups at the right cadence. Logs replies, posts Friday's close-rate digest. Humans set the price.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: the open-quote report</li>
-                    <li>Send: follow-ups from a scoped mailbox</li>
-                    <li>Owner: your service manager</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every send logged</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-          <div class="card-slot">
-            <article class="card">
-              <div class="card-tag">Agent 03</div>
-              <h3>The Warranty Clerk</h3>
-              <p>Assembles claims paperwork with serials and photos attached, submits on approval, and tracks every claim to payout.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Assembles every warranty claim, tracks each to payout.</span></p>
-              <details class="agent-how">
-                <summary>How it works</summary>
-                <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every eligible job. Reads work orders, serials, and photos. Assembles the claim packet. Queues it for approval, tracks payout. Humans approve.</p>
-                  <p><strong>What it needs:</strong></p>
-                  <ul class="agent-needs">
-                    <li>Read: closed work orders and photos</li>
-                    <li>Post: the warranty tracking sheet</li>
-                    <li>Owner: your office manager</li>
-                    <li>Budget cap live in the request path</li>
-                    <li>Audit trail from day one</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-          </div>
-        </div>
-        <p class="ind-capacity">The multiplier shows up on the road: the same office keeps more trucks rolling full days, and no quote ever goes cold.</p>
-        <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
-      </section>
 
     </div>
   </section>
@@ -1849,150 +498,12 @@ button.ind-card:focus-visible {
 </footer>
 
 <script>
-/* Industry explorer: card grid <-> detail panels.
-   Same-document View Transitions zoom the picked icon from card to panel;
-   @starting-style covers browsers without them; hash deep links, popstate,
-   Escape, and focus restoration all handled. Dependency-free. */
+/* The industries now live on their own pages. Old #hash deep links redirect. */
 (function () {
   "use strict";
-
-  var gridWrap = document.getElementById("explorer-grid");
-  if (!gridWrap) return;
-
-  var panels = [].slice.call(document.querySelectorAll(".ind-panel"));
-  var cards = [].slice.call(document.querySelectorAll(".ind-card"));
-  if (!panels.length || !cards.length) return;
-
-  var byId = {};
-  panels.forEach(function (p) { byId[p.id] = p; });
-
-  var reduce = window.matchMedia
-    ? matchMedia("(prefers-reduced-motion: reduce)")
-    : { matches: false };
-
-  var openId = null;     /* currently open panel id, or null */
-  var fromClick = false; /* current open state was pushed by a card click */
-  var lastCard = null;   /* originating card, for focus restoration */
-
-  function cardFor(id) {
-    return document.querySelector('.ind-card[aria-controls="' + id + '"]');
-  }
-
-  function idFromLocation() {
-    var id = location.hash.replace(/^#/, "");
-    return Object.prototype.hasOwnProperty.call(byId, id) ? id : null;
-  }
-
-  /* the single instant state swap; everything else is decoration */
-  function apply(id) {
-    panels.forEach(function (p) { p.hidden = (p.id !== id); });
-    gridWrap.hidden = !!id;
-    cards.forEach(function (c) {
-      c.setAttribute("aria-expanded", String(c.getAttribute("aria-controls") === id));
-    });
-    openId = id;
-  }
-
-  function focusAfter(id) {
-    if (id) {
-      var h = byId[id].querySelector("h2");
-      if (h) h.focus();
-    } else if (lastCard) {
-      lastCard.focus();
-    }
-  }
-
-  function swap(id, focus) {
-    var vtOK = !!document.startViewTransition && !reduce.matches;
-    if (!vtOK) {
-      apply(id);
-      if (focus) focusAfter(id);
-      return;
-    }
-
-    /* pair the two icons under one transient name so the icon ZOOMS.
-       Names are set only here, per element, and cleared afterwards, so no
-       two visible elements ever share an active view-transition-name. */
-    var zoomId = id || openId;
-    var name = "ind-" + zoomId;
-    var fromCard = cardFor(zoomId);
-    var from = id
-      ? (fromCard && fromCard.querySelector(".ind-icon"))
-      : (byId[zoomId] && byId[zoomId].querySelector(".ind-icon"));
-    var to = id
-      ? byId[id].querySelector(".ind-icon")
-      : (fromCard && fromCard.querySelector(".ind-icon"));
-
-    if (from) from.style.viewTransitionName = name;
-    var vt = document.startViewTransition(function () {
-      if (from) from.style.viewTransitionName = "";
-      if (to) to.style.viewTransitionName = name;
-      apply(id);
-      if (focus) focusAfter(id);
-    });
-    var clean = function () {
-      if (from) from.style.viewTransitionName = "";
-      if (to) to.style.viewTransitionName = "";
-    };
-    vt.finished.then(clean, clean);
-  }
-
-  /* open from a card click: push history so Back returns to the grid */
-  cards.forEach(function (card) {
-    card.addEventListener("click", function () {
-      var id = card.getAttribute("aria-controls");
-      if (!id || !byId[id] || id === openId) return;
-      lastCard = card;
-      try {
-        history.pushState({ ind: id }, "", "#" + id);
-        fromClick = true;
-        swap(id, true);
-      } catch (e) {
-        location.hash = id; /* popstate listener finishes the job */
-      }
-    });
-  });
-
-  /* close: history.back() when we own the entry, else clear the hash */
-  function requestClose() {
-    if (!openId) return;
-    if (fromClick && history.state && history.state.ind === openId) {
-      history.back();
-    } else {
-      try {
-        history.replaceState(null, "", location.pathname + location.search);
-      } catch (e) {
-        location.hash = "";
-      }
-      fromClick = false;
-      swap(null, true);
-    }
-  }
-
-  panels.forEach(function (p) {
-    var back = p.querySelector(".ind-back");
-    if (back) back.addEventListener("click", requestClose);
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && openId) requestClose();
-  });
-
-  /* back/forward and manual hash edits */
-  window.addEventListener("popstate", function (e) {
-    var id = idFromLocation();
-    if (id === openId) return;
-    if (id && !lastCard) lastCard = cardFor(id);
-    fromClick = !!(e.state && e.state.ind);
-    swap(id, true);
-  });
-
-  /* deep link: open instantly, no transition, no focus steal */
-  var initial = idFromLocation();
-  if (initial) {
-    lastCard = cardFor(initial);
-    apply(initial);
-  }
+  var slugs = ["logistics", "manufacturing", "ecommerce", "saas", "services", "agencies", "property", "finops", "healthops", "oilgas", "engineering", "fieldservices"];
+  var h = location.hash.replace(/^#/, "");
+  if (slugs.indexOf(h) !== -1) location.replace("/industries/" + h);
 })();
 </script>
 </body>

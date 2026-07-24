@@ -96,7 +96,7 @@ API for page builders. Everything here is already in `assets/site.css` / `assets
       </nav>
       <div class="footer-col">
         <div class="footer-heading">Contact</div>
-        <a href="mailto:hello@theagenticstandard.com">hello@theagenticstandard.com</a>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
         <p class="footer-detail">Canada<br>Remote-capable</p>
       </div>
     </div>

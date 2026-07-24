@@ -39,5 +39,5 @@ The site is a static HTML site with no build tools, frameworks, or external Java
 
 ## Contact
 
-- Email: hello@agenticstandard.ca
-- Domain: agenticstandard.ca
+- Email: jordan@theagenticstandard.com
+- Domain: theagenticstandard.com

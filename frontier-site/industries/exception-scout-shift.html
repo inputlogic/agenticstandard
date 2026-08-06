@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Shift with The Exception Scout &middot; Logistics — Agentic Standard</title>
+<meta name="description" content="Work a full day on a freight desk beside an AI agent. Watch it wait, watch it catch one late load five hours early, and make the one call it will not make for you.">
+<meta property="og:title" content="A Shift with The Exception Scout — Agentic Standard">
+<meta property="og:description" content="Work a full day on a freight desk beside an AI agent. You are the owner. The one decision is yours.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A Shift with The Exception Scout — Agentic Standard">
+<meta name="twitter:description" content="Work a full day on a freight desk beside an AI agent. You are the owner. The one decision is yours.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<style>
+/* ==== A shift with The Exception Scout ==================================
+   The operator's cut. One workday on a freight desk, driven click by
+   click: the agent's loop on the left, the channel it posts to in the
+   middle, the desk clock and live board on the right. Everything is
+   scoped under .sh-* so nothing here leaks into site.css components. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --good: #8FAC77;
+  --warn: #C9A24B;
+}
+
+/* -- hero ------------------------------------------------------------------ */
+.hero { padding-block: clamp(3.5rem, 9vw, 6rem) clamp(2rem, 5vw, 3rem); }
+.hero h1 { max-width: 17ch; }
+.hero .lead { margin-block-start: clamp(1.1rem, 2.5vw, 1.6rem); max-width: 58ch; }
+.rise { animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.21, 1) both; }
+@keyframes rise { from { opacity: 0; translate: 0 1.4rem; } to { opacity: 1; translate: 0 0; } }
+.hero .kicker.rise { animation-delay: 0.06s; }
+.hero h1.rise { animation-delay: 0.18s; }
+.hero .lead.rise { animation-delay: 0.36s; }
+.hero .sh-controls.rise { animation-delay: 0.5s; }
+
+.sh-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: clamp(1.3rem, 3vw, 1.8rem); }
+.sh-control {
+  display: inline-flex; align-items: baseline; gap: 0.55em;
+  border: 1px solid var(--hairline-strong); padding: 0.55em 0.9em;
+  font-size: var(--text-small); color: var(--muted);
+}
+.sh-control b {
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft);
+}
+
+/* ==== THE CONSOLE ======================================================== */
+.sh-console { font-size: 14px; line-height: 1.5; }
+.sh-console button { font-family: var(--font-sans); }
+
+.sh-stage {
+  position: relative;
+  display: grid; grid-template-columns: 236px minmax(360px, 1.28fr) minmax(240px, .84fr);
+  border: 1px solid var(--hairline-strong); background: var(--panel);
+  height: min(740px, 78vh); min-height: 560px; overflow: hidden;
+}
+.sh-col { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.sh-col + .sh-col { border-inline-start: 1px solid var(--hairline); }
+.sh-head {
+  padding: 0.75rem 0.95rem; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--muted); border-block-end: 1px solid var(--hairline);
+  display: flex; align-items: center; gap: 0.55rem; flex: 0 0 auto;
+  white-space: nowrap; overflow: hidden;
+}
+.sh-head b { color: var(--fg-dim); font-weight: 600; }
+.sh-head span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.sh-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--good); flex: none; }
+.sh-console.live .sh-pulse { animation: sh-breathe 1.8s ease-in-out infinite; }
+@keyframes sh-breathe { 0%, 100% { opacity: .4 } 50% { opacity: 1 } }
+
+/* ---- left: the agent ---- */
+.sh-agent { background: var(--bg-soft); }
+.sh-scroll { overflow: auto; padding: 0.85rem 0.8rem 1.1rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.sh-id { border: 1px solid var(--hairline); background: var(--panel); padding: 0.7rem; display: flex; gap: 0.6rem; align-items: center; }
+.sh-id .sh-av { width: 32px; height: 32px; flex: none; border: 1px solid var(--hairline); display: grid; place-items: center; }
+.sh-id .sh-av svg { width: 18px; height: 18px; }
+.sh-id .sh-nm { font-weight: 600; color: var(--fg); font-size: 0.78rem; line-height: 1.2; }
+.sh-id .sh-tg { font-size: 0.62rem; color: var(--muted); margin-block-start: 2px; }
+.sh-chip-state {
+  margin-inline-start: auto; flex: none; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; border: 1px solid var(--hairline-strong); color: var(--muted);
+  padding: 0.3em 0.6em; white-space: nowrap; transition: color .2s ease, border-color .2s ease;
+}
+.sh-chip-state.on { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.sh-chip-state.busy { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.sh-chip-state.wait { color: var(--accent); border-color: var(--accent); animation: sh-breathe 1.4s ease-in-out infinite; }
+
+.sh-cap { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+.sh-cap::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+
+.sh-loop { display: flex; flex-direction: column; }
+.sh-node { display: grid; grid-template-columns: 24px 1fr; gap: 0.6rem; padding: 0.35rem 0.1rem; position: relative; }
+.sh-node::before { content: ""; position: absolute; left: 11.5px; top: 28px; bottom: -4px; width: 1px; background: var(--hairline); }
+.sh-node:last-child::before { display: none; }
+.sh-dot {
+  width: 24px; height: 24px; border: 1px solid var(--hairline-strong); background: var(--panel);
+  display: grid; place-items: center; color: var(--muted); transition: .25s ease; z-index: 1;
+}
+.sh-dot svg { width: 12px; height: 12px; }
+.sh-name { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-dim); }
+.sh-gloss { font-size: 0.64rem; color: var(--muted); line-height: 1.45; margin-block-start: 1px; }
+.sh-stat { font-size: 0.64rem; color: var(--muted); line-height: 1.45; margin-block-start: 2px; }
+.sh-stat:empty { display: none; }
+.sh-stat b { color: var(--fg-dim); font-weight: 600; }
+.sh-stat .w { color: var(--warn); } .sh-stat .a { color: var(--accent-soft); } .sh-stat .g { color: var(--good); }
+.sh-node.run .sh-dot { border-color: var(--accent); color: var(--accent); }
+.sh-node.run .sh-name, .sh-node.hot .sh-name, .sh-node.amber .sh-name { color: var(--fg); }
+.sh-node.ok .sh-dot { border-color: color-mix(in srgb, var(--good) 55%, transparent); color: var(--good); }
+.sh-node.amber .sh-dot { border-color: var(--warn); color: var(--warn); }
+.sh-node.hot .sh-dot { border-color: var(--accent); background: var(--accent); color: var(--bg); }
+.sh-node.wait .sh-dot { border-color: var(--accent); color: var(--accent); animation: sh-breathe 1.3s ease-in-out infinite; }
+.sh-node.skip .sh-dot { opacity: .45; }
+.sh-node.skip .sh-name, .sh-node.skip .sh-gloss { opacity: .55; }
+.sh-tool {
+  font-family: var(--font-mono); font-size: 0.6rem; line-height: 1.5; color: var(--muted);
+  border-inline-start: 1px solid var(--hairline-strong); padding: 2px 0 2px 0.5rem; margin-block-start: 4px;
+  animation: sh-rise .35s ease both;
+}
+.sh-tool b { color: var(--fg-dim); font-weight: 600; }
+.sh-tool .r { color: var(--accent-soft); }
+
+.sh-pnl { border: 1px solid var(--hairline); background: var(--panel); }
+.sh-pnl-h { padding: 0.6rem 0.7rem 0.5rem; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border-block-end: 1px solid var(--hairline); }
+.sh-pnl-h b { color: var(--accent); font-weight: 600; }
+.sh-prow { display: grid; grid-template-columns: 58px 1fr; gap: 0.5rem; padding: 0.5rem 0.7rem; border-block-end: 1px solid var(--hairline); font-size: 0.66rem; line-height: 1.5; }
+.sh-prow:last-child { border-block-end: 0; }
+.sh-prow .k { color: var(--muted); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.56rem; padding-block-start: 2px; }
+.sh-prow .v { color: var(--muted); }
+.sh-prow .v b { color: var(--fg-dim); font-weight: 600; }
+.sh-meter { display: block; height: 3px; background: var(--hairline-strong); margin-block-start: 6px; }
+.sh-meter i { display: block; height: 100%; width: 1.5%; background: var(--accent); transition: width .6s ease; }
+.sh-spendline { display: flex; justify-content: space-between; margin-block-start: 4px; font-size: 0.58rem; color: var(--muted); }
+.sh-spendline b { color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+.sh-trailbtn { appearance: none; background: none; border: 0; padding: 0; color: var(--accent-soft); font-size: 0.66rem; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.sh-trailbtn:hover { color: var(--accent); }
+
+/* ---- centre: the channel ---- */
+.sh-chan-col { background: var(--panel); container-type: inline-size; container-name: shchan; }
+.sh-chan { flex: 1; min-height: 0; overflow: auto; padding: 1rem 1.1rem 0.6rem; display: flex; flex-direction: column; gap: 0.75rem; scroll-behavior: smooth; }
+.sh-sys { align-self: center; text-align: center; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); line-height: 1.8; max-width: 64ch; animation: sh-rise .4s ease both; }
+.sh-sys b { color: var(--fg-dim); }
+.sh-chap {
+  align-self: stretch; display: flex; align-items: center; gap: 0.75rem; margin-block: 0.5rem 0.1rem;
+  color: var(--accent); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase;
+  white-space: nowrap; animation: sh-rise .4s ease both;
+}
+.sh-chap::before, .sh-chap::after { content: ""; flex: 1; height: 1px; background: var(--hairline-strong); }
+/* callouts flow as normal text: the marker is positioned, never a flex item */
+.sh-note {
+  align-self: center; position: relative; max-width: 56ch; text-wrap: pretty;
+  font-size: 0.72rem; line-height: 1.6; color: var(--muted);
+  padding: 0.6rem 0.8rem 0.6rem 1.75rem; border: 1px dashed var(--hairline-strong);
+  animation: sh-rise .4s ease both;
+}
+.sh-note::before { content: ""; position: absolute; inset-inline-start: 0.8rem; top: 0.95rem; width: 6px; height: 6px; background: var(--accent); }
+.sh-note b { color: var(--fg-dim); font-weight: 600; }
+
+.sh-msg { display: grid; grid-template-columns: 28px 1fr; gap: 0.6rem; animation: sh-rise .4s ease both; }
+.sh-msg .av { width: 28px; height: 28px; border: 1px solid var(--hairline); background: var(--bg-soft); display: grid; place-items: center; flex: none; margin-block-start: 2px; color: var(--fg); }
+.sh-msg .av svg { width: 15px; height: 15px; }
+.sh-msg.you .av { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; font-size: 0.66rem; }
+.sh-msg .hd { display: flex; align-items: baseline; gap: 0.5rem; margin-block-end: 3px; flex-wrap: wrap; }
+.sh-msg .who { font-weight: 600; color: var(--fg); font-size: 0.76rem; }
+.sh-msg .app { font-size: 0.52rem; font-weight: 600; letter-spacing: 0.1em; color: var(--muted); border: 1px solid var(--hairline-strong); padding: 1px 4px; margin-inline-start: 5px; text-transform: uppercase; }
+.sh-msg .ts { font-size: 0.6rem; color: var(--muted-dim); font-variant-numeric: tabular-nums; }
+.sh-msg .bd { font-size: 0.78rem; line-height: 1.62; color: var(--fg-body); max-width: 62ch; }
+.sh-msg .bd b { color: var(--fg); font-weight: 600; }
+.sh-msg .bd p { margin: 0 0 0.45rem; } .sh-msg .bd p:last-child { margin-block-end: 0; }
+
+.sh-x { margin-block-start: 0.5rem; border: 1px solid var(--hairline-strong); border-inline-start: 2px solid var(--accent); background: var(--bg-soft); max-width: 560px; }
+.sh-x .xh { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.55rem; padding: 0.6rem 0.8rem; border-block-end: 1px solid var(--hairline); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg); }
+.sh-x .flag { color: var(--accent); display: grid; place-items: center; }
+.sh-x .flag svg { width: 13px; height: 13px; }
+.sh-x .conf { margin-inline-start: auto; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; text-transform: none; font-size: 0.64rem; }
+.sh-xrow { display: grid; grid-template-columns: 80px 1fr; gap: 0.6rem; padding: 0.5rem 0.8rem; border-block-end: 1px solid var(--hairline); font-size: 0.7rem; line-height: 1.55; }
+.sh-xrow:last-of-type { border-block-end: 0; }
+.sh-xrow .xk { color: var(--muted); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding-block-start: 2px; }
+.sh-xrow .xv { color: var(--fg-body); } .sh-xrow .xv b { color: var(--fg); font-weight: 600; }
+.sh-xrow .late { color: var(--accent-soft); font-weight: 600; }
+.sh-xrow.scope { background: var(--accent-tint); }
+.sh-xfoot { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; padding: 0.55rem 0.8rem; border-block-start: 1px solid var(--hairline); font-size: 0.64rem; color: var(--muted); }
+.sh-xfoot .at { color: var(--accent-soft); font-weight: 600; }
+.sh-xfoot .cost { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
+
+.sh-d { margin-block-start: 0.5rem; border: 1px solid var(--hairline-strong); background: var(--bg-soft); max-width: 560px; }
+.sh-d .dh { padding: 0.6rem 0.85rem; border-block-end: 1px solid var(--hairline); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg); }
+.sh-dgrid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.sh-dstat { padding: 0.65rem 0.4rem 0.6rem; text-align: center; border-inline-end: 1px solid var(--hairline); }
+.sh-dstat:nth-child(3n) { border-inline-end: 0; }
+.sh-dstat:nth-child(n+4) { border-block-start: 1px solid var(--hairline); }
+.sh-dstat .n { font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.sh-dstat .n.acc { color: var(--accent); } .sh-dstat .n.good { color: var(--good); }
+.sh-dstat .l { font-size: 0.52rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-block-start: 5px; line-height: 1.45; }
+.sh-dfoot { padding: 0.6rem 0.85rem; border-block-start: 1px solid var(--hairline); font-size: 0.7rem; line-height: 1.6; color: var(--muted); }
+.sh-dfoot b { color: var(--fg-dim); }
+
+.sh-replies { flex: 0 0 auto; border-block-start: 1px solid var(--hairline); padding: 0.75rem 1rem 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; background: var(--panel); }
+.sh-rl { font-size: 0.56rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+.sh-rl.hot { color: var(--accent); }
+.sh-rl::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+.sh-rrow { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.sh-qr {
+  appearance: none; cursor: pointer; text-align: left; border: 1px solid var(--hairline-strong);
+  background: var(--bg-soft); color: var(--fg); padding: 0.55rem 0.8rem; font-size: 0.74rem;
+  font-weight: 600; line-height: 1.35; transition: .16s ease; animation: sh-rise .4s ease both; max-width: 100%;
+}
+.sh-qr small { display: block; font-weight: 400; color: var(--muted); font-size: 0.66rem; margin-block-start: 2px; }
+.sh-qr:hover { border-color: var(--accent); translate: 0 -1px; }
+.sh-qr.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.sh-qr.primary small { color: color-mix(in srgb, var(--bg) 72%, transparent); }
+.sh-qr.primary:hover { background: var(--accent-hover); }
+.sh-qr:disabled { opacity: .4; cursor: default; translate: 0 0; }
+.sh-typing { display: inline-flex; gap: 4px; align-items: center; padding: 4px 2px; }
+.sh-typing i { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); animation: sh-tdot 1.1s infinite; }
+.sh-typing i:nth-child(2) { animation-delay: .18s } .sh-typing i:nth-child(3) { animation-delay: .36s }
+@keyframes sh-tdot { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+
+/* ---- right: the desk ---- */
+.sh-desk { background: var(--bg-soft); }
+.sh-clockcard { border: 1px solid var(--hairline); background: var(--panel); padding: 0.7rem 0.8rem 0.6rem; }
+.sh-day { font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.sh-clockrow { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.sh-clock { font-family: var(--font-display); font-weight: 500; font-size: 2.4rem; line-height: 1.15; color: var(--fg); font-variant-numeric: tabular-nums; }
+.sh-clock .z { font-size: 0.8rem; color: var(--muted); font-family: var(--font-sans); letter-spacing: 0.08em; }
+.sh-shiftlab { margin-inline-start: auto; text-align: right; font-size: 0.6rem; color: var(--muted); line-height: 1.5; }
+.sh-shiftlab b { color: var(--fg-dim); }
+.sh-statgrid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--hairline); }
+.sh-sstat { padding: 0.5rem 0.3rem 0.45rem; text-align: center; border-inline-end: 1px solid var(--hairline); background: var(--panel); }
+.sh-sstat:last-child { border-inline-end: 0; }
+.sh-sstat .n { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.sh-sstat .n.acc { color: var(--accent); } .sh-sstat .n.good { color: var(--good); } .sh-sstat .n.warn { color: var(--warn); }
+.sh-sstat .l { font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-block-start: 4px; }
+
+.sh-feedwrap { border: 1px solid var(--hairline); background: var(--panel); display: flex; flex-direction: column; min-height: 150px; }
+.sh-feedhead { padding: 0.5rem 0.7rem; font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border-block-end: 1px solid var(--hairline); display: flex; gap: 0.5rem; align-items: center; }
+.sh-feedhead .src { margin-inline-start: auto; letter-spacing: 0.04em; text-transform: none; font-size: 0.56rem; color: var(--muted-dim); }
+.sh-feed { font-family: var(--font-mono); font-size: 0.6rem; line-height: 1.85; color: var(--muted); padding: 0.5rem 0.7rem; overflow: auto; flex: 1; min-height: 0; white-space: pre; }
+.sh-feed .row { display: block; animation: sh-rise .3s ease both; }
+.sh-feed .id { color: var(--fg-dim); font-weight: 600; }
+.sh-feed .ok { color: var(--good); } .sh-feed .warn { color: var(--warn); }
+.sh-feed .bad { color: var(--accent-soft); font-weight: 600; } .sh-feed .dim { color: var(--muted-dim); }
+.sh-feed.ff .row { animation-duration: .12s; }
+
+.sh-brief { border: 1px solid var(--accent); background: var(--panel); animation: sh-rise .45s ease both; }
+.sh-brief .bh { padding: 0.55rem 0.7rem; border-block-end: 1px solid var(--hairline); display: flex; align-items: center; gap: 0.5rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.sh-brow { display: grid; grid-template-columns: 66px 1fr; gap: 0.5rem; padding: 0.5rem 0.7rem; border-block-end: 1px solid var(--hairline); font-size: 0.7rem; line-height: 1.55; }
+.sh-brow:last-of-type { border-block-end: 0; }
+.sh-bk { color: var(--muted); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding-block-start: 2px; }
+.sh-bv { color: var(--fg-body); } .sh-bv b { color: var(--fg); }
+.sh-bv ol { margin: 2px 0 0; padding-inline-start: 1rem; display: grid; gap: 3px; }
+.sh-bfoot { padding: 0.65rem 0.7rem; }
+.sh-callbtn { appearance: none; cursor: pointer; width: 100%; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); padding: 0.6rem 0.8rem; font-weight: 600; font-size: 0.74rem; transition: .16s ease; }
+.sh-callbtn:hover { background: var(--accent-hover); }
+.sh-callbtn:disabled { opacity: .45; cursor: default; }
+
+/* ---- dock ---- */
+.sh-dock { border: 1px solid var(--hairline-strong); border-block-start: 0; background: var(--panel); }
+.sh-dockbar { display: flex; align-items: center; gap: 0.85rem; padding: 0.55rem 0.9rem; flex-wrap: wrap; }
+.sh-logtog { appearance: none; background: none; border: 0; color: var(--fg-dim); font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.sh-logtog .ch { transition: rotate .25s ease; }
+.sh-logtog[aria-expanded="true"] .ch { rotate: 90deg; }
+.sh-logtog b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.sh-dockbar .sp { flex: 1; }
+.sh-prog { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.sh-ctrl { appearance: none; background: transparent; border: 1px solid var(--hairline-strong); color: var(--fg-dim); padding: 0.4rem 0.75rem; font-size: 0.68rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; transition: .16s ease; }
+.sh-ctrl:hover { border-color: var(--accent); color: var(--fg); }
+.sh-ctrl svg { width: 11px; height: 11px; }
+.sh-logbody { max-height: 0; overflow: auto; border-block-start: 1px solid transparent; transition: max-height .3s ease; font-family: var(--font-mono); font-size: 0.6rem; line-height: 1.9; color: var(--muted); }
+.sh-logbody.open { max-height: 168px; border-block-start-color: var(--hairline); }
+.sh-logbody .inner, .sh-logbody .empty { padding: 0.6rem 0.95rem; }
+.sh-logbody .empty { color: var(--muted-dim); }
+.sh-lg { display: block; white-space: pre-wrap; animation: sh-rise .3s ease both; }
+.sh-lg .t { color: var(--muted-dim); } .sh-lg .who { color: var(--fg-dim); font-weight: 600; }
+.sh-lg .who.you { color: var(--accent); } .sh-lg .c { color: var(--muted-dim); float: right; font-variant-numeric: tabular-nums; }
+
+/* ---- overlays ---- */
+.sh-ovl { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; padding: clamp(1rem, 3vw, 2.2rem); overflow: auto; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.sh-ovl[hidden] { display: none; }
+.sh-ovl-card { max-width: 54ch; margin: auto; }
+.sh-ovl-card h2 { font-family: var(--font-display); font-weight: 500; color: var(--fg); font-size: clamp(1.6rem, 1.2rem + 2vw, 2.5rem); line-height: 1.1; margin: 0.5rem 0 0.7rem; text-wrap: balance; }
+.sh-ovl-card h2 em { font-style: italic; color: var(--accent); }
+.sh-ovl-card p { font-size: 0.84rem; line-height: 1.65; color: var(--fg-body); margin: 0 0 0.8rem; }
+.sh-ovl-card p b { color: var(--fg); }
+.sh-go { appearance: none; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); font-weight: 600; font-size: 0.82rem; padding: 0.7rem 1.2rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: .16s ease; text-decoration: none; }
+.sh-go:hover { background: var(--accent-hover); translate: 0 -1px; }
+.sh-ghost { appearance: none; cursor: pointer; border: 1px solid var(--hairline-strong); background: transparent; color: var(--fg); font-weight: 600; font-size: 0.76rem; padding: 0.65rem 1rem; transition: .16s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem; }
+.sh-ghost:hover { border-color: var(--accent); }
+.sh-ovl-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: 1rem; }
+.sh-finstats { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-block: 0.9rem; }
+.sh-finstats span { font-size: 0.66rem; color: var(--muted); border: 1px solid var(--hairline-strong); padding: 0.4em 0.7em; }
+.sh-finstats b { color: var(--fg); font-weight: 600; }
+.sh-finstats b.hot { color: var(--accent); }
+
+@keyframes sh-rise { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+
+/* narrow channel: stack the card labels, let the prose use the width */
+@container shchan (max-width: 460px) {
+  .sh-xrow, .sh-brow { grid-template-columns: 1fr; gap: 2px; }
+  .sh-xrow .xk, .sh-bk { padding-block-start: 0; }
+  .sh-msg .bd { max-width: none; }
+  .sh-note, .sh-sys { align-self: stretch; max-width: none; }
+}
+
+/* ==== THE ARCHITECTURE SECTION =========================================== */
+.sh-arch-wrap { border: 1px solid var(--hairline); background: var(--panel); padding: clamp(1rem, 3vw, 1.6rem); margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem); }
+.sh-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-block-end: 1.1rem; }
+.sh-chip { appearance: none; cursor: pointer; border: 1px solid var(--hairline-strong); background: transparent; color: var(--fg-dim); padding: 0.42em 0.85em; font-size: 0.78rem; font-weight: 600; font-family: var(--font-sans); transition: .16s ease; }
+.sh-chip:hover { border-color: var(--accent); color: var(--fg); }
+.sh-chip[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+/* six loop steps, two even rows of three. auto-fit alone lands on 4 + 2. */
+.sh-archrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.1rem 1.4rem; }
+@media (min-width: 900px) { .sh-archrow { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 560px) and (max-width: 899px) { .sh-archrow { grid-template-columns: repeat(2, 1fr); } }
+.sh-anode .an { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg); display: flex; gap: 0.5rem; align-items: baseline; margin-block-end: 0.35rem; }
+.sh-anode .an .ai { font-family: var(--font-mono); font-size: 0.6rem; color: var(--accent); }
+.sh-anode:nth-child(5) .an { color: var(--accent); }
+.sh-anode .ag { font-size: 0.72rem; color: var(--muted); line-height: 1.5; margin-block-end: 0.5rem; }
+.sh-anode .av { font-size: 0.76rem; color: var(--fg-body); line-height: 1.55; border-block-start: 1px solid var(--hairline); padding-block-start: 0.5rem; }
+.sh-archline { margin-block-start: 1.1rem; padding-block-start: 0.9rem; border-block-start: 1px solid var(--hairline); font-size: var(--text-small); line-height: 1.6; color: var(--muted); }
+.sh-archline b { color: var(--fg-dim); }
+
+.honest-note { position: relative; max-width: var(--reading); color: var(--muted); font-size: var(--text-small); line-height: 1.6; text-wrap: pretty; margin-block: clamp(1.1rem, 2.5vw, 1.6rem) 0; padding-inline-start: 1.2rem; }
+.honest-note::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.5em; width: 8px; height: 8px; background: var(--accent); }
+
+.cta-final { text-align: center; }
+.cta-final h2 { max-width: 24ch; margin-inline: auto; }
+.cta-final .cta-sub { max-width: 56ch; margin: 0 auto clamp(1.75rem, 4vw, 2.5rem); }
+
+/* ---- responsive ---- */
+@media (max-width: 1000px) {
+  .sh-stage { grid-template-columns: 1fr; grid-template-rows: auto auto auto; height: auto; min-height: 0; }
+  .sh-col + .sh-col { border-inline-start: 0; border-block-start: 1px solid var(--hairline); }
+  .sh-chan-col { order: 1; }
+  .sh-agent { order: 2; }
+  .sh-desk { order: 3; }
+  .sh-chan { min-height: 58vh; }
+  .sh-scroll { overflow: visible; }
+  .sh-feed { max-height: 170px; }
+  .sh-ovl { position: sticky; top: 0; min-height: 62vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise, .sh-msg, .sh-note, .sh-sys, .sh-chap, .sh-tool, .sh-feed .row, .sh-lg, .sh-brief, .sh-qr { animation: none !important; }
+  .sh-chan { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="/" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/standard">Standard</a>
+      <a href="/foundation">Foundation</a>
+      <a href="/continuum">Continuum</a>
+      <a href="/about">About</a>
+      <a href="/industries" aria-current="page">Industries</a>
+      <a class="nav-cta" href="/book">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="container">
+      <p><a class="text-link" href="/industries/logistics"><span aria-hidden="true">&#8592;</span> Back to Logistics &amp; Freight</a></p>
+      <div class="kicker accent rise" style="margin-block-start: 1.4rem;">Live Demo &middot; Agent 02 &middot; Logistics</div>
+      <h1 class="rise">A shift with <em>The Exception Scout</em>.</h1>
+      <p class="lead rise">You are the dispatch manager at Meridian Freight. Forty-seven loads are on the board, and an agent has been watching them all night. Clock in and work a full day beside it: what it does, what it refuses to do, and the one decision it hands back to you.</p>
+      <div class="sh-controls rise" aria-label="How this demo works">
+        <span class="sh-control"><b>Your clicks</b> run the shift</span>
+        <span class="sh-control"><b>1 decision</b> only you can make</span>
+        <span class="sh-control"><b>3 min</b> start to finish</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- the console -->
+  <section class="section" id="run" style="padding-block-start: 0;">
+    <div class="container">
+      <div class="sh-console" id="shConsole">
+        <div class="sh-stage" role="group" aria-label="A shift with The Exception Scout, interactive">
+
+          <!-- left: the agent -->
+          <div class="sh-col sh-agent">
+            <div class="sh-head"><span class="sh-pulse"></span> <span>The agent &middot; on shift</span></div>
+            <div class="sh-scroll">
+              <div class="sh-id">
+                <span class="sh-av" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" fill="none">
+                    <g stroke="currentColor" stroke-linecap="square" stroke-width="9"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g>
+                    <circle cx="60" cy="60" r="7" fill="var(--accent)"/>
+                  </svg>
+                </span>
+                <div>
+                  <div class="sh-nm">the-exception-scout</div>
+                  <div class="sh-tg">Agent 02 &middot; watches the board</div>
+                </div>
+                <span class="sh-chip-state on" id="shState">Watching</span>
+              </div>
+
+              <div>
+                <div class="sh-cap">The loop it runs</div>
+                <div class="sh-loop" id="shLoop">
+                  <div class="sh-node">
+                    <span class="sh-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+                    <div>
+                      <div class="sh-name">Trigger</div>
+                      <div class="sh-gloss">a clock. Every 15 minutes, no human needed.</div>
+                      <div class="sh-stat" id="shLs0"></div>
+                    </div>
+                  </div>
+                  <div class="sh-node">
+                    <span class="sh-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></span>
+                    <div>
+                      <div class="sh-name">Read</div>
+                      <div class="sh-gloss">track-and-trace + the order file. Read-only.</div>
+                      <div class="sh-stat" id="shLs1"></div>
+                    </div>
+                  </div>
+                  <div class="sh-node">
+                    <span class="sh-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5z"/><path d="M12 17v4M7.5 9.5 4 7.5M16.5 9.5 20 7.5M7.5 14.5 4 16.5M16.5 14.5 20 16.5"/></svg></span>
+                    <div>
+                      <div class="sh-name">Think</div>
+                      <div class="sh-gloss">three cheap rules first. The model only on candidates.</div>
+                      <div class="sh-stat" id="shLs2"></div>
+                      <div id="shTools"></div>
+                    </div>
+                  </div>
+                  <div class="sh-node">
+                    <span class="sh-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-3.5-7.5L3 10z"/></svg></span>
+                    <div>
+                      <div class="sh-name">Act</div>
+                      <div class="sh-gloss">one post to the channel, or silence. Nothing else.</div>
+                      <div class="sh-stat" id="shLs3"></div>
+                    </div>
+                  </div>
+                  <div class="sh-node">
+                    <span class="sh-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20.5c.8-4 3.5-6 7-6s6.2 2 7 6"/></svg></span>
+                    <div>
+                      <div class="sh-name">Your call</div>
+                      <div class="sh-gloss">the judgment. Stays with a named human. You.</div>
+                      <div class="sh-stat" id="shLs4"></div>
+                    </div>
+                  </div>
+                  <div class="sh-node">
+                    <span class="sh-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9.5 13h6M9.5 16.5h6M9.5 9.5H12"/></svg></span>
+                    <div>
+                      <div class="sh-name">Log</div>
+                      <div class="sh-gloss">every read, every post, every override. On the record.</div>
+                      <div class="sh-stat" id="shLs5"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sh-pnl" aria-label="The agent's P and L">
+                <div class="sh-pnl-h">The agent's <b>P&amp;L</b> &middot; five lines, written before it touched real work</div>
+                <div class="sh-prow"><span class="k">Scope</span><span class="v">Watch every load. Post exceptions to this channel. <b>Nothing else.</b></span></div>
+                <div class="sh-prow"><span class="k">Owner</span><span class="v"><b>You.</b> Dispatch manager. One named human, not a committee.</span></div>
+                <div class="sh-prow"><span class="k">Budget</span><span class="v"><b>$5.00 a day</b>, enforced in the request path itself.
+                  <span class="sh-meter"><i id="shSpendBar"></i></span>
+                  <span class="sh-spendline"><span>spent today</span><b id="shSpendNum">$0.030</b></span>
+                </span></div>
+                <div class="sh-prow"><span class="k">Review</span><span class="v">First Friday, monthly. Judged on <b>output shipped</b>, like any hire.</span></div>
+                <div class="sh-prow"><span class="k">Trail</span><span class="v">On since day one. <button class="sh-trailbtn" id="shTrailBtn" type="button"><span id="shTrailCount">0 entries</span> today, open it</button></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- centre: the channel -->
+          <div class="sh-col sh-chan-col">
+            <div class="sh-head"><b>#load-exceptions</b> <span>&middot; the Scout posts here. Humans decide here.</span></div>
+            <div class="sh-chan" id="shChan" aria-live="polite"></div>
+            <div class="sh-replies" id="shReplies"></div>
+          </div>
+
+          <!-- right: the desk -->
+          <div class="sh-col sh-desk">
+            <div class="sh-head"><span>Your desk &middot; Meridian Freight Co.</span></div>
+            <div class="sh-scroll">
+              <div class="sh-clockcard">
+                <div class="sh-day">Wednesday &middot; dispatch desk</div>
+                <div class="sh-clockrow">
+                  <div class="sh-clock" id="shClock">06:45<span class="z"> ET</span></div>
+                  <div class="sh-shiftlab">your shift <b>06:45 to 17:00</b><br>the Scout's shift <b>always</b></div>
+                </div>
+              </div>
+              <div class="sh-statgrid" aria-label="Board status">
+                <div class="sh-sstat"><div class="n" id="shLoads">47</div><div class="l">loads</div></div>
+                <div class="sh-sstat"><div class="n good" id="shOk">47</div><div class="l">in window</div></div>
+                <div class="sh-sstat"><div class="n" id="shWatch">0</div><div class="l">watching</div></div>
+                <div class="sh-sstat"><div class="n" id="shPosted">0</div><div class="l">posted</div></div>
+              </div>
+              <div class="sh-feedwrap">
+                <div class="sh-feedhead"><span class="sh-pulse"></span> track-and-trace <span class="src">api &middot; edi &middot; eld</span></div>
+                <div class="sh-feed" id="shFeed"><span class="row dim">feed idle &middot; next tick on the clock</span></div>
+              </div>
+              <div id="shBriefMount"></div>
+            </div>
+          </div>
+
+          <!-- intro overlay -->
+          <div class="sh-ovl" id="shIntro">
+            <div class="sh-ovl-card">
+              <div class="kicker accent">Wednesday, 06:45</div>
+              <h2>The board is <em>quiet</em>. Clock in.</h2>
+              <p>You will watch three things: <b>the agent</b> and the loop it runs, <b>the channel</b> where it speaks, and <b>your desk</b> with the clock and the live board.</p>
+              <p>Fair warning: most of the day, nothing happens. That is the point.</p>
+              <div class="sh-ovl-row">
+                <button class="sh-go" id="shStart" type="button">Clock in at 06:45 <span aria-hidden="true">&#8594;</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- finale overlay -->
+          <div class="sh-ovl" id="shFinale" hidden>
+            <div class="sh-ovl-card">
+              <div class="kicker accent">Shift complete &middot; 17:00</div>
+              <h2>You worked the day. It worked the <em>loop</em>.</h2>
+              <p id="shFinaleLine">One agent watched 8,774 pings so you could make one phone call at the right moment. That is the whole trade.</p>
+              <div class="sh-finstats" id="shFinStats"></div>
+              <div class="sh-ovl-row">
+                <a class="sh-go" href="/book">Map this onto your desk <span aria-hidden="true">&#8594;</span></a>
+                <button class="sh-ghost" id="shSeeArch" type="button">See the architecture <span aria-hidden="true">&#8595;</span></button>
+                <button class="sh-ghost" id="shAgain" type="button">Run it again</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- dock -->
+        <div class="sh-dock" aria-label="Paper trail">
+          <div class="sh-dockbar">
+            <button class="sh-logtog" id="shLogTog" aria-expanded="false" aria-controls="shLogBody">
+              <svg class="ch" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Paper trail <b id="shLogCount">0 entries</b>
+            </button>
+            <span class="sp"></span>
+            <span class="sh-prog" id="shProg">Clock in to start</span>
+            <button class="sh-ctrl" id="shRestart" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg>
+              Restart
+            </button>
+          </div>
+          <div class="sh-logbody" id="shLogBody"><div class="empty">Every read, every post, every decision and every dollar lands here. The audit trail is on before the agent is.</div></div>
+        </div>
+      </div>
+
+      <p class="honest-note">Simulated freight, real anatomy. Meridian Freight is invented and the numbers are illustrative. The loop, the spend cap, the scope boundary and where the human sits are exactly how the production build is wired.</p>
+    </div>
+  </section>
+
+  <!-- the architecture -->
+  <section class="section section-rule" id="architecture" aria-labelledby="arch-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">The Architecture</div>
+        <h2 id="arch-title">One loop. <em>Any</em> industry.</h2>
+        <p class="lead">Everything in that shift was one pattern: a trigger the agent waits on, a read-only look at your systems, cheap rules before expensive thinking, one bounded action, a named human holding the judgment, and a log of all of it. Swap the feed and the post, and the same loop runs any desk we deploy.</p>
+      </div>
+      <div class="sh-arch-wrap reveal reveal-late">
+        <div class="sh-chips" id="shChips" role="tablist" aria-label="See the loop for another industry"></div>
+        <div class="sh-archrow" id="shArchRow"></div>
+        <p class="sh-archline" id="shArchLine"></p>
+      </div>
+      <p class="honest-note">Every industry above is an example build, not a case study. Which loop is worth running first on your desk is exactly what the Readiness Map answers.</p>
+      <p style="margin-block-start: clamp(1.25rem, 3vw, 1.75rem);"><a class="text-link" href="/industries/exception-scout">Prefer the engineer's cut? Open one tick, layer by layer <span aria-hidden="true">&#8594;</span></a></p>
+    </div>
+  </section>
+
+  <!-- final CTA -->
+  <section class="section inverted cta-final">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Real Numbers</div>
+        <h2>Enough simulations. Get <em>your</em> number.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead cta-sub">Every number in that shift is an estimate, because every desk is different. The Readiness Map makes it exact: your workflows, your multipliers, your first agents, with names and owners.</p>
+        <a class="btn" href="/book">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="/">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We make AI agents work inside your company, not just in a demo.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="/foundation">The Foundation</a>
+        <a href="/continuum">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="/standard">The Standard</a>
+        <a href="/about">About</a>
+        <a href="/industries">Industries</a>
+        <a href="/book">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* =====================================================================
+   A SHIFT WITH THE EXCEPTION SCOUT
+   The operator's cut: one workday, driven click by click. Every beat is
+   a function; nothing advances without a click. The architecture grid
+   below the console is static HTML the chips repaint.
+   ===================================================================== */
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
+
+  var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var S = { timers: [], raf: null, clock: 405, spend: 0.03, logs: 0, path: null, fast: REDUCE };
+
+  function after(ms, fn) { var id = setTimeout(fn, S.fast ? Math.min(ms, 40) : ms); S.timers.push(id); return id; }
+  function seq(steps) { var t = 0; steps.forEach(function (s) { t += s[0]; after(t, s[1]); }); return t; }
+  function clearTimers() { S.timers.forEach(clearTimeout); S.timers = []; if (S.raf) cancelAnimationFrame(S.raf); }
+
+  /* ---------- clock ---------- */
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function fmtClock(min) { return pad(Math.floor(min / 60) % 24) + ":" + pad(min % 60); }
+  function setClock(min) { S.clock = min; $("#shClock").innerHTML = fmtClock(min) + '<span class="z"> ET</span>'; }
+  /* The animated sweep is decoration. A hidden tab suspends rAF entirely, so a
+     timer guard always lands the clock and runs the callback: the shift can
+     never stall because someone looked away mid-beat. */
+  function spinClock(to, dur, done) {
+    if (S.fast) { setClock(to); if (done) done(); return; }
+    var from = S.clock, start = performance.now(), landed = false;
+    if (S.raf) cancelAnimationFrame(S.raf);
+    function land() {
+      if (landed) return;
+      landed = true;
+      if (S.raf) { cancelAnimationFrame(S.raf); S.raf = null; }
+      setClock(to);
+      if (done) done();
+    }
+    var step = function (now) {
+      if (landed) return;
+      var p = Math.min(1, (now - start) / dur), e = 1 - Math.pow(1 - p, 3);
+      setClock(Math.round(from + (to - from) * e));
+      if (p < 1) { S.raf = requestAnimationFrame(step); } else { land(); }
+    };
+    S.raf = requestAnimationFrame(step);
+    after(dur + 400, land);
+  }
+
+  /* ---------- spend + paper trail ---------- */
+  function money(v) { return "$" + v.toFixed(v < 0.1 ? 3 : 2); }
+  function addSpend(v) {
+    S.spend += v;
+    $("#shSpendNum").textContent = money(S.spend);
+    $("#shSpendBar").style.width = Math.max(1.5, (S.spend / 5) * 100) + "%";
+  }
+  function log(actor, action, cost) {
+    var body = $("#shLogBody");
+    if (!body.dataset.init) { body.innerHTML = '<div class="inner"></div>'; body.dataset.init = "1"; }
+    var inner = body.querySelector(".inner");
+    inner.appendChild(el("span", "sh-lg",
+      '<span class="t">' + fmtClock(S.clock) + '</span>  <span class="who' + (actor === "you" ? " you" : "") + '">' +
+      (actor === "you" ? "you" : "scout") + '</span>  ' + action +
+      (cost != null ? '<span class="c">' + (cost === 0 ? "$0" : "$" + cost.toFixed(3)) + '</span>' : "")));
+    S.logs++;
+    var label = S.logs + (S.logs === 1 ? " entry" : " entries");
+    $("#shLogCount").textContent = label;
+    $("#shTrailCount").textContent = label;
+    body.scrollTop = body.scrollHeight;
+  }
+
+  /* ---------- channel ---------- */
+  function scrollChan() { var c = $("#shChan"); c.scrollTop = c.scrollHeight; }
+  function sys(html) { $("#shChan").appendChild(el("div", "sh-sys", html)); scrollChan(); }
+  function note(html) { $("#shChan").appendChild(el("div", "sh-note", html)); scrollChan(); }
+  function chap(html) { $("#shChan").appendChild(el("div", "sh-chap", html)); scrollChan(); }
+  var MARK = '<svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-linecap="square" stroke-width="9"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g><circle cx="60" cy="60" r="7" fill="var(--accent)"/></svg>';
+  function msg(who, html) {
+    var you = who === "you";
+    var m = el("div", "sh-msg" + (you ? " you" : ""));
+    m.innerHTML = '<span class="av">' + (you ? "JD" : MARK) + '</span>' +
+      '<div><div class="hd"><span class="who">' + (you ? "Jordan Doyle" : "the-exception-scout") +
+      (you ? "" : '<span class="app">agent</span>') + '</span><span class="ts">' + fmtClock(S.clock) + '</span></div>' +
+      '<div class="bd">' + html + '</div></div>';
+    $("#shChan").appendChild(m); scrollChan(); return m;
+  }
+  function typingThen(ms, fn) {
+    var t = el("div", "sh-msg");
+    t.innerHTML = '<span class="av">' + MARK + '</span><div><div class="hd"><span class="who">the-exception-scout<span class="app">agent</span></span></div><div class="sh-typing"><i></i><i></i><i></i></div></div>';
+    $("#shChan").appendChild(t); scrollChan();
+    after(S.fast ? 60 : ms, function () { t.remove(); fn(); });
+  }
+
+  /* ---------- replies ---------- */
+  function replies(label, items, hot) {
+    var r = $("#shReplies"); r.innerHTML = "";
+    if (label) r.appendChild(el("div", "sh-rl" + (hot ? " hot" : ""), label));
+    var row = el("div", "sh-rrow");
+    items.forEach(function (it, i) {
+      var b = el("button", "sh-qr" + (it.primary ? " primary" : ""), it.label + (it.sub ? "<small>" + it.sub + "</small>" : ""));
+      b.type = "button"; b.style.animationDelay = (i * 70) + "ms";
+      b.addEventListener("click", function () {
+        Array.prototype.forEach.call(row.children, function (x) { x.disabled = true; });
+        r.innerHTML = ""; it.go();
+      });
+      row.appendChild(b);
+    });
+    r.appendChild(row); scrollChan();
+  }
+
+  /* ---------- agent panel ---------- */
+  var NODES = Array.prototype.slice.call(document.querySelectorAll(".sh-node"));
+  function setState(txt, cls) { var c = $("#shState"); c.textContent = txt; c.className = "sh-chip-state " + cls; }
+  function loopReset() {
+    NODES.forEach(function (n) { n.className = "sh-node"; });
+    for (var i = 0; i < 6; i++) $("#shLs" + i).innerHTML = "";
+    $("#shTools").innerHTML = "";
+  }
+  function nodeSet(i, cls, stat) {
+    NODES[i].className = "sh-node " + (cls || "");
+    if (stat != null) $("#shLs" + i).innerHTML = stat;
+  }
+  function tool(html) { $("#shTools").appendChild(el("div", "sh-tool", html)); }
+
+  /* ---------- desk ---------- */
+  function stats(o) {
+    if (o.ok != null) { $("#shOk").textContent = o.ok; $("#shOk").className = "n " + (o.ok < 47 ? "warn" : "good"); }
+    if (o.watch != null) { $("#shWatch").textContent = o.watch; $("#shWatch").className = "n " + (o.watch > 0 ? "warn" : ""); }
+    if (o.posted != null) { $("#shPosted").textContent = o.posted; $("#shPosted").className = "n " + (o.posted > 0 ? "acc" : ""); }
+  }
+  function feedRows(rows, ff) {
+    var f = $("#shFeed"); f.className = "sh-feed" + (ff ? " ff" : ""); f.innerHTML = "";
+    rows.forEach(function (r, i) { var s = el("span", "row", r); s.style.animationDelay = (i * (ff ? 30 : 90)) + "ms"; f.appendChild(s); });
+    f.scrollTop = 0;
+  }
+  function feedOk(t) {
+    return [
+      '<span class="id">LD-2214</span>  LAX &#8594; PHX   61 mph  <span class="ok">in window</span>',
+      '<span class="id">LD-5120</span>  SEA &#8594; PDX   54 mph  <span class="ok">in window</span>',
+      '<span class="id">LD-4417</span>  ELG &#8594; CMH   ' + t,
+      '<span class="id">LD-1893</span>  DFW &#8594; OKC   58 mph  <span class="ok">in window</span>',
+      '<span class="id">LD-3117</span>  GRY &#8594; CLE   62 mph  <span class="ok">recovered</span>',
+      '<span class="id">LD-4917</span>  DAV &#8594; MSP   at pickup  <span class="ok">on plan</span>',
+      '<span class="id">LD-2731</span>  IND &#8594; DEN   arrived  <span class="dim">delivered</span>',
+      '<span class="dim">&#8230;40 more &middot; 214 events this tick</span>'
+    ];
+  }
+
+  /* =====================================================================
+     THE SHIFT
+     ===================================================================== */
+  function quietTick(no, opts, done) {
+    var u = opts.fast ? 0.55 : 1;
+    setState("Tick running", "busy"); loopReset();
+    seq([
+      [100, function () { nodeSet(0, "run", "fired on the clock &middot; tick #" + no); }],
+      [420 * u, function () { nodeSet(0, "ok"); nodeSet(1, "run", "<b>47 loads</b> &middot; 214 pings &middot; 1.9s"); feedRows(feedOk('64 mph  <span class="ok">in window</span>')); }],
+      [620 * u, function () { nodeSet(1, "ok"); nodeSet(2, "run", "3 rules &middot; <b>0 candidates</b> &middot; model not needed"); }],
+      [520 * u, function () { nodeSet(2, "ok"); nodeSet(3, "ok", "held. <b>Nothing worth posting.</b>"); nodeSet(4, "skip", "not needed this tick"); }],
+      [420 * u, function () { nodeSet(5, "ok", "+1 entry"); log("scout", "tick #" + no + " &middot; 47 loads read &middot; 0 candidates &middot; held", 0.001); addSpend(0.001); }],
+      [500 * u, function () { setState("Watching", "on"); if (done) done(); }]
+    ]);
+  }
+
+  function clockIn() {
+    $("#shIntro").hidden = true;
+    $("#shConsole").classList.add("live");
+    $("#shProg").textContent = "06:45 &middot; on shift";
+    sys("Wednesday &middot; 06:45 &middot; you clocked in");
+    after(400, function () { chap("Part one &middot; The quiet part"); });
+    after(900, function () {
+      typingThen(900, function () {
+        msg("scout",
+          "<p>Morning. <b>Overnight report:</b> I ran the board 39 times since 21:00, one full pass every 15 minutes. Each pass is a <b>tick</b>. 47 loads read per tick, <b>zero exceptions posted</b>.</p>" +
+          "<p>One wobble: LD-3117 fell 21 minutes behind near Gary at 04:12 and recovered on its own by 04:42. I logged it and let it ride. Everything is inside its window.</p>");
+        log("scout", "overnight digest &middot; 39 ticks &middot; 9,366 pings read &middot; 0 posts", 0.031);
+        after(900, function () {
+          note("It watched all night so nobody had to. Nothing was worth waking a human, <b>so it didn't.</b> That silence is a feature you pay for once and keep.");
+          after(700, function () {
+            replies("Work the morning with it", [
+              { label: "Watch the 06:57 tick run", sub: "one pass of the loop, live on the agent panel", primary: true, go: beatTick1 }
+            ]);
+          });
+        });
+      });
+    });
+  }
+
+  function beatTick1() {
+    $("#shProg").textContent = "06:57 · tick #2,881";
+    note("Eyes on <b>the agent panel</b>. Six steps light up, top to bottom: trigger, read, think, act, your call, log. That loop is the whole worker.");
+    after(1400, function () {
+      setClock(417);
+      quietTick("2,881", {}, function () {
+        sys("06:57 &middot; tick #2,881 ran &middot; the channel stayed silent");
+        after(500, function () {
+          note("<b>No post.</b> Forty-seven loads checked, nothing worth your attention, so it said nothing. A channel that only speaks when it matters is the whole product.");
+          after(600, function () {
+            replies(null, [{ label: "Run the 07:12 tick", sub: "most ticks end exactly like this", primary: true, go: beatTick2 }]);
+          });
+        });
+      });
+    });
+  }
+
+  function beatTick2() {
+    $("#shProg").textContent = "07:12 · tick #2,882";
+    setClock(432);
+    quietTick("2,882", { fast: true }, function () {
+      after(300, function () {
+        note("Same again. On a normal day it runs <b>96 of these</b> and posts maybe twice. Watching is the job. You hired it so a human never has to do this part again.");
+        after(600, function () {
+          replies("You have your own desk to run", [
+            { label: "Fast-forward the quiet part", sub: "07:12 to 09:12 &middot; you work, it ticks", primary: true, go: fastForward1 }
+          ]);
+        });
+      });
+    });
+  }
+
+  function fastForward1() {
+    $("#shProg").textContent = "07:12 to 09:12 · seven ticks";
+    setState("Watching", "on");
+    sys("07:27 to 08:57 &middot; seven more ticks &middot; nothing posted");
+    feedRows([
+      '<span class="dim">tick #2,883 &middot; 07:27 &middot; 47 loads &middot; clear</span>',
+      '<span class="dim">tick #2,884 &middot; 07:42 &middot; 47 loads &middot; clear</span>',
+      '<span class="dim">tick #2,885 &middot; 07:57 &middot; 47 loads &middot; clear</span>',
+      '<span class="dim">tick #2,886 &middot; 08:12 &middot; 46 loads &middot; 1 delivered</span>',
+      '<span class="dim">tick #2,887 &middot; 08:27 &middot; 47 loads &middot; 1 new pickup</span>',
+      '<span class="dim">tick #2,888 &middot; 08:42 &middot; 47 loads &middot; clear</span>',
+      '<span class="dim">tick #2,889 &middot; 08:57 &middot; 47 loads &middot; clear</span>'
+    ], true);
+    log("scout", "ticks #2,883 to #2,889 &middot; 7 runs &middot; 0 candidates &middot; 0 posts", 0.007);
+    addSpend(0.007);
+    spinClock(552, 2100, function () {
+      note("You answered email. Rated a carrier. Argued about a lumper fee. The Scout ran seven loops behind you and spent <b>seven tenths of a cent</b>.");
+      after(1100, beatTrigger);
+    });
+  }
+
+  function beatTrigger() {
+    $("#shProg").textContent = "09:12 · tick #2,890";
+    chap("Part two &middot; The trigger");
+    sys("09:12 &middot; tick #2,890 &middot; <b>you did not run this one. The clock did.</b>");
+    setState("Tick running", "busy"); loopReset();
+    seq([
+      [200, function () { nodeSet(0, "run", "fired on the clock &middot; tick #2,890"); }],
+      [500, function () {
+        nodeSet(0, "ok"); nodeSet(1, "run", "<b>47 loads</b> &middot; 209 pings &middot; 2.1s");
+        feedRows(feedOk('<span class="bad">0 mph &middot; dwell 52m &middot; Whitestown, IN</span>'));
+      }],
+      [750, function () {
+        nodeSet(1, "ok"); nodeSet(2, "amber", "<span class='w'>1 candidate past the rules:</span> <b>LD-4417</b> &middot; dwell 52m");
+        setState("Investigating", "busy"); stats({ ok: 46, watch: 1 });
+      }],
+      [700, function () { tool('<b>orders.lookup</b> <span class="r">window 14:00 to 16:00 ET &middot; Bexley DC 12</span>'); }],
+      [700, function () { tool('<b>eta.project</b> <span class="r">4h 58m left + break due &middot; ETA 17:36</span>'); }],
+      [700, function () { tool('<b>traffic.check</b> <span class="r">I-70 E incident &middot; +20m</span>'); }],
+      [700, function () { tool('<b>post.draft</b> <span class="r">confidence 84% &middot; in scope</span>'); }],
+      [600, function () { nodeSet(2, "ok"); nodeSet(3, "hot", "<span class='a'><b>one post</b> &#8594; #load-exceptions</span>"); }],
+      [500, postException]
+    ]);
+  }
+
+  function postException() {
+    stats({ posted: 1 });
+    setState("Waiting on you", "wait");
+    nodeSet(4, "wait", "<span class='a'>waiting on a human</span>");
+    nodeSet(5, "ok", "+2 entries");
+    log("scout", "read orders + eta + traffic for LD-4417", 0.028);
+    log("scout", "posted exception LD-4417 to #load-exceptions", 0.013);
+    addSpend(0.041);
+    msg("scout",
+      '<p><b>Heads-up, one load is going to miss.</b> Everything I know, and everything I prepped, is below. The call is yours.</p>' +
+      '<div class="sh-x">' +
+        '<div class="xh"><span class="flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v11M12 18.5v.5"/><path d="M12 3 5 21h14L12 3z" stroke-linejoin="round"/></svg></span>Exception &middot; LD-4417 &middot; Elgin, IL to Columbus, OH<span class="conf">confidence 84%</span></div>' +
+        '<div class="sh-xrow"><span class="xk">Carrier</span><span class="xv"><b>Redline Haulage</b> &middot; dry van &middot; ELD tracking live</span></div>' +
+        '<div class="sh-xrow"><span class="xk">Promised</span><span class="xv">today <b>14:00 to 16:00 ET</b> &middot; Bexley Foods DC 12 &middot; PO BX-88213</span></div>' +
+        '<div class="sh-xrow"><span class="xk">Projected</span><span class="xv"><span class="late">17:36 ET, about 96 minutes past the window</span></span></div>' +
+        '<div class="sh-xrow"><span class="xk">Why</span><span class="xv">52 minute dwell at Whitestown, a mandatory break coming due, and an I-70 incident adding 20 more.</span></div>' +
+        '<div class="sh-xrow"><span class="xk">Prepped</span><span class="xv">Receiving contact <b>Dana Okafor, ext 4102</b>, a drafted heads-up note, and tomorrow&#8217;s <b>08:00 dock slot</b> held open as the fallback.</span></div>' +
+        '<div class="sh-xrow scope"><span class="xk">Not done</span><span class="xv">I did not call the customer, rebook the carrier, or promise a new time. <b>Out of my scope. In yours.</b></span></div>' +
+        '<div class="sh-xfoot"><span class="at">@dispatch</span> your call.<span class="cost">this investigation cost $0.041</span></div>' +
+      '</div>');
+    after(700, function () { chap("Part three &middot; Your call"); });
+    after(1100, function () {
+      replies("The one decision only you can make", [
+        { label: "Call Bexley now, before they notice", sub: "the Scout already prepped the call", primary: true, go: forkCall },
+        { label: "Tell it to watch 20 more minutes", sub: "maybe the driver makes up time", go: forkWatch },
+        { label: "Dismiss it", sub: "Bexley&#8217;s windows are soft anyway", go: forkDismiss }
+      ], true);
+    });
+  }
+
+  function forkCall() {
+    S.path = S.path || "call";
+    $("#shProg").textContent = "09:14 · your move";
+    setClock(554);
+    log("you", "decision: call the customer, ahead of the miss", 0);
+    msg("you", "Taking it. Calling Bexley receiving now.");
+    after(600, function () {
+      $("#shBriefMount").innerHTML =
+        '<div class="sh-brief">' +
+          '<div class="bh"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" stroke-linejoin="round"/></svg> Call brief &middot; prepped at 09:12</div>' +
+          '<div class="sh-brow"><span class="sh-bk">Who</span><span class="sh-bv"><b>Dana Okafor</b> &middot; Bexley Foods DC 12 receiving &middot; ext 4102</span></div>' +
+          '<div class="sh-brow"><span class="sh-bk">Order</span><span class="sh-bv">PO BX-88213 &middot; LD-4417 &middot; Elgin to Columbus</span></div>' +
+          '<div class="sh-brow"><span class="sh-bk">Say</span><span class="sh-bv"><ol><li>Your 14:00 to 16:00 truck lands near 17:36.</li><li>Driver dwell plus an I-70 incident. Tracked live, not a guess.</li><li>Offer: deliver tonight at 17:36, or your open <b>08:00 dock tomorrow</b>.</li></ol></span></div>' +
+          '<div class="sh-bfoot"><button class="sh-callbtn" id="shMadeCall" type="button">You made the call &middot; it took 90 seconds</button></div>' +
+        '</div>';
+      $("#shMadeCall").addEventListener("click", function () {
+        $("#shMadeCall").disabled = true;
+        setClock(556);
+        log("you", "called Bexley receiving &middot; moved to 08:00 tomorrow", 0);
+        msg("you", "Done. Dana moved us to the 08:00 dock tomorrow. She <b>thanked us</b> for the heads-up.");
+        after(700, function () {
+          typingThen(800, function () {
+            msg("scout", "Logged. I set LD-4417 to the new window, told the carrier to stage 20 minutes out tonight, on your approval, and I will watch it in tomorrow. Back to the board.");
+            log("scout", "LD-4417 rescheduled &middot; watch set on new window", 0.002);
+            addSpend(0.002);
+            after(800, function () {
+              note("Play that back. The agent caught it at 09:12, <b>five hours before the miss</b>. You spent 90 seconds and came out ahead. The customer heard it from you, not from an empty dock at 16:10.");
+              nodeSet(4, "ok", "you called it at 09:14");
+              setState("Watching", "on");
+              stats({ ok: 47, watch: 1 });
+              after(800, function () {
+                replies(null, [{ label: "Run the afternoon", sub: "back to quiet, mostly", primary: true, go: beatHold }]);
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+
+  function forkWatch() {
+    S.path = "watch";
+    $("#shProg").textContent = "09:14 · watching it";
+    setClock(554);
+    log("you", "decision: hold 20 minutes, re-check", 0);
+    msg("you", "Hold it. Watch 20 more minutes, the driver might make it up.");
+    after(600, function () {
+      typingThen(700, function () {
+        msg("scout", "Holding. Re-check at 09:32. If it is still trending late I will repost with fresh numbers.");
+        log("scout", "watch timer set &middot; re-check 09:32", 0);
+        after(900, function () {
+          spinClock(572, 1300, function () {
+            $("#shProg").textContent = "09:32 · re-check";
+            loopReset(); setState("Investigating", "busy");
+            nodeSet(0, "ok", "re-check timer, not the 15m clock");
+            nodeSet(1, "ok", "LD-4417 only");
+            nodeSet(2, "amber", "dwell ended 09:26 &middot; still projecting late");
+            tool('<b>eta.project</b> re-run &middot; <span class="r">ETA 17:41 &middot; confidence 91%</span>');
+            log("scout", "re-checked LD-4417 &middot; still late &middot; confidence 91%", 0.012);
+            addSpend(0.012);
+            after(1000, function () {
+              setState("Waiting on you", "wait"); nodeSet(4, "wait", "<span class='a'>still yours</span>");
+              msg("scout", "Re-check: the driver is rolling again since 09:26, but with the break due and the incident still live the math got <b>worse</b>, not better. <b>ETA 17:41, confidence 91%.</b> This one is real.");
+              after(800, function () {
+                note("Twenty minutes bought <b>certainty</b>, not recovery. That is what a re-check is for. The judgment is still yours. It always was.");
+                after(700, function () {
+                  replies("Same decision, better information", [
+                    { label: "Call Bexley now", sub: "five hours of warning is still five hours", primary: true, go: forkCall },
+                    { label: "Dismiss it", sub: "still think the window flexes", go: forkDismiss }
+                  ], true);
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+
+  function forkDismiss() {
+    S.path = "dismiss";
+    $("#shProg").textContent = "09:15 · overridden";
+    setClock(Math.max(S.clock, 555));
+    log("you", "override: dismissed LD-4417 exception &middot; reason on file", 0);
+    msg("you", "Dismissing. Bexley&#8217;s windows are soft, they flex an hour all the time.");
+    after(700, function () {
+      typingThen(800, function () {
+        msg("scout", "Logged as an <b>override</b> with your reason attached. I will keep watching it quietly and stay out of your channel unless the picture changes hard. Overrides come up at the first Friday review. Mine and yours.");
+        log("scout", "override recorded &middot; silent watch continues", 0);
+        after(900, function () {
+          note("The agent did not argue. It <b>recorded</b>. Bounded autonomy means the human can be wrong out loud, on the record, and the system learns from whichever of you was right.");
+          nodeSet(4, "ok", "overridden at " + fmtClock(S.clock));
+          setState("Watching", "on");
+          after(900, function () {
+            replies(null, [{ label: "Run the afternoon", sub: "back to quiet, mostly", primary: true, go: beatHold }]);
+          });
+        });
+      });
+    });
+  }
+
+  function beatHold() {
+    $("#shProg").textContent = "to 11:27 · two quiet ticks";
+    setState("Watching", "on"); loopReset();
+    sys(fmtClock(S.clock) + " to 11:12 &middot; quiet ticks &middot; nothing posted");
+    log("scout", "ticks to 11:12 &middot; 0 candidates &middot; 0 posts", 0.008);
+    addSpend(0.008);
+    spinClock(687, 1600, function () {
+      $("#shProg").textContent = "11:27 · tick #2,899";
+      setState("Tick running", "busy");
+      seq([
+        [150, function () { nodeSet(0, "run", "fired on the clock &middot; tick #2,899"); }],
+        [450, function () { nodeSet(0, "ok"); nodeSet(1, "run", "<b>47 loads</b> &middot; 212 pings"); feedRows(feedOk('67 mph  <span class="ok">rolling again</span>')); }],
+        [650, function () { nodeSet(1, "ok"); nodeSet(2, "amber", "<span class='w'>1 candidate:</span> <b>LD-3391</b> &middot; LOU &#8594; BNA &middot; 24m behind"); }],
+        [800, function () { tool('<b>eta.project</b> <span class="r">24m behind &middot; 45m buffer &middot; 71% on-time</span>'); }],
+        [700, function () {
+          nodeSet(2, "ok"); nodeSet(3, "ok", "<b>held.</b> Inside tolerance. No post.");
+          nodeSet(4, "skip", "not needed"); nodeSet(5, "ok", "+1 entry");
+          log("scout", "tick #2,899 &middot; LD-3391 inside tolerance &middot; held", 0.019); addSpend(0.019);
+        }],
+        [700, function () {
+          setState("Watching", "on");
+          sys("11:27 &middot; tick #2,899 &middot; one candidate checked &middot; <b>held</b>");
+          note("It found something and <b>said nothing</b>, because 24 minutes inside a 45 minute buffer is not an exception, it is Tuesday. An agent that cries wolf gets muted by Friday. Restraint is what makes this channel worth trusting.");
+          after(900, function () {
+            replies(null, [{ label: "Fast-forward to clock-out", sub: "the rest of the shift", primary: true, go: fastForward2 }]);
+          });
+        }]
+      ]);
+    });
+  }
+
+  function fastForward2() {
+    $("#shProg").textContent = "to 17:00 · the quiet part";
+    sys("11:42 onward &middot; quiet ticks &middot; you ran your desk");
+    feedRows([
+      '<span class="dim">tick #2,900 &middot; 11:42 &middot; clear</span>',
+      '<span class="dim">tick #2,903 &middot; 12:27 &middot; clear</span>',
+      '<span class="dim">tick #2,907 &middot; 13:27 &middot; 2 delivered</span>',
+      '<span class="dim">tick #2,911 &middot; 14:27 &middot; clear</span>',
+      '<span class="dim">tick #2,915 &middot; 15:27 &middot; 3 new pickups</span>',
+      '<span class="dim">tick #2,919 &middot; 16:27 &middot; clear</span>'
+    ], true);
+    log("scout", "ticks #2,900 to #2,921 &middot; 22 runs &middot; 0 posts", 0.022);
+    addSpend(0.022);
+    if (S.path === "dismiss") {
+      spinClock(1001, 2100, function () {
+        $("#shProg").textContent = "16:41 · the callback";
+        sys("16:41 &middot; <b>Bexley receiving called the desk</b>");
+        after(400, function () {
+          msg("you", "Bexley called. The dock crew stood around from 16:00. They heard about the late truck <b>from their own floor</b>, not from us.");
+          log("you", "inbound complaint &middot; Bexley DC 12 &middot; missed window, no warning", 0);
+          after(900, function () {
+            note("Sometimes the override is right. <b>This time it wasn't.</b> The Scout logged the 09:12 catch and the 09:15 dismissal, so Friday&#8217;s review is a conversation about facts, not memories. Judgment is a muscle. The paper trail is how it trains.");
+            after(900, function () {
+              replies(null, [{ label: "Finish the shift", sub: "17:00 is close", primary: true, go: function () { spinClock(1020, 900, clockOut); } }]);
+            });
+          });
+        });
+      });
+    } else {
+      spinClock(962, 1800, function () {
+        sys("16:02 &middot; LD-4417 staged outside Columbus &middot; tomorrow 08:00 confirmed");
+        log("scout", "LD-4417 staged &middot; new window on track", 0.001);
+        addSpend(0.001);
+        after(700, function () { spinClock(1020, 900, clockOut); });
+      });
+    }
+  }
+
+  function clockOut() {
+    $("#shProg").textContent = "17:00 · clocking out";
+    setClock(1020);
+    sys("17:00 &middot; you clocked out");
+    chap("Part four &middot; The record");
+    var dismiss = S.path === "dismiss";
+    after(600, function () {
+      typingThen(900, function () {
+        msg("scout",
+          "<p>Your shift, on the record:</p>" +
+          '<div class="sh-d">' +
+            '<div class="dh">Shift digest &middot; Wednesday 06:45 to 17:00</div>' +
+            '<div class="sh-dgrid">' +
+              '<div class="sh-dstat"><div class="n">41</div><div class="l">ticks run</div></div>' +
+              '<div class="sh-dstat"><div class="n">8,774</div><div class="l">pings read</div></div>' +
+              '<div class="sh-dstat"><div class="n">2</div><div class="l">candidates</div></div>' +
+              '<div class="sh-dstat"><div class="n acc">1</div><div class="l">exception posted</div></div>' +
+              '<div class="sh-dstat"><div class="n">1</div><div class="l">held, no noise</div></div>' +
+              (dismiss
+                ? '<div class="sh-dstat"><div class="n acc">1</div><div class="l">customer surprised</div></div>'
+                : '<div class="sh-dstat"><div class="n good">0</div><div class="l">customers surprised</div></div>') +
+            '</div>' +
+            '<div class="sh-dfoot">Spend today <b>' + money(S.spend) + '</b> against the <b>$5.00 cap</b>, enforced in the request path, not on a dashboard. I do not clock out. Tick #2,922 runs at 17:12.</div>' +
+          '</div>');
+        log("scout", "shift digest delivered", 0.002);
+        addSpend(0.002);
+        after(1000, function () {
+          note("First Friday of the month, this agent gets a <b>performance review</b> like any hire. Output shipped, overrides, spend against cap. If it stops earning the seat, you retire it. That is what owning an agent means.");
+          after(900, function () {
+            replies("One more thing", [
+              { label: "See what you just drove", sub: "the same loop, mapped onto five other industries", primary: true, go: showFinale }
+            ]);
+          });
+        });
+      });
+    });
+  }
+
+  function showFinale() {
+    $("#shReplies").innerHTML = "";
+    $("#shProg").textContent = "Shift complete";
+    var dismiss = S.path === "dismiss";
+    $("#shFinaleLine").innerHTML = dismiss
+      ? "One agent read 8,774 pings, caught the miss five hours early, and logged your override when you waved it off. Both of those facts are on the record for Friday."
+      : "One agent read 8,774 pings so you could make one phone call at the right moment, five hours before the customer would have noticed. That is the whole trade.";
+    $("#shFinStats").innerHTML =
+      '<span>ticks run <b>41</b></span>' +
+      '<span>pings read <b>8,774</b></span>' +
+      '<span>posts <b>1</b></span>' +
+      '<span>your decisions <b class="hot">1</b></span>' +
+      '<span>spend <b>' + money(S.spend) + '</b> of $5.00</span>';
+    $("#shFinale").hidden = false;
+  }
+
+  /* =====================================================================
+     THE ARCHITECTURE (static section, chips repaint it)
+     ===================================================================== */
+  var GENERIC = [
+    { n: "Trigger", g: "what wakes it. A clock, a webhook, an inbox. Never a human babysitter." },
+    { n: "Read", g: "your systems, read-only. It looks before it ever touches." },
+    { n: "Think", g: "cheap rules first, the model only on real candidates. Cost lives here." },
+    { n: "Act", g: "one bounded move inside a written scope. Post, draft, chase. Never beyond." },
+    { n: "Human", g: "the judgment call, held by one named owner. The gate, not the bottleneck." },
+    { n: "Log", g: "every step on the record from day one. Reviews run on facts." }
+  ];
+  var INDUSTRIES = [
+    { name: "Logistics", label: "Logistics &middot; this shift",
+      line: "The Exception Scout, the shift above: it watched 47 loads all day and asked for one decision.",
+      map: ["a clock, every 15 minutes", "track-and-trace pings and the order file", "dwell, drift and dark-load rules, then the model on 1 or 2 candidates", "one exception post with the fix prepped", "you called Bexley at 09:14", "8,774 pings, 2 decisions, every dollar"] },
+    { name: "Manufacturing", label: "Manufacturing",
+      line: "The Down-line Scout: machine telemetry in, one stoppage post out, and the supervisor walks the floor knowing why.",
+      map: ["the machine event stream", "line telemetry and the shift plan", "rate-drop rules, then the model on the anomaly", "posts the stoppage with the likely cause", "the supervisor walks the line", "every event, every catch, every miss"] },
+    { name: "E-commerce", label: "E-commerce",
+      line: "The Stuck-order Scout: it reads every order flow hourly and hands you the ones that stopped moving, apology drafted.",
+      map: ["every hour, on the hour", "orders, inventory and carrier scans", "stalled-flow rules, then the model on the weird ones", "posts stuck orders, drafts the apology and the reship", "you approve the reship spend", "every order touched, every refund reasoned"] },
+    { name: "SaaS", label: "SaaS",
+      line: "The Churn-signal Scout: a nightly read of product usage, one at-risk list, and your CSM makes the save call.",
+      map: ["nightly, after the usage rollup", "product events and the CRM", "usage-cliff rules, then the model on real drops", "posts at-risk accounts with a drafted save note", "the CSM makes the call", "every signal scored, every save tracked"] },
+    { name: "Finance ops", label: "Finance ops",
+      line: "The Variance Scout: every invoice against every contract, disputes drafted, and the controller signs.",
+      map: ["an invoice arriving", "the invoice and the contracted rates", "tolerance rules, then the model on variances", "flags the variance, drafts the dispute", "the controller signs the dispute", "every line item checked, every dollar traced"] },
+    { name: "Field services", label: "Field services",
+      line: "The Overrun Scout: jobs, GPS and parts in, one about-to-blow-the-window post out, and the dispatcher re-routes.",
+      map: ["job status pings through the day", "the schedule, tech GPS and parts stock", "overrun-risk rules, then the model on the tight ones", "posts jobs about to miss, with options", "the dispatcher re-routes", "every job, every slip, every save"] }
+  ];
+  function paintArch(i) {
+    var ind = INDUSTRIES[i], row = $("#shArchRow");
+    row.innerHTML = "";
+    GENERIC.forEach(function (g, k) {
+      row.appendChild(el("div", "sh-anode",
+        '<div class="an"><span class="ai">0' + (k + 1) + '</span>' + g.n + '</div>' +
+        '<div class="ag">' + g.g + '</div><div class="av">' + ind.map[k] + '</div>'));
+    });
+    $("#shArchLine").innerHTML = "<b>" + ind.name + ":</b> " + ind.line;
+  }
+  (function buildChips() {
+    var chips = $("#shChips");
+    INDUSTRIES.forEach(function (ind, i) {
+      var c = el("button", "sh-chip", ind.label);
+      c.type = "button"; c.setAttribute("role", "tab");
+      c.setAttribute("aria-selected", i === 0 ? "true" : "false");
+      c.addEventListener("click", function () {
+        Array.prototype.forEach.call(chips.children, function (x) { x.setAttribute("aria-selected", "false"); });
+        c.setAttribute("aria-selected", "true");
+        paintArch(i);
+      });
+      chips.appendChild(c);
+    });
+    paintArch(0);
+  })();
+
+  /* =====================================================================
+     CONTROLS
+     ===================================================================== */
+  function resetShift() {
+    clearTimers();
+    S.clock = 405; S.spend = 0.03; S.logs = 0; S.path = null;
+    setClock(405);
+    $("#shSpendNum").textContent = money(0.03);
+    $("#shSpendBar").style.width = "1.5%";
+    $("#shLogCount").textContent = "0 entries";
+    $("#shTrailCount").textContent = "0 entries";
+    var body = $("#shLogBody");
+    body.dataset.init = ""; body.classList.remove("open");
+    body.innerHTML = '<div class="empty">Every read, every post, every decision and every dollar lands here. The audit trail is on before the agent is.</div>';
+    $("#shLogTog").setAttribute("aria-expanded", "false");
+    $("#shChan").innerHTML = ""; $("#shReplies").innerHTML = ""; $("#shBriefMount").innerHTML = "";
+    $("#shFeed").className = "sh-feed";
+    $("#shFeed").innerHTML = '<span class="row dim">feed idle &middot; next tick on the clock</span>';
+    loopReset(); setState("Watching", "on");
+    stats({ ok: 47, watch: 0, posted: 0 });
+    $("#shProg").textContent = "Clock in to start";
+    $("#shConsole").classList.remove("live");
+    $("#shFinale").hidden = true; $("#shIntro").hidden = false;
+  }
+
+  $("#shStart").addEventListener("click", clockIn);
+  $("#shRestart").addEventListener("click", resetShift);
+  $("#shAgain").addEventListener("click", resetShift);
+  $("#shSeeArch").addEventListener("click", function () {
+    $("#shFinale").hidden = true;
+    document.getElementById("architecture").scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "start" });
+  });
+  $("#shLogTog").addEventListener("click", function () {
+    var open = $("#shLogBody").classList.toggle("open");
+    $("#shLogTog").setAttribute("aria-expanded", String(open));
+    if (open) $("#shLogBody").scrollTop = $("#shLogBody").scrollHeight;
+  });
+  $("#shTrailBtn").addEventListener("click", function () {
+    if (!$("#shLogBody").classList.contains("open")) $("#shLogTog").click();
+    $("#shLogBody").scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "nearest" });
+  });
+})();
+</script>
+</body>
+</html>

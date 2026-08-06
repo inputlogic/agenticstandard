@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Logistics &amp; Freight · Agentic Standard — Agentic Standard</title>
-<meta name="description" content="Invoices audited, exceptions caught, carriers chased. Before coffee. Three agent scenarios for Logistics &amp; Freight, with the worker multiplier each one delivers.">
-<meta property="og:title" content="Logistics &amp; Freight · Agentic Standard — Agentic Standard">
-<meta property="og:description" content="Invoices audited, exceptions caught, carriers chased. Before coffee. Three agent scenarios for Logistics &amp; Freight, with the worker multiplier each one delivers.">
+<title>Logistics &amp; Freight — Agentic Standard</title>
+<meta name="description" content="Invoices audited, exceptions caught, carriers chased. Before coffee. Three agents for Logistics &amp; Freight.">
+<meta property="og:title" content="Logistics &amp; Freight — Agentic Standard">
+<meta property="og:description" content="Invoices audited, exceptions caught, carriers chased. Before coffee. Three agents for Logistics &amp; Freight.">
 <meta property="og:site_name" content="Agentic Standard">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Logistics &amp; Freight · Agentic Standard — Agentic Standard">
-<meta name="twitter:description" content="Invoices audited, exceptions caught, carriers chased. Before coffee. Three agent scenarios for Logistics &amp; Freight, with the worker multiplier each one delivers.">
+<meta name="twitter:title" content="Logistics &amp; Freight — Agentic Standard">
+<meta name="twitter:description" content="Invoices audited, exceptions caught, carriers chased. Before coffee. Three agents for Logistics &amp; Freight.">
 <meta name="theme-color" content="#100D0A">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,6 +310,99 @@ button.ind-card:focus-visible {
 .ind-panel-head { margin-block-start: clamp(1.4rem, 3.5vw, 2rem); }
 .ind-panel-head h1 { font-size: var(--text-h2); margin-block-end: 0; max-width: 24ch; }
 a.ind-back { text-decoration: none; }
+
+/* ==== live demo teasers (#scout-demo) ===================================
+   Two cards that should read as doors, not paragraphs: a warm spotlight
+   tracks the pointer across the one you are considering, the other recedes,
+   and a slow accent arc marks the recommended way in. */
+@property --demo-spin { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+#scout-demo .lead { max-width: 62ch; }
+.demo-grid {
+  margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem);
+  display: grid; gap: clamp(1rem, 2.5vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+
+.demo-card {
+  position: relative;
+  display: grid; align-content: start; gap: 0.55rem;
+  padding: clamp(1.35rem, 3vw, 1.9rem);
+  background: var(--panel);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 2px;
+  text-decoration: none;
+  isolation: isolate;
+  transition: border-color 0.2s ease, translate 0.2s ease, opacity 0.25s ease;
+}
+/* the spotlight: a soft accent wash that follows the cursor */
+.demo-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s ease;
+  background: radial-gradient(
+    22rem circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in oklch, var(--accent) 16%, transparent), transparent 68%);
+}
+.demo-card:hover, .demo-card:focus-visible { border-color: var(--accent); translate: 0 -2px; }
+.demo-card:hover::before, .demo-card:focus-visible::before { opacity: 1; }
+.demo-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* hovering one card pushes the other back, so the choice reads as a choice */
+.demo-grid:has(.demo-card:hover) .demo-card:not(:hover) { opacity: 0.55; }
+
+/* the recommended door gets a slow accent arc travelling its edge */
+.demo-card.is-featured::after {
+  content: ""; position: absolute; inset: 0; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--demo-spin),
+    transparent 0 58%, var(--accent) 76%, transparent 88% 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: demo-spin 9s linear infinite;
+}
+@keyframes demo-spin { to { --demo-spin: 360deg; } }
+
+.demo-eyebrow {
+  display: flex; align-items: center; gap: 0.5em;
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+}
+.demo-eyebrow .dot {
+  width: 6px; height: 6px; background: var(--accent); flex: none;
+  animation: demo-blink 2.4s ease-in-out infinite;
+}
+.demo-card:not(.is-featured) .demo-eyebrow { color: var(--muted); }
+.demo-card:not(.is-featured) .demo-eyebrow .dot { background: var(--muted-dim); animation: none; }
+@keyframes demo-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.demo-card h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem); line-height: 1.15;
+  letter-spacing: -0.01em; color: var(--fg); margin: 0; text-wrap: balance;
+}
+.demo-card p { margin: 0; color: var(--fg-body); font-size: var(--text-small); line-height: 1.6; }
+
+.demo-meta {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; margin: 0.35rem 0 0; padding: 0;
+}
+.demo-meta li {
+  font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--hairline); padding: 0.35em 0.6em;
+}
+.demo-go {
+  margin-block-start: 0.75rem; display: inline-flex; align-items: center; gap: 0.5em;
+  font-weight: 600; font-size: var(--text-small); color: var(--fg);
+}
+.demo-card.is-featured .demo-go { color: var(--accent-soft); }
+.demo-go .arrow { transition: translate 0.2s ease; }
+.demo-card:hover .demo-go .arrow { translate: 4px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-card.is-featured::after, .demo-eyebrow .dot { animation: none; }
+  .demo-card:hover { translate: none; }
+  .demo-go .arrow, .demo-card:hover .demo-go .arrow { translate: none; }
+}
 </style>
 </head>
 <body class="grain">
@@ -414,6 +507,7 @@ a.ind-back { text-decoration: none; }
                   </ul>
                 </div>
               </details>
+              <p class="card-cta"><a class="text-link" href="/industries/exception-scout-shift">Work a shift with it <span aria-hidden="true">&#8594;</span></a></p>
             </article>
           </div>
           <div class="card-slot">
@@ -440,9 +534,44 @@ a.ind-back { text-decoration: none; }
           </div>
         </div>
         <p class="ind-capacity">Stack the three and the desk runs like a bigger one: every load covered, and room for the freight you used to turn away.</p>
-        <p class="honest-note">An illustrative scenario: the multipliers are directional, not promises, grounded in how much an agent covers and how often it runs. Your real number comes out of the Readiness Map.</p>
+        <p class="honest-note">An example scenario. The multipliers are estimates, not promises. Your real numbers come from the Readiness Map.</p>
         <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
       </section>
+    </div>
+  </section>
+
+  <!-- 2b. Live demo teasers -->
+  <section class="section section-rule" id="scout-demo" aria-labelledby="scout-demo-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">Live Demos &middot; Agent 02</div>
+        <h2 id="scout-demo-title">Take the Exception Scout for a <em>drive</em>.</h2>
+        <p class="lead">Two ways in, one agent. Pick the one that matches the question you are actually asking: what is this like to work with, or how is this actually built.</p>
+      </div>
+      <div class="demo-grid reveal reveal-late" id="demoGrid">
+        <a class="demo-card is-featured" href="/industries/exception-scout-shift">
+          <span class="demo-eyebrow"><span class="dot" aria-hidden="true"></span> Start here &middot; the operator&#8217;s cut</span>
+          <h3>A shift with the Scout</h3>
+          <p>Play the dispatch manager for one full workday. Watch it wait through the quiet hours, watch it catch a load going late five hours early, and make the one call it will not make for you.</p>
+          <ul class="demo-meta">
+            <li>3 minutes</li>
+            <li>1 decision yours</li>
+            <li>4 chapters</li>
+          </ul>
+          <span class="demo-go">Work the shift <span class="arrow" aria-hidden="true">&#8594;</span></span>
+        </a>
+        <a class="demo-card" href="/industries/exception-scout">
+          <span class="demo-eyebrow"><span class="dot" aria-hidden="true"></span> The engineer&#8217;s cut</span>
+          <h3>One tick, layer by layer</h3>
+          <p>Open a single run of the same agent and step through all six layers: ingestion, state, the rules that keep it cheap, the model calls, the guardrails, delivery.</p>
+          <ul class="demo-meta">
+            <li>2 minutes</li>
+            <li>3 model calls yours</li>
+            <li>6 layers</li>
+          </ul>
+          <span class="demo-go">Open the pipeline <span class="arrow" aria-hidden="true">&#8594;</span></span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -454,7 +583,7 @@ a.ind-back { text-decoration: none; }
         <h2>Enough ranges. Get <em>your</em> number.</h2>
       </div>
       <div class="reveal reveal-late">
-        <p class="lead cta-sub">Here's the honest catch: every number on this page is directional, because every shop is different. Your stack, your volume, your team decide where you land. The Readiness Map pins it down: your workflows, your multipliers, your first agents, with names and owners. Directional for the industry. Exact for you. That's the Agentic Standard.</p>
+        <p class="lead cta-sub">Every number on this page is an estimate, because every company is different. The Readiness Map makes it exact: your workflows, your multipliers, your first agents, with names and owners.</p>
         <a class="btn" href="/book">Book the call</a>
       </div>
     </div>
@@ -476,7 +605,7 @@ a.ind-back { text-decoration: none; }
           </svg>
           <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
         </a>
-        <p class="footer-tagline">We make agentic AI work inside your organization, not just in a demo.</p>
+        <p class="footer-tagline">We make AI agents work inside your company, not just in a demo.</p>
       </div>
       <nav class="footer-col" aria-label="The Work">
         <div class="footer-heading">The Work</div>
@@ -502,5 +631,22 @@ a.ind-back { text-decoration: none; }
     </div>
   </div>
 </footer>
+
+<script>
+/* Feeds the demo cards the pointer position so their spotlight follows the
+   cursor. Decoration only: the cards are plain links without it. Skipped on
+   coarse pointers, where there is no cursor to follow. */
+(function () {
+  var grid = document.getElementById("demoGrid");
+  if (!grid || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  grid.addEventListener("pointermove", function (e) {
+    var card = e.target.closest(".demo-card");
+    if (!card) return;
+    var r = card.getBoundingClientRect();
+    card.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+    card.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  });
+})();
+</script>
 </body>
 </html>

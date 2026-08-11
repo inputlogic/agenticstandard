@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>E-commerce &amp; Retail · Agentic Standard — Agentic Standard</title>
-<meta name="description" content="Returns, chargebacks, price moves, the CX pile. Handled. Three agent scenarios for E-commerce &amp; Retail, with the worker multiplier each one delivers.">
-<meta property="og:title" content="E-commerce &amp; Retail · Agentic Standard — Agentic Standard">
-<meta property="og:description" content="Returns, chargebacks, price moves, the CX pile. Handled. Three agent scenarios for E-commerce &amp; Retail, with the worker multiplier each one delivers.">
+<title>E-commerce &amp; Retail — Agentic Standard</title>
+<meta name="description" content="The basket read every night, the live shopping clerk on your floor, the follow-up that feels like taste. Three agents for E-commerce &amp; Retail.">
+<meta property="og:title" content="E-commerce &amp; Retail — Agentic Standard">
+<meta property="og:description" content="The basket read every night, the live shopping clerk on your floor, the follow-up that feels like taste. Three agents for E-commerce &amp; Retail.">
 <meta property="og:site_name" content="Agentic Standard">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="E-commerce &amp; Retail · Agentic Standard — Agentic Standard">
-<meta name="twitter:description" content="Returns, chargebacks, price moves, the CX pile. Handled. Three agent scenarios for E-commerce &amp; Retail, with the worker multiplier each one delivers.">
+<meta name="twitter:title" content="E-commerce &amp; Retail — Agentic Standard">
+<meta name="twitter:description" content="The basket read every night, the live shopping clerk on your floor, the follow-up that feels like taste. Three agents for E-commerce &amp; Retail.">
 <meta name="theme-color" content="#100D0A">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -256,6 +256,21 @@ button.ind-card:focus-visible {
   background: var(--muted-dim);
 }
 
+/* the agent cards share their row tracks, so the tag, the name, the blurb,
+   the multiplier and the HOW IT WORKS rail land on the same lines in every
+   card of the row, whatever their text lengths. Row 6 is the per-card CTA.
+   container-type must come off the slot: containment blocks subgridding.
+   row-gap: 0 keeps the outer grid's gap out of the rows inside a card. */
+@supports (grid-template-rows: subgrid) {
+  .ind-agents .card-slot {
+    container-type: normal;
+    display: grid; grid-template-rows: subgrid; grid-row: span 6; row-gap: 0;
+  }
+  .ind-agents .card { display: grid; grid-template-rows: subgrid; grid-row: span 6; row-gap: 0; }
+  /* the card-body cqi clamp lost its query container with the containment */
+  .ind-agents .card p { font-size: 0.9rem; }
+}
+
 /* -- "industry not listed" band --------------------------------------------- */
 .not-listed { text-align: center; margin-block-start: clamp(2.5rem, 6vw, 4rem); }
 .not-listed h2 { max-width: 20ch; margin-inline: auto; }
@@ -310,6 +325,91 @@ button.ind-card:focus-visible {
 .ind-panel-head { margin-block-start: clamp(1.4rem, 3.5vw, 2rem); }
 .ind-panel-head h1 { font-size: var(--text-h2); margin-block-end: 0; max-width: 24ch; }
 a.ind-back { text-decoration: none; }
+
+/* ==== live demo teaser (#clerk-demo) ====================================
+   One card that should read as a door, not a paragraph: a warm spotlight
+   tracks the pointer, and a slow accent arc marks the way in. */
+@property --demo-spin { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+#clerk-demo .lead { max-width: 62ch; }
+.demo-grid {
+  margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem);
+  display: grid; gap: clamp(1rem, 2.5vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.demo-grid.solo { grid-template-columns: minmax(min(100%, 20rem), 38rem); }
+
+.demo-card {
+  position: relative;
+  display: grid; align-content: start; gap: 0.55rem;
+  padding: clamp(1.35rem, 3vw, 1.9rem);
+  background: var(--panel);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 2px;
+  text-decoration: none;
+  isolation: isolate;
+  transition: border-color 0.2s ease, translate 0.2s ease, opacity 0.25s ease;
+}
+.demo-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s ease;
+  background: radial-gradient(
+    22rem circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in oklch, var(--accent) 16%, transparent), transparent 68%);
+}
+.demo-card:hover, .demo-card:focus-visible { border-color: var(--accent); translate: 0 -2px; }
+.demo-card:hover::before, .demo-card:focus-visible::before { opacity: 1; }
+.demo-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.demo-card.is-featured::after {
+  content: ""; position: absolute; inset: 0; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--demo-spin),
+    transparent 0 58%, var(--accent) 76%, transparent 88% 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: demo-spin 9s linear infinite;
+}
+@keyframes demo-spin { to { --demo-spin: 360deg; } }
+
+.demo-eyebrow {
+  display: flex; align-items: center; gap: 0.5em;
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+}
+.demo-eyebrow .dot {
+  width: 6px; height: 6px; background: var(--accent); flex: none;
+  animation: demo-blink 2.4s ease-in-out infinite;
+}
+@keyframes demo-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.demo-card h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem); line-height: 1.15;
+  letter-spacing: -0.01em; color: var(--fg); margin: 0; text-wrap: balance;
+}
+.demo-card p { margin: 0; color: var(--fg-body); font-size: var(--text-small); line-height: 1.6; }
+
+.demo-meta {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; margin: 0.35rem 0 0; padding: 0;
+}
+.demo-meta li {
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--hairline); padding: 0.35em 0.6em;
+}
+.demo-go {
+  margin-block-start: 0.75rem; display: inline-flex; align-items: center; gap: 0.5em;
+  font-weight: 600; font-size: var(--text-small); color: var(--accent-soft);
+}
+.demo-go .arrow { transition: translate 0.2s ease; }
+.demo-card:hover .demo-go .arrow { translate: 4px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-card.is-featured::after, .demo-eyebrow .dot { animation: none; }
+  .demo-card:hover { translate: none; }
+  .demo-go .arrow, .demo-card:hover .demo-go .arrow { translate: none; }
+}
 </style>
 </head>
 <body class="grain">
@@ -361,33 +461,33 @@ a.ind-back { text-decoration: none; }
           </span>
           <div>
             <div class="kicker accent">E-commerce &amp; Retail</div>
-            <h1 id="ecommerce-title">Your margin hides in the <em>follow-up</em>.</h1>
+            <h1 id="ecommerce-title">Shoppers tell you everything. Agents finally <em>listen</em>.</h1>
           </div>
         </div>
         <figure class="framed ind-quote">
           <svg class="frame-bracket frame-tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
-          <blockquote class="pull-quote">&#8220;Chargebacks were a shoebox of screenshots. Now the evidence packet is <em>done</em> before I open the case.&#8221;</blockquote>
-          <figcaption class="ind-quote-attr">Operations manager &middot; DTC home goods brand</figcaption>
+          <blockquote class="pull-quote">&#8220;The website used to be a shelf. Now it sells like our best <em>floor person</em>, at 2am, to forty people at once.&#8221;</blockquote>
+          <figcaption class="ind-quote-attr">Founder &middot; DTC kitchenware brand</figcaption>
           <svg class="frame-bracket frame-br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
         </figure>
         <div class="ind-agents auto-grid">
           <div class="card-slot">
             <article class="card">
               <div class="card-tag">Agent 01</div>
-              <h3>The Chargeback Clerk</h3>
-              <p>Assembles the evidence for every dispute. Order record, tracking, delivery confirmation, the full customer thread. One packet, ready to submit.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Builds the packet for every dispute, not just the easy ones.</span></p>
+              <h3>The Basket Reader</h3>
+              <p>Reads every order, every night. What sells together, which customers are drifting, where the next bundle is hiding. The merchandising brief is waiting at open.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Reads every basket, not the ten a spreadsheet afternoon can.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every new dispute. Reads the order, tracking, and customer thread. Assembles the evidence packet. Files it to the disputes folder. A human clicks submit.</p>
+                  <p><strong>The loop:</strong> Runs nightly. Reads the order history and catalog. Maps what sells together and who is buying it. Posts the merchandising brief. Humans pick the plays.</p>
                   <p><strong>What it needs:</strong></p>
                   <ul class="agent-needs">
-                    <li>Read: the processor dispute feed</li>
-                    <li>Write: packets to a shared drive</li>
-                    <li>Owner: your ops manager</li>
-                    <li>Spend cap live in the request path</li>
-                    <li>Audit log on day one</li>
+                    <li>Read: the nightly order export</li>
+                    <li>Post: the merchandising channel</li>
+                    <li>Owner: your head of e-commerce</li>
+                    <li>Per-run spend cap, enforced</li>
+                    <li>Every brief logged</li>
                   </ul>
                 </div>
               </details>
@@ -396,52 +496,77 @@ a.ind-back { text-decoration: none; }
           <div class="card-slot">
             <article class="card">
               <div class="card-tag">Agent 02</div>
-              <h3>The Shelf Scout</h3>
-              <p>Scans competitor price and stock on your key listings overnight, then drops a morning digest with only the moves that matter.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Scans every tracked SKU overnight, never a spot-check.</span></p>
+              <h3>The Floor Clerk</h3>
+              <p>The live shopping agent on your storefront. Greets like staff, asks one good question, builds the cart from what actually sells together, and hands checkout back to the store.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">15&#215;</span><span class="agent-stat-gloss">On the floor for every visitor at once, midnight included.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs overnight. Reads competitor listings on your tracked SKUs. Diffs price and stock against yesterday. Posts the morning digest to Slack. Humans set the response.</p>
+                  <p><strong>The loop:</strong> Runs on every visitor who says hello. Reads the catalog, live stock, and the basket map. Asks, recommends, and builds the cart. Checkout stays the store&#8217;s, always.</p>
                   <p><strong>What it needs:</strong></p>
                   <ul class="agent-needs">
-                    <li>Read: the tracked-SKU watchlist</li>
-                    <li>Post: #pricing in Slack</li>
-                    <li>Owner: your merchandiser</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every scan logged</li>
+                    <li>Read: catalog, stock, the basket map</li>
+                    <li>Act: build carts, never touch checkout</li>
+                    <li>Owner: your e-commerce lead</li>
+                    <li>Per-conversation cap, enforced</li>
+                    <li>Full transcript logged, with every why</li>
                   </ul>
                 </div>
               </details>
+              <p class="card-cta"><a class="text-link" href="/industries/floor-clerk-shop">Shop with it <span aria-hidden="true">&#8594;</span></a></p>
             </article>
           </div>
           <div class="card-slot">
             <article class="card">
               <div class="card-tag">Agent 03</div>
-              <h3>The CX Drafter</h3>
-              <p>Writes a first-draft reply to every support ticket with the order, the tracking, and your policies already in it. Your team reviews and sends.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">6&#215;</span><span class="agent-stat-gloss">Drafts a reply to every ticket; you send in one pass.</span></p>
+              <h3>The Matchmaker</h3>
+              <p>Turns understanding customers into recommendations that feel like taste, not tracking. The goes-with rail, the finish-the-kit follow-up, the restock nudge timed to the last bag of beans.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">A follow-up for every customer, timed to how they actually shop.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs on every ticket. Reads the helpdesk queue plus order context. Drafts the reply in your tone. Saves it as a suggested response. A human reviews and sends.</p>
+                  <p><strong>The loop:</strong> Runs daily. Reads purchase history and the basket map. Drafts the goes-with rails, the follow-up emails, the restock nudges. A human approves every send.</p>
                   <p><strong>What it needs:</strong></p>
                   <ul class="agent-needs">
-                    <li>Read: helpdesk queue and order lookup</li>
-                    <li>Draft: inside the helpdesk, never auto-send</li>
-                    <li>Owner: your CX lead</li>
-                    <li>Monthly token budget, hard-capped</li>
-                    <li>Audit trail on from day one</li>
+                    <li>Read: order history and the basket map</li>
+                    <li>Draft: campaigns, never auto-send</li>
+                    <li>Owner: your marketing lead</li>
+                    <li>Monthly budget, hard-capped</li>
+                    <li>Every send logged</li>
                   </ul>
                 </div>
               </details>
             </article>
           </div>
         </div>
-        <p class="ind-capacity">One rep now covers what a room of them used to, and the win shows up downstream: retention, reviews, customers who stay.</p>
-        <p class="honest-note">An illustrative scenario: the multipliers are directional, not promises, grounded in how much an agent covers and how often it runs. Your real number comes out of the Readiness Map.</p>
+        <p class="ind-capacity">Stack the three and the store sells like it has staff on every aisle: every basket read, every visitor greeted, every follow-up on time.</p>
+        <p class="honest-note">An example scenario. The multipliers are estimates, not promises. Your real numbers come from the Readiness Map.</p>
         <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
       </section>
+    </div>
+  </section>
+
+  <!-- 2b. Live demo teaser -->
+  <section class="section section-rule" id="clerk-demo" aria-labelledby="clerk-demo-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">Live Demo &middot; Agent 02</div>
+        <h2 id="clerk-demo-title">Shop with the Floor Clerk <em>yourself</em>.</h2>
+        <p class="lead">Not a video of an agent. The agent. Walk into a small storefront it staffs, shop for a gift, and watch it build your cart from what four thousand baskets say belongs together. Then flip the counter and see everything the shop saw.</p>
+      </div>
+      <div class="demo-grid solo reveal reveal-late" id="demoGrid">
+        <a class="demo-card is-featured" href="/industries/floor-clerk-shop">
+          <span class="demo-eyebrow"><span class="dot" aria-hidden="true"></span> Start here &middot; this time you are the customer</span>
+          <h3>Shop with the Clerk</h3>
+          <p>Ask for a gift or just poke the shelves. It asks one good question, assembles the kit with the reasoning out loud, drafts the gift note, and stops dead at checkout. The flip at the end shows the merchant side: the basket map, the fence, the log.</p>
+          <ul class="demo-meta">
+            <li>2 minutes</li>
+            <li>you play the shopper</li>
+            <li>1 counter flip</li>
+          </ul>
+          <span class="demo-go">Walk in <span class="arrow" aria-hidden="true">&#8594;</span></span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -453,7 +578,7 @@ a.ind-back { text-decoration: none; }
         <h2>Enough ranges. Get <em>your</em> number.</h2>
       </div>
       <div class="reveal reveal-late">
-        <p class="lead cta-sub">Here's the honest catch: every number on this page is directional, because every shop is different. Your stack, your volume, your team decide where you land. The Readiness Map pins it down: your workflows, your multipliers, your first agents, with names and owners. Directional for the industry. Exact for you. That's the Agentic Standard.</p>
+        <p class="lead cta-sub">Every number on this page is an estimate, because every company is different. The Readiness Map makes it exact: your workflows, your multipliers, your first agents, with names and owners.</p>
         <a class="btn" href="/book">Book the call</a>
       </div>
     </div>
@@ -475,7 +600,7 @@ a.ind-back { text-decoration: none; }
           </svg>
           <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
         </a>
-        <p class="footer-tagline">We make agentic AI work inside your organization, not just in a demo.</p>
+        <p class="footer-tagline">We make AI agents work inside your company, not just in a demo.</p>
       </div>
       <nav class="footer-col" aria-label="The Work">
         <div class="footer-heading">The Work</div>
@@ -501,5 +626,22 @@ a.ind-back { text-decoration: none; }
     </div>
   </div>
 </footer>
+
+<script>
+/* Feeds the demo card the pointer position so its spotlight follows the
+   cursor. Decoration only: the card is a plain link without it. Skipped on
+   coarse pointers, where there is no cursor to follow. */
+(function () {
+  var grid = document.getElementById("demoGrid");
+  if (!grid || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  grid.addEventListener("pointermove", function (e) {
+    var card = e.target.closest(".demo-card");
+    if (!card) return;
+    var r = card.getBoundingClientRect();
+    card.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+    card.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  });
+})();
+</script>
 </body>
 </html>

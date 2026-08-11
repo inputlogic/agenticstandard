@@ -688,33 +688,114 @@
   function browsePath() {
     S.learned.push("Browsing, no brief. It waited instead of pitching.");
     typingThen(600, function () {
-      say("Take your time. Tap anything on the shelf and I will tell you what I actually know about it. <b>No hovering.</b>");
+      say("Take your time. Tap anything on the shelf: it goes on the counter, and I will tell you what I actually know about it. <b>No hovering.</b>");
+      /* never leave the dock with zero chips. The shelf is the real
+         affordance here, but a way back into the guided path should always
+         be one tap away. */
+      chips([{ label: "Actually, help me pick a gift.", go: giftPath }]);
     });
+  }
+
+  /* what the basket map says to reach for next, used when a shopper puts
+     something on the counter themselves rather than taking a kit */
+  var PAIRS = {
+    dripper: { id: "filters", line: "78 of every 100 people who take that dripper add filters in the same order." },
+    filters: { id: "dripper", line: "Filters on their own are a hint. The Alma is what they usually sit under." },
+    kettle: { id: "dripper", line: "The gooseneck wants something to pour into. The Alma is the usual answer." },
+    grinder: { id: "beans", line: "Grinders and beans travel together. Fresh grounds are the whole point." },
+    beans: { id: "mug", line: "Beans and a mug: 4 in 10 do exactly that." },
+    press: { id: "beans", line: "44 of every 100 press buyers add beans on the spot." },
+    scale: { id: "grinder", line: "Scales and grinders sell together a third of the time. Precision people find each other." },
+    mug: { id: "beans", line: "A mug with nothing to put in it is a sad gift. Beans fix that." }
+  };
+
+  /* the chips a shopper always deserves once something is on the counter:
+     a way onward, and a way to keep looking. No dead ends on the shelf. */
+  function afterCounterChips(extra) {
+    var opts = (extra || []).slice();
+    var hasPrimary = opts.some(function (o) { return o.primary; });
+    if (S.cart.length) opts.push({ label: "That is everything. Cart it.", primary: !hasPrimary, go: cartIt });
+    /* a wall of chips is its own kind of broken. The shelf is always there,
+       so the explicit browse prompt only earns a slot when little else does. */
+    if (opts.length < 3) {
+      opts.push({ label: "Keep browsing.", go: function () { say("Take your time. Tap anything, and it goes on the counter, or comes straight back off."); afterCounterChips(); } });
+    }
+    chips(opts);
+  }
+
+  function addItem(id, quiet) {
+    if (S.cart.indexOf(id) > -1) return;
+    setCart(S.cart.concat([id]));
+    S.learned.push("Put the " + BY_ID[id].nm.toLowerCase() + " on the counter themselves.");
+    if (quiet) return;
+    typingThen(450, function () {
+      var pair = PAIRS[id], extra = null;
+      var line = "On the counter. <b>" + money(cartTotal()) + "</b> so far.";
+      if (pair && S.cart.indexOf(pair.id) === -1) {
+        line += " " + pair.line;
+        extra = [{ label: "Add the " + BY_ID[pair.id].nm.toLowerCase() + " too.", primary: true, go: function () { S.suggestions++; addItem(pair.id); } }];
+      }
+      say(line);
+      afterCounterChips(extra);
+    });
+  }
+
+  function removeItem(id) {
+    S.cart = S.cart.filter(function (x) { return x !== id; });
+    renderCart();
+    typingThen(400, function () {
+      say(S.cart.length
+        ? "Off it comes. <b>" + money(cartTotal()) + "</b> left on the counter."
+        : "Off it comes. The counter is clear again, and that is a fine place to be.");
+      afterCounterChips();
+    });
+  }
+
+  /* runs fn as soon as the Clerk is not mid-sentence, so two replies never
+     interleave. It always runs eventually: a tap that goes quiet forever
+     reads as a broken button. */
+  function whenFree(fn, tries) {
+    tries = tries == null ? 24 : tries;
+    var busy = document.querySelector(".fc-typing") || Date.now() - (S.lastChipAt || 0) < 600;
+    if (!busy || tries <= 0) { fn(); return; }
+    var t = setTimeout(function () { whenFree(fn, tries - 1); }, 250);
+    S.timers.push(t);
   }
 
   function onTile(id) {
     if (S.done) return;
-    /* one voice at a time: while the Clerk is composing a reply, the
-       shelf waits. Prevents two answers interleaving mid-conversation. */
-    if (document.querySelector(".fc-typing") || Date.now() - (S.lastChipAt || 0) < 1200) return;
-    /* a tile tap can land mid-conversation: keep whatever question was
-       pending so a curious shopper can always find the way back */
-    var pending = S.chips.slice();
     var p = BY_ID[id];
-    you(p.nm + "?");
+    var pending = S.chips.slice();
+    var had = S.cart.indexOf(id) > -1;
+
+    /* the counter answers the tap instantly, before a word is spoken. A tap
+       that changes nothing you can see is a broken button, whatever the
+       Clerk says about it half a second later. */
+    if (had) { S.cart = S.cart.filter(function (x) { return x !== id; }); renderCart(); }
+    else { setCart(S.cart.concat([id])); S.learned.push("Put the " + p.nm.toLowerCase() + " on the counter themselves."); }
     S.suggestions++;
-    typingThen(650, function () {
-      say(p.fact);
-      var opts = [];
-      if (!S.kitKey) {
-        opts.push({ label: "Build something around it.", primary: true, go: function () { assembleKit(kitFor(id), id); } });
-      }
-      if (pending.length) {
-        opts.push({ label: "Back to where we were.", go: function () { chips(pending); } });
-      } else {
-        opts.push({ label: "Keep browsing.", go: function () { say("The shelf is patient. So am I."); } });
-      }
-      chips(opts);
+    you(had ? p.nm + ", back off please." : p.nm + "?");
+
+    whenFree(function () {
+      typingThen(600, function () {
+        if (had) {
+          say(S.cart.length
+            ? "Off it comes. <b>" + money(cartTotal()) + "</b> left on the counter."
+            : "Off it comes. The counter is clear again, and that is a fine place to be.");
+          afterCounterChips(pending.length ? [{ label: "Back to where we were.", go: function () { chips(pending); } }] : null);
+          return;
+        }
+        var pair = PAIRS[id], extra = [];
+        var line = p.fact + " <b>" + money(cartTotal()) + "</b> on the counter.";
+        if (pair && S.cart.indexOf(pair.id) === -1) {
+          line += " " + pair.line;
+          extra.push({ label: "Add the " + BY_ID[pair.id].nm.toLowerCase() + " too.", primary: true, go: function () { S.suggestions++; addItem(pair.id); } });
+        }
+        if (!S.kitKey) extra.push({ label: "Build something around it.", go: function () { assembleKit(kitFor(id), id); } });
+        if (pending.length) extra.push({ label: "Back to where we were.", go: function () { chips(pending); } });
+        say(line);
+        afterCounterChips(extra);
+      });
     });
   }
 
@@ -737,14 +818,22 @@
     S.kitKey = kitKey;
     S.suggestions += 3;
     typingThen(850, function () {
+      /* the anchor joins the kit, it never replaces a member: the affinity
+         claims below name specific products, so swapping one out silently
+         would leave the Clerk describing a cart it did not build */
       var ids = kit.ids.slice();
-      if (anchorId && ids.indexOf(anchorId) === -1) ids[0] = anchorId;
-      ids.forEach(function (id, i) { after(200 + i * 350, function () { setCart(S.cart.concat([id])); }); });
+      var extra = null;
+      if (anchorId && ids.indexOf(anchorId) === -1) { extra = anchorId; ids.push(anchorId); }
+      ids.forEach(function (id, i) {
+        after(200 + i * 350, function () { if (S.cart.indexOf(id) === -1) setCart(S.cart.concat([id])); });
+      });
+      S.kitIds = ids.slice();
       after(200 + ids.length * 350, function () {
+        var tail = extra ? " Plus the " + BY_ID[extra].nm.toLowerCase() + " you were looking at." : "";
         if (kitKey === "pour") {
-          say("The Alma dripper, the gooseneck, and a box of filters. <b>" + money(cartTotal()) + "</b>. Not a guess: in 4,800 baskets here, 78 of every 100 dripper buyers grab filters in the same order, and 61 come back for a gooseneck within a month. This kit is just the <b>return trip, skipped</b>.");
+          say("The Alma dripper, the gooseneck, and a box of filters." + tail + " <b>" + money(cartTotal()) + "</b>. Not a guess: in 4,800 baskets here, 78 of every 100 dripper buyers grab filters in the same order, and 61 come back for a gooseneck within a month. This kit is just the <b>return trip, skipped</b>.");
         } else {
-          say("The press, the Halvor grinder, and this month&#8217;s beans. <b>" + money(cartTotal()) + "</b>. Press people who grind fresh reorder beans at twice the rate. That is not a bundle, that is <b>a person falling in love</b> with a morning.");
+          say("The press, the Halvor grinder, and this month&#8217;s beans." + tail + " <b>" + money(cartTotal()) + "</b>. Press people who grind fresh reorder beans at twice the rate. That is not a bundle, that is <b>a person falling in love</b> with a morning.");
         }
         chips([
           { label: "Perfect. Cart it.", primary: true, go: cartIt },
@@ -759,7 +848,7 @@
     S.suggestions++;
     typingThen(700, function () {
       var addId = S.kitKey === "pour" ? "beans" : "mug";
-      setCart(S.cart.concat([addId]));
+      if (S.cart.indexOf(addId) === -1) setCart(S.cart.concat([addId]));
       if (addId === "beans") {
         say("Added the roaster&#8217;s pick, $19. The kit teaches Saturday morning; <b>the beans make it happen this week</b>. " + money(cartTotal()) + " all in.");
       } else {
@@ -792,7 +881,7 @@
   function assembleRestore() {
     S.suggestions++;
     typingThen(500, function () {
-      setCart(KITS[S.kitKey].ids.slice());
+      setCart((S.kitIds || KITS[S.kitKey].ids).slice());
       say("Back to the full kit, " + money(cartTotal()) + ". Your call was right the first time.");
       chips([{ label: "Cart it.", primary: true, go: cartIt }]);
     });
@@ -868,7 +957,7 @@
   function resetAll() {
     S.timers.forEach(clearTimeout); S.timers = [];
     S.cart = []; S.path = null; S.learned = []; S.suggestions = 0; S.questions = 0;
-    S.noteText = null; S.done = false; S.chips = []; S.kitKey = null;
+    S.noteText = null; S.done = false; S.chips = []; S.kitKey = null; S.kitIds = null; S.lastChipAt = 0;
     $("#fcChat").innerHTML = ""; $("#fcChips").innerHTML = "";
     $("#fcCheckoutMount").innerHTML = "";
     $("#fcState").textContent = "On the floor";

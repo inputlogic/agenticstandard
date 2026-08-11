@@ -80,7 +80,7 @@ API for page builders. Everything here is already in `assets/site.css` / `assets
           </svg>
           <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
         </a>
-        <p class="footer-tagline">We make agentic AI work inside your organization, not just in a demo.</p>
+        <p class="footer-tagline">We put AI agents to work inside your company, and prove it in six weeks.</p>
       </div>
       <nav class="footer-col" aria-label="The Work">
         <div class="footer-heading">The Work</div>

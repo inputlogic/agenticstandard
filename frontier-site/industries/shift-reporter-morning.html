@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Morning, Already Built &middot; Manufacturing — Agentic Standard</title>
+<meta name="description" content="It is 06:40 and stand-up is at 07:00. The Shift Reporter built the overnight production report at 05:04, while the plant slept. Read it, question it, and set the one priority only you can set.">
+<meta property="og:title" content="The Morning, Already Built — Agentic Standard">
+<meta property="og:description" content="An AI agent built the overnight production report before anyone clocked in. Every number opens. The priority is yours.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Morning, Already Built — Agentic Standard">
+<meta name="twitter:description" content="An AI agent built the overnight production report before anyone clocked in. Every number opens. The priority is yours.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<style>
+/* ==== The morning, already built ========================================
+   The operator's cut for Manufacturing, and deliberately NOT another
+   console. The Exception Scout demo is a day you work beside a watcher.
+   This is the opposite tempo: the work is finished before you arrive.
+   The centerpiece is the report itself, a cream paper artifact on the
+   dark page. You open its numbers, question it, and set one priority
+   against a countdown. Everything scoped under .rm-*. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --good: #8FAC77;
+  --warn: #C9A24B;
+  --good-ink: #5E7A4E;
+  --warn-ink: #8f6b1e;
+}
+
+/* -- hero ------------------------------------------------------------------ */
+.hero { padding-block: clamp(3.5rem, 9vw, 6rem) clamp(2rem, 5vw, 3rem); }
+.hero h1 { max-width: 18ch; }
+.hero .lead { margin-block-start: clamp(1.1rem, 2.5vw, 1.6rem); max-width: 58ch; }
+.rise { animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.21, 1) both; }
+@keyframes rise { from { opacity: 0; translate: 0 1.4rem; } to { opacity: 1; translate: 0 0; } }
+.hero .kicker.rise { animation-delay: 0.06s; }
+.hero h1.rise { animation-delay: 0.18s; }
+.hero .lead.rise { animation-delay: 0.36s; }
+.hero .rm-controls.rise { animation-delay: 0.5s; }
+
+.rm-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: clamp(1.3rem, 3vw, 1.8rem); }
+.rm-control {
+  display: inline-flex; align-items: baseline; gap: 0.55em;
+  border: 1px solid var(--hairline-strong); padding: 0.55em 0.9em;
+  font-size: var(--text-small); color: var(--muted);
+}
+.rm-control b {
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft);
+}
+
+/* ==== THE STAGE ========================================================== */
+.rm-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(400px, 1.5fr) minmax(280px, 1fr);
+  grid-template-areas: "paper railtop" "paper railflow" "paper railpad";
+  grid-template-rows: auto auto 1fr;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  align-items: start;
+}
+
+/* ---- the paper ---- */
+.rm-paper {
+  grid-area: paper;
+  border: 1px solid #C4B8A5;
+  box-shadow: 0 34px 90px -44px rgba(0, 0, 0, 0.85);
+  padding: clamp(1.2rem, 3vw, 2.1rem);
+  font-size: 0.8rem; line-height: 1.55;
+  scroll-margin-block-start: 5.5rem;
+}
+.rm-masthead { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; align-items: baseline; border-block-end: 2px solid var(--fg); padding-block-end: 0.7rem; }
+.rm-masthead .co { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--fg); }
+.rm-masthead .doc { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.3rem, 2.4vw, 1.75rem); line-height: 1.1; color: var(--fg); width: 100%; }
+.rm-masthead .meta { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--muted); width: 100%; }
+.rm-masthead .meta b { color: var(--accent); font-weight: 600; }
+
+/* the "what now" strip: keeps the next move visible in any layout, so the
+   demo can never feel stalled while a prompt sits off-screen in the rail */
+.rm-hintbar {
+  position: relative; margin-block-start: 0.9rem;
+  border: 1px dashed var(--hairline-strong); background: var(--bg-soft);
+  padding: 0.55rem 0.75rem 0.55rem 1.6rem;
+  font-size: 0.7rem; line-height: 1.55; color: var(--fg-dim); text-wrap: pretty;
+  animation: rm-rise .35s ease both;
+}
+.rm-hintbar[hidden] { display: none; }
+.rm-hintbar::before { content: ""; position: absolute; inset-inline-start: 0.7rem; top: 0.9rem; width: 6px; height: 6px; background: var(--accent); }
+.rm-hintbar b { color: var(--fg); }
+.rm-hintbar button {
+  appearance: none; border: 0; background: none; padding: 0; cursor: pointer; font: inherit;
+  color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 2px;
+}
+.rm-hintbar button:hover { color: var(--accent-active); }
+
+.rm-sec { margin-block-start: 1.1rem; }
+.rm-sec-cap { font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 0.55rem; margin-block-end: 0.55rem; }
+.rm-sec-cap::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+
+.rm-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.rm-stat {
+  appearance: none; font-family: var(--font-sans); text-align: left; cursor: pointer;
+  border: 1px solid var(--hairline); background: var(--panel); padding: 0.6rem 0.65rem 0.55rem;
+  display: grid; gap: 2px; transition: border-color .18s ease, translate .18s ease;
+}
+.rm-stat:hover { border-color: var(--accent); translate: 0 -1px; }
+.rm-stat[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-tint); }
+.rm-stat .l { font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.rm-stat .n { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; line-height: 1.05; color: var(--fg); font-variant-numeric: tabular-nums; }
+.rm-stat .d { font-size: 0.6rem; color: var(--muted); }
+.rm-stat .d.up { color: var(--accent); font-weight: 600; }
+.rm-stat .d.good { color: var(--good-ink); font-weight: 600; }
+.rm-stat .open-hint { font-family: var(--font-mono); font-size: 0.54rem; color: var(--accent); letter-spacing: 0.08em; margin-block-start: 2px; }
+.rm-stat[aria-expanded="true"] .open-hint { visibility: hidden; }
+
+/* provenance: one box, swaps content per opened door */
+.rm-prov {
+  margin-block-start: 0.5rem; border: 1px solid var(--hairline-strong); border-inline-start: 3px solid var(--accent);
+  background: var(--bg-soft); padding: 0.65rem 0.8rem;
+  font-family: var(--font-mono); font-size: 0.62rem; line-height: 1.7; color: var(--fg-dim);
+  animation: rm-rise .3s ease both; white-space: pre-wrap;
+}
+.rm-prov[hidden] { display: none; }
+.rm-prov .ph { font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-size: 0.56rem; margin-block-end: 0.3rem; display: block; font-family: var(--font-mono); }
+.rm-prov b { color: var(--fg); }
+
+.rm-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.rm-table th { font-family: var(--font-mono); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0.3rem 0.5rem; border-block-end: 1px solid var(--hairline-strong); }
+.rm-table td { padding: 0.42rem 0.5rem; border-block-end: 1px solid var(--hairline); color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+.rm-table td:first-child { font-weight: 600; color: var(--fg); }
+.rm-tag { display: inline-block; font-family: var(--font-mono); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.15em 0.5em; border: 1px solid; }
+.rm-tag.ok { color: var(--good-ink); border-color: var(--good-ink); }
+.rm-tag.flag { color: var(--accent); border-color: var(--accent); }
+.rm-tag.rec { color: var(--good-ink); border-color: var(--good-ink); background: rgba(94, 122, 78, 0.08); }
+
+.rm-flag {
+  border: 1px solid var(--hairline-strong); border-inline-start: 3px solid var(--accent);
+  background: var(--bg-soft); padding: 0.7rem 0.85rem; margin-block-start: 0.55rem;
+}
+.rm-flag.goodnote { border-inline-start-color: var(--good-ink); }
+.rm-flag .fh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; font-weight: 600; color: var(--fg); font-size: 0.76rem; }
+.rm-flag .fh .conf { margin-inline-start: auto; font-family: var(--font-mono); font-size: 0.58rem; color: var(--muted); font-weight: 500; }
+.rm-flag p { margin: 0.3rem 0 0; color: var(--fg-dim); font-size: 0.72rem; line-height: 1.6; }
+.rm-flag p b { color: var(--fg); }
+.rm-flag .fbtn {
+  appearance: none; background: none; border: 0; padding: 0; margin-block-start: 0.4rem; cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
+}
+.rm-flag .fbtn:hover { color: var(--accent-active); }
+
+/* addenda stamped onto the paper as the morning plays out */
+.rm-add {
+  margin-block-start: 0.9rem; border-block-start: 2px dashed var(--hairline-strong); padding-block-start: 0.6rem;
+  animation: rm-rise .45s ease both;
+}
+.rm-add .ah { font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.rm-add.good .ah { color: var(--good-ink); }
+.rm-add p { margin: 0.3rem 0 0; font-size: 0.74rem; line-height: 1.6; color: var(--fg-dim); }
+.rm-add p b { color: var(--fg); }
+
+/* ---- the rail ---- */
+.rm-railtop { grid-area: railtop; display: grid; gap: 0.8rem; }
+.rm-railflow { grid-area: railflow; display: grid; gap: 0.8rem; align-content: start; }
+.rm-card { border: 1px solid var(--hairline); background: var(--panel); padding: 0.85rem 0.95rem; }
+.rm-count .cl { font-size: 0.56rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.rm-count .cv { font-family: var(--font-display); font-weight: 500; font-size: 2rem; line-height: 1.15; color: var(--fg); }
+.rm-count .cv b { color: var(--accent); font-weight: 600; }
+.rm-count .cs { font-size: 0.62rem; color: var(--muted); margin-block-start: 2px; }
+.rm-count.now .cv { color: var(--accent); }
+
+.rm-agent { display: grid; gap: 0.55rem; }
+.rm-agent .who { display: flex; align-items: center; gap: 0.55rem; }
+.rm-agent .av { width: 30px; height: 30px; border: 1px solid var(--hairline); display: grid; place-items: center; color: var(--fg); flex: none; }
+.rm-agent .av svg { width: 16px; height: 16px; }
+.rm-agent .nm { font-weight: 600; color: var(--fg); font-size: 0.76rem; line-height: 1.2; }
+.rm-agent .tg { font-size: 0.6rem; color: var(--muted); }
+.rm-facts { display: grid; gap: 0.3rem; font-size: 0.66rem; color: var(--muted); border-block-start: 1px solid var(--hairline); padding-block-start: 0.55rem; }
+.rm-facts b { color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+.rm-pnlrows { border-block-start: 1px solid var(--hairline); padding-block-start: 0.55rem; display: grid; gap: 0.35rem; }
+.rm-pnlrows .pr { display: grid; grid-template-columns: 52px 1fr; gap: 0.5rem; font-size: 0.62rem; line-height: 1.5; color: var(--muted); }
+.rm-pnlrows .pk { font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.52rem; color: var(--muted); padding-block-start: 1px; }
+.rm-pnlrows .pr b { color: var(--fg-dim); }
+
+.rm-note {
+  position: relative; font-size: 0.7rem; line-height: 1.6; color: var(--muted); text-wrap: pretty;
+  border: 1px dashed var(--hairline-strong); padding: 0.6rem 0.75rem 0.6rem 1.6rem;
+  animation: rm-rise .4s ease both;
+}
+.rm-note::before { content: ""; position: absolute; inset-inline-start: 0.7rem; top: 0.92rem; width: 6px; height: 6px; background: var(--accent); }
+.rm-note b { color: var(--fg-dim); font-weight: 600; }
+
+/* the Q&A thread */
+.rm-qa { display: grid; gap: 0.55rem; }
+.rm-qa .cap { font-size: 0.56rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+.rm-qa .cap::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+.rm-chiprow { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.rm-chip {
+  appearance: none; cursor: pointer; font-family: var(--font-sans); text-align: left;
+  border: 1px solid var(--hairline-strong); background: var(--bg-soft); color: var(--fg);
+  font-size: 0.68rem; font-weight: 600; padding: 0.45rem 0.7rem; transition: .16s ease;
+  animation: rm-rise .35s ease both;
+}
+.rm-chip:hover { border-color: var(--accent); translate: 0 -1px; }
+.rm-chip:disabled { opacity: 0.35; cursor: default; translate: 0 0; }
+.rm-qq { font-size: 0.7rem; color: var(--fg-dim); font-weight: 600; animation: rm-rise .3s ease both; }
+.rm-qq::before { content: "you · "; color: var(--accent-soft); font-weight: 600; font-size: 0.6rem; letter-spacing: 0.06em; }
+.rm-ans { display: grid; grid-template-columns: 24px 1fr; gap: 0.5rem; animation: rm-rise .35s ease both; }
+.rm-ans .av { width: 24px; height: 24px; border: 1px solid var(--hairline); background: var(--bg-soft); display: grid; place-items: center; color: var(--fg); flex: none; margin-block-start: 1px; }
+.rm-ans .av svg { width: 13px; height: 13px; }
+.rm-ans .bd { font-size: 0.7rem; line-height: 1.6; color: var(--fg-body); }
+.rm-ans .bd b { color: var(--fg); }
+.rm-ans .src { display: block; margin-block-start: 3px; font-family: var(--font-mono); font-size: 0.56rem; color: var(--muted-dim); }
+
+/* the decision */
+.rm-decide { border: 1px solid var(--accent); background: var(--panel); padding: 0.85rem 0.95rem; animation: rm-rise .45s ease both; }
+.rm-decide .dh { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-block-end: 0.55rem; }
+.rm-opts { display: grid; gap: 0.45rem; }
+.rm-opt {
+  appearance: none; cursor: pointer; font-family: var(--font-sans); text-align: left;
+  border: 1px solid var(--hairline-strong); background: var(--bg-soft); color: var(--fg);
+  padding: 0.55rem 0.75rem; font-size: 0.72rem; font-weight: 600; line-height: 1.35; transition: .16s ease;
+}
+.rm-opt small { display: block; font-weight: 400; color: var(--muted); font-size: 0.62rem; margin-block-start: 2px; }
+.rm-opt:hover { border-color: var(--accent); translate: 0 -1px; }
+.rm-opt.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.rm-opt.primary small { color: color-mix(in srgb, var(--bg) 72%, transparent); }
+.rm-opt.primary:hover { background: var(--accent-hover); }
+.rm-opt:disabled { opacity: 0.4; cursor: default; translate: 0 0; }
+
+.rm-next {
+  appearance: none; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--bg);
+  font-family: var(--font-sans); font-weight: 600; font-size: 0.76rem; padding: 0.6rem 1rem;
+  display: inline-flex; align-items: center; gap: 0.5em; transition: .16s ease; text-decoration: none;
+  animation: rm-rise .4s ease both;
+}
+.rm-next:hover { background: var(--accent-hover); translate: 0 -1px; }
+.rm-ghostbtn {
+  appearance: none; cursor: pointer; border: 1px solid var(--hairline-strong); background: transparent; color: var(--fg-dim);
+  font-family: var(--font-sans); font-weight: 600; font-size: 0.66rem; padding: 0.45rem 0.75rem;
+  display: inline-flex; align-items: center; gap: 0.45em; transition: .16s ease;
+}
+.rm-ghostbtn:hover { border-color: var(--accent); color: var(--fg); }
+
+/* intro overlay */
+.rm-ovl {
+  position: absolute; inset: -1px; z-index: 6; display: flex; align-items: center; justify-content: center;
+  padding: clamp(1rem, 3vw, 2.2rem); overflow: auto;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+}
+.rm-ovl[hidden] { display: none; }
+.rm-ovl-card { max-width: 54ch; margin: auto; }
+.rm-ovl-card h2 { font-family: var(--font-display); font-weight: 500; color: var(--fg); font-size: clamp(1.6rem, 1.2rem + 2vw, 2.5rem); line-height: 1.1; margin: 0.5rem 0 0.7rem; text-wrap: balance; }
+.rm-ovl-card h2 em { font-style: italic; color: var(--accent); }
+.rm-ovl-card p { font-size: 0.84rem; line-height: 1.65; color: var(--fg-body); margin: 0 0 0.8rem; }
+.rm-ovl-card p b { color: var(--fg); }
+
+@keyframes rm-rise { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+
+/* ==== BEHIND THE MORNING (static sections) =============================== */
+.rm-arch-wrap { border: 1px solid var(--hairline); background: var(--panel); padding: clamp(1rem, 3vw, 1.6rem); margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem); }
+.rm-archrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.1rem 1.4rem; }
+@media (min-width: 900px) { .rm-archrow { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 560px) and (max-width: 899px) { .rm-archrow { grid-template-columns: repeat(2, 1fr); } }
+.rm-anode .an { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg); display: flex; gap: 0.5rem; align-items: baseline; margin-block-end: 0.35rem; }
+.rm-anode .an .ai { font-family: var(--font-mono); font-size: 0.6rem; color: var(--accent); }
+.rm-anode:nth-child(5) .an { color: var(--accent); }
+.rm-anode .ag { font-size: 0.72rem; color: var(--muted); line-height: 1.5; margin-block-end: 0.5rem; }
+.rm-anode .av { font-size: 0.76rem; color: var(--fg-body); line-height: 1.55; border-block-start: 1px solid var(--hairline); padding-block-start: 0.5rem; }
+.rm-anode .av b { color: var(--fg); }
+
+.rm-tempos { margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem); }
+.rm-tempos .card-tag { color: var(--accent); }
+.rm-tempos .tempo-when { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-block-end: 0.4rem; display: block; }
+
+.honest-note { position: relative; max-width: var(--reading); color: var(--muted); font-size: var(--text-small); line-height: 1.6; text-wrap: pretty; margin-block: clamp(1.1rem, 2.5vw, 1.6rem) 0; padding-inline-start: 1.2rem; }
+.honest-note::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.5em; width: 8px; height: 8px; background: var(--accent); }
+
+.cta-final { text-align: center; }
+.cta-final h2 { max-width: 24ch; margin-inline: auto; }
+.cta-final .cta-sub { max-width: 56ch; margin: 0 auto clamp(1.75rem, 4vw, 2.5rem); }
+
+/* ---- responsive ---- */
+@media (max-width: 940px) {
+  .rm-stage { grid-template-columns: 1fr; grid-template-areas: "railtop" "paper" "railflow"; grid-template-rows: auto auto auto; }
+  .rm-kpis { grid-template-columns: repeat(2, 1fr); }
+  .rm-ovl { position: fixed; inset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise, .rm-prov, .rm-add, .rm-note, .rm-chip, .rm-qq, .rm-ans, .rm-decide, .rm-next { animation: none !important; }
+}
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="/" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/standard">Standard</a>
+      <a href="/foundation">Foundation</a>
+      <a href="/continuum">Continuum</a>
+      <a href="/about">About</a>
+      <a href="/industries" aria-current="page">Industries</a>
+      <a class="nav-cta" href="/book">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="container">
+      <p><a class="text-link" href="/industries/manufacturing"><span aria-hidden="true">&#8592;</span> Back to Manufacturing</a></p>
+      <div class="kicker accent rise" style="margin-block-start: 1.4rem;">Live Demo &middot; Agent 01 &middot; Manufacturing</div>
+      <h1 class="rise">Walk into a morning that is already <em>built</em>.</h1>
+      <p class="lead rise">You are the plant ops manager at Calder Components. The Exception Scout demo lets you work a day beside a watcher. This is the other tempo an agent can run: The Shift Reporter did its work at 05:04, while the plant slept. What is waiting for you is not an alert. It is a finished report, and twenty minutes before stand-up.</p>
+      <div class="rm-controls rise" aria-label="How this demo works">
+        <span class="rm-control"><b>Every number</b> opens to its sources</span>
+        <span class="rm-control"><b>1 priority</b> only you can set</span>
+        <span class="rm-control"><b>2 min</b> before stand-up</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- the stage -->
+  <section class="section" id="run" style="padding-block-start: 0;">
+    <div class="container">
+      <div class="rm-stage" id="rmStage">
+
+        <!-- THE PAPER -->
+        <article class="inverted rm-paper" id="rmPaper" aria-label="The overnight production report">
+          <header class="rm-masthead">
+            <span class="co">Calder Components &middot; Plant 2</span>
+            <h2 class="doc">Overnight production summary</h2>
+            <span class="meta">Wednesday &middot; 21:00 to 05:00 &middot; built <b>05:04</b> by <b>the-shift-reporter</b> &middot; 11 sources &middot; run cost $0.07</span>
+          </header>
+          <div class="rm-hintbar" id="rmHint" hidden></div>
+
+          <div class="rm-sec">
+            <div class="rm-sec-cap">The night, in four numbers</div>
+            <div class="rm-kpis" role="group" aria-label="Headline numbers, each opens to its sources">
+              <button class="rm-stat" type="button" data-prov="units" aria-expanded="false">
+                <span class="l">Units</span><span class="n">41,270</span>
+                <span class="d good">plan 40,800 &middot; ahead</span>
+                <span class="open-hint">+ open</span>
+              </button>
+              <button class="rm-stat" type="button" data-prov="yield" aria-expanded="false">
+                <span class="l">First-pass yield</span><span class="n">96.1%</span>
+                <span class="d up">down 0.8 on the week</span>
+                <span class="open-hint">+ open</span>
+              </button>
+              <button class="rm-stat" type="button" data-prov="scrap" aria-expanded="false">
+                <span class="l">Scrap</span><span class="n">$8,410</span>
+                <span class="d up">up $3,120 &middot; see flag 01</span>
+                <span class="open-hint">+ open</span>
+              </button>
+              <button class="rm-stat" type="button" data-prov="down" aria-expanded="false">
+                <span class="l">Downtime</span><span class="n">74 min</span>
+                <span class="d up">up 22 &middot; see flag 02</span>
+                <span class="open-hint">+ open</span>
+              </button>
+            </div>
+            <div class="rm-prov" id="rmProv" hidden></div>
+          </div>
+
+          <div class="rm-sec">
+            <div class="rm-sec-cap">By line</div>
+            <table class="rm-table">
+              <thead><tr><th>Line</th><th>Units</th><th>Yield</th><th>Scrap</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Line 1</td><td>12,480</td><td>98.9%</td><td>$610</td><td><span class="rm-tag rec">record night</span></td></tr>
+                <tr><td>Line 2</td><td>9,210</td><td>92.4%</td><td>$4,980</td><td><span class="rm-tag flag">flag 01</span></td></tr>
+                <tr><td>Line 3</td><td>8,140</td><td>97.2%</td><td>$1,140</td><td><span class="rm-tag flag">flag 02</span></td></tr>
+                <tr><td>Line 4</td><td>11,440</td><td>97.8%</td><td>$1,680</td><td><span class="rm-tag ok">normal</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rm-sec">
+            <div class="rm-sec-cap">What moved, and why I think so</div>
+            <div class="rm-flag">
+              <div class="fh">Flag 01 &middot; Line 2 scrap, station 4 <span class="conf">confidence 84%</span></div>
+              <p>Scrap tripled after <b>02:10</b>, and the pattern is mechanical, not human: burr height climbing run over run on station 4 only, both shifts, both operators. The signature matches <b>die wear on Die 4</b>. Suggest a pull and inspection, about 40 planned minutes.</p>
+              <button class="fbtn" type="button" data-prov="flag1">show the receipts</button>
+            </div>
+            <div class="rm-flag">
+              <div class="fh">Flag 02 &middot; Line 3 micro-stops <span class="conf">confidence 77%</span></div>
+              <p><b>13 stops under four minutes</b>, none logged by hand, all with the feeder-jam signature at the bowl. Worth a tech visit. Not urgent at current takt, but it is quietly eating cycle time.</p>
+              <button class="fbtn" type="button" data-prov="flag2">show the receipts</button>
+            </div>
+            <div class="rm-flag goodnote">
+              <div class="fh">Worth saying out loud</div>
+              <p><b>Line 1 ran its best night in 60 days.</b> Same crew as the Tuesday dip. The difference was the die change at 19:40, which is one more point for flag 01.</p>
+            </div>
+          </div>
+
+          <div id="rmAddenda"></div>
+        </article>
+
+        <!-- RAIL TOP: the clock + the agent -->
+        <div class="rm-railtop">
+          <div class="rm-card rm-count" id="rmCount">
+            <div class="cl">Stand-up &middot; 07:00</div>
+            <div class="cv" id="rmCountV">T minus <b>20</b> min</div>
+            <div class="cs" id="rmCountS">It is 06:40. Coffee in hand.</div>
+          </div>
+          <div class="rm-card rm-agent">
+            <div class="who">
+              <span class="av" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-linecap="square" stroke-width="9"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g><circle cx="60" cy="60" r="7" fill="var(--accent)"/></svg></span>
+              <div>
+                <div class="nm">the-shift-reporter</div>
+                <div class="tg">Agent 01 &middot; builds the morning</div>
+              </div>
+            </div>
+            <div class="rm-facts">
+              <span>ran at <b>05:00</b>, posted <b>05:04</b> &middot; no human woke it</span>
+              <span>read <b>11 sources</b> &middot; MES, schedule, scrap log, 30-night baseline</span>
+              <span>this run cost <b>$0.07</b> of a <b>$1.00</b> per-run cap</span>
+            </div>
+            <div class="rm-pnlrows">
+              <div class="pr"><span class="pk">Scope</span><span>Read the exports. Build one morning report. <b>Nothing else.</b></span></div>
+              <div class="pr"><span class="pk">Owner</span><span><b>You.</b> Plant ops manager.</span></div>
+              <div class="pr"><span class="pk">Review</span><span>First Friday, on <b>output shipped</b>.</span></div>
+              <div class="pr"><span class="pk">Trail</span><span>Every number opens to its <b>source rows</b>.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RAIL FLOW: guidance, questions, the decision -->
+        <div class="rm-railflow" id="rmFlow"></div>
+
+        <!-- intro overlay -->
+        <div class="rm-ovl" id="rmIntro">
+          <div class="rm-ovl-card">
+            <div class="kicker accent">Wednesday, 06:40</div>
+            <h2>The report has been waiting since <em>05:04</em>.</h2>
+            <p>This used to be your first ninety minutes: pull the MES export, chase the scrap log, build the picture, walk in late. <b>The agent did the reading while the plant slept.</b></p>
+            <p>Stand-up is at 07:00. Read what it built, question it, and pick the one thing that leads the meeting. The priority is yours. It always is.</p>
+            <button class="rm-next" id="rmStart" type="button">Open the morning report <span aria-hidden="true">&#8594;</span></button>
+          </div>
+        </div>
+      </div>
+
+      <p class="honest-note">Simulated plant, real anatomy. Calder Components is invented and the numbers are illustrative. The 05:00 run, the provenance behind every figure, the per-run cap and where the human sits are exactly how the production build is wired.</p>
+    </div>
+  </section>
+
+  <!-- behind the morning -->
+  <section class="section section-rule" id="behind" aria-labelledby="behind-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">Behind the Morning</div>
+        <h2 id="behind-title">Built while the plant <em>slept</em>.</h2>
+        <p class="lead">Same six-step loop as every agent we deploy, run at a different tempo. No console to watch, no alert to answer: the trigger fired at 05:00, the loop ran once, and the output was a finished document with its homework attached.</p>
+      </div>
+      <div class="rm-arch-wrap reveal reveal-late">
+        <div class="rm-archrow">
+          <div class="rm-anode"><div class="an"><span class="ai">01</span>Trigger</div><div class="ag">what wakes it. A clock, a webhook, an inbox. Never a human babysitter.</div><div class="av">a <b>05:00 cron</b>. Nobody woke it, and nobody had to remember it.</div></div>
+          <div class="rm-anode"><div class="an"><span class="ai">02</span>Read</div><div class="ag">your systems, read-only. It looks before it ever touches.</div><div class="av">the overnight <b>MES export</b>, the schedule, the scrap log. 11 files.</div></div>
+          <div class="rm-anode"><div class="an"><span class="ai">03</span>Think</div><div class="ag">cheap rules first, the model only on what moved. Cost lives here.</div><div class="av">reconcile against plan, compare <b>30 nights of baseline</b>, flag the two things that moved.</div></div>
+          <div class="rm-anode"><div class="an"><span class="ai">04</span>Act</div><div class="ag">one bounded move inside a written scope. Never beyond.</div><div class="av">one finished report, two flags, one good word. Posted <b>05:04</b>.</div></div>
+          <div class="rm-anode"><div class="an"><span class="ai">05</span>Human</div><div class="ag">the judgment call, held by one named owner. The gate, not the bottleneck.</div><div class="av"><b>your first move at 07:00</b>. The report proposes. Stand-up disposes.</div></div>
+          <div class="rm-anode"><div class="an"><span class="ai">06</span>Log</div><div class="ag">every step on the record from day one. Reviews run on facts.</div><div class="av">every number opens to its <b>source rows</b>. You clicked one yourself.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the three tempos -->
+  <section class="section section-rule" id="tempos" aria-labelledby="tempos-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">The Range</div>
+        <h2 id="tempos-title">Three tempos an agent can <em>run</em>.</h2>
+        <p class="lead">Not every agent is an alarm. The loop is the same six steps every time; what changes is when it fires and what lands in front of a person. These are the three tempos we deploy most, and you can drive two of them right now.</p>
+      </div>
+      <div class="auto-grid rm-tempos reveal reveal-late">
+        <div class="card-slot">
+          <article class="card">
+            <div class="card-tag">Tempo 01</div>
+            <span class="tempo-when">lives in the minutes</span>
+            <h3>The Watcher</h3>
+            <p>Runs all day on a short clock, says nothing for hours, and speaks the moment one load goes sideways. You answer with a judgment call. The Exception Scout on our Logistics desk is one.</p>
+            <p class="card-cta"><a class="text-link" href="/industries/exception-scout-shift">Work a shift with it <span aria-hidden="true">&#8594;</span></a></p>
+          </article>
+        </div>
+        <div class="card-slot">
+          <article class="card">
+            <div class="card-tag">Tempo 02</div>
+            <span class="tempo-when">lives in the night</span>
+            <h3>The Reporter</h3>
+            <p>Runs once, before you arrive, and hands you a finished artifact with its homework attached. No alert to answer. Your day simply starts at the decision instead of the reading. You just drove it.</p>
+            <p class="card-cta"><button class="text-link" id="rmAgainLink" type="button" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;">Read the morning again <span aria-hidden="true">&#8594;</span></button></p>
+          </article>
+        </div>
+        <div class="card-slot">
+          <article class="card">
+            <div class="card-tag">Tempo 03</div>
+            <span class="tempo-when">lives in the backlog</span>
+            <h3>The Queue-worker</h3>
+            <p>Runs on every item that lands: sorts it, drafts the next step, and keeps the pile at zero. You sign the plan. The Maintenance Triager on this page is one, and its demo is next in line.</p>
+          </article>
+        </div>
+      </div>
+      <p class="honest-note">Every tempo above is an example build, not a case study. Which one earns a seat on your floor first is exactly what the Readiness Map answers.</p>
+    </div>
+  </section>
+
+  <!-- final CTA -->
+  <section class="section inverted cta-final">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Real Numbers</div>
+        <h2>Enough simulations. Get <em>your</em> number.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead cta-sub">Every number in that report is an estimate, because every plant is different. The Readiness Map makes it exact: your workflows, your multipliers, your first agents, with names and owners.</p>
+        <a class="btn" href="/book">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="/">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We make AI agents work inside your company, not just in a demo.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="/foundation">The Foundation</a>
+        <a href="/continuum">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="/standard">The Standard</a>
+        <a href="/about">About</a>
+        <a href="/industries">Industries</a>
+        <a href="/book">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* =====================================================================
+   THE MORNING, ALREADY BUILT
+   No console, no ticks. The report is done when you arrive. Three moves:
+   open a number, ask a question, set the priority. A countdown to
+   stand-up gives the morning its pressure. All timers, no rAF.
+   ===================================================================== */
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
+  var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var S = { opened: {}, openedCount: 0, asked: 0, stage: "read", timers: [] };
+  function after(ms, fn) { var id = setTimeout(fn, REDUCE ? Math.min(ms, 40) : ms); S.timers.push(id); return id; }
+
+  var MARK = '<svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-linecap="square" stroke-width="9"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g><circle cx="60" cy="60" r="7" fill="var(--accent)"/></svg>';
+
+  /* ---------- countdown ---------- */
+  function setCount(minsLeft, sub) {
+    var c = $("#rmCount"), v = $("#rmCountV"), s = $("#rmCountS");
+    if (minsLeft === 0) { c.classList.add("now"); v.innerHTML = "<b>now</b>"; }
+    else if (minsLeft < 0) { c.classList.add("now"); v.innerHTML = "done"; $("#rmCount .cl").textContent = "The morning, after"; }
+    else { v.innerHTML = "T minus <b>" + minsLeft + "</b> min"; }
+    if (sub != null) s.textContent = sub;
+  }
+
+  /* ---------- provenance: the doors ---------- */
+  var PROV = {
+    units: '<span class="ph">Units &middot; how I got 41,270</span>Good-unit completions summed across 4 lines, MES export 21:00 to 05:00: 12,480 + 9,210 + 8,140 + 11,440. Plan of 40,800 comes from the Tuesday schedule file, rev C. <b>Ahead by 470, on Line 1&#8217;s back.</b>',
+    yield: '<span class="ph">First-pass yield &middot; how I got 96.1%</span>Good units over total starts, 41,270 of 42,945. The 0.8 point drop against the 7-day mean is <b>entirely Line 2 after 02:10</b>. Lines 1, 3 and 4 are all inside half a point of their baselines.',
+    scrap: '<span class="ph">Scrap &middot; how I got $8,410</span>612 scrap events multiplied by standard cost per part. $4,980 of it is Line 2, and $4,310 of that landed <b>after 02:10</b>. Before 02:10, Line 2 was scrapping at its normal rate. Something changed at 02:10.',
+    down: '<span class="ph">Downtime &middot; how I got 74 minutes</span>41 logged minutes across Lines 1, 2 and 4, plus <b>33 unlogged minutes on Line 3</b>: thirteen stops under four minutes each, reconstructed from cycle-gap analysis. Short stops rarely make the log. They still make the math.',
+    flag1: '<span class="ph">Flag 01 &middot; the receipts</span>1,214 cycle records, station 4, both shifts. Burr-height proxy climbs monotonically across 6 consecutive lots, operators changed at 03:00, <b>trend did not blink</b>. Material lot 22-H ran clean on Line 1 the same night at 0.4% scrap, which rules out the steel. Die 4 last inspected 41 days ago against a 45-day interval. Wear signature match against 30-night baseline: <b>84%</b>.',
+    flag2: '<span class="ph">Flag 02 &middot; the receipts</span>13 cycle gaps of 40 to 220 seconds, none with an operator downtime code, all preceded by a feed-rate stutter at the bowl feeder, which is the classic jam signature. Pattern is new this week: 2 similar stops last Wednesday, 6 on Monday, <b>13 tonight</b>. It is trending, not random.'
+  };
+  var provOpenFor = null;
+  function toggleProv(key, scrollTarget) {
+    var box = $("#rmProv");
+    document.querySelectorAll(".rm-stat").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+    if (provOpenFor === key) { box.hidden = true; provOpenFor = null; return; }
+    box.innerHTML = PROV[key]; box.hidden = false; provOpenFor = key;
+    var btn = document.querySelector('.rm-stat[data-prov="' + key + '"]');
+    if (btn) btn.setAttribute("aria-expanded", "true");
+    if (!S.opened[key]) { S.opened[key] = true; S.openedCount++; onDoorOpened(); }
+    if (scrollTarget) box.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "nearest" });
+  }
+  document.querySelectorAll("[data-prov]").forEach(function (b) {
+    b.addEventListener("click", function () { toggleProv(b.getAttribute("data-prov"), b.classList.contains("fbtn")); });
+  });
+
+  /* ---------- the rail flow + the "what now" strip ---------- */
+  var flow = $("#rmFlow");
+  function railNote(html) { var n = el("div", "rm-note", html); flow.appendChild(n); return n; }
+  function setHint(html, targetSel, targetLabel) {
+    var h = $("#rmHint");
+    if (html == null) { h.hidden = true; h.innerHTML = ""; return; }
+    h.innerHTML = html + (targetSel ? ' <button type="button">' + targetLabel + " &#8595;</button>" : "");
+    h.hidden = false;
+    if (targetSel) {
+      h.querySelector("button").addEventListener("click", function () {
+        var t = document.querySelector(targetSel);
+        if (t) t.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "center" });
+      });
+    }
+  }
+
+  function start() {
+    $("#rmIntro").hidden = true;
+    setCount(19, "It is 06:41. The report is open.");
+    setHint("<b>Every number is a door.</b> Tap a headline stat, or &#8220;show the receipts&#8221; on a flag.");
+    railNote("Read it like you own it, because you do. <b>Every number is a door.</b> Open one: click a headline stat, or &#8220;show the receipts&#8221; on a flag.");
+    /* the click said "open the report", so land the reader on the report */
+    $("#rmPaper").scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "start" });
+  }
+
+  function onDoorOpened() {
+    if (S.openedCount === 1) {
+      setCount(16, "06:44. You checked its work.");
+      after(600, function () {
+        railNote("<b>No magic.</b> Every claim traces to source rows, which is what an audit trail looks like when it grows up into a document. Open as many doors as you like.");
+        after(500, function () {
+          mountQA();
+          setHint("It shows its work. When you are done reading, <b>ask it a question</b>.", "#rmQA", "go to the questions");
+        });
+      });
+    }
+  }
+
+  var QS = [
+    { q: "Was it the material lot?", a: "No. Lot 22-H ran on Line 1 the same night at <b>0.4% scrap</b>. The signature is mechanical and station-local: burr height climbing on station 4 only, through an operator change. That is a die, not a lot.", src: "sources: mes cycle records &middot; lot genealogy &middot; 30-night baseline" },
+    { q: "What is it costing while we wait?", a: "About <b>$310 an hour</b> of scrap while Line 2 runs, $4,980 since 02:10. And every hour widens the quality exposure on parts already shipped downstream.", src: "sources: scrap events x standard cost &middot; run-rate projection" },
+    { q: "Could it wait a shift?", a: "It can. At about $310 an hour, plus sort risk on the 02:00 to 06:00 batch if quality catches it first. <b>That trade is yours, not mine.</b>", src: "sources: run-rate projection &middot; quality hold history" }
+  ];
+  function mountQA() {
+    if ($("#rmQA")) return;
+    var qa = el("div", "rm-qa"); qa.id = "rmQA";
+    qa.innerHTML = '<div class="cap">Ask it</div>';
+    var row = el("div", "rm-chiprow");
+    QS.forEach(function (item) {
+      var c = el("button", "rm-chip", item.q); c.type = "button";
+      c.addEventListener("click", function () {
+        c.disabled = true; S.asked++;
+        qa.insertBefore(el("div", "rm-qq", item.q), row);
+        var ans = el("div", "rm-ans",
+          '<span class="av">' + MARK + '</span><div class="bd">' + item.a + '<span class="src">' + item.src + "</span></div>");
+        qa.insertBefore(ans, row);
+        if (S.asked === 1) {
+          setCount(8, "06:52. You know what it knows.");
+          after(900, function () {
+            mountDecision();
+            setHint("Stand-up in eight. <b>Set your first move.</b>", "#rmDecide", "go to the decision");
+          });
+        }
+      });
+      row.appendChild(c);
+    });
+    qa.appendChild(row);
+    flow.appendChild(qa);
+  }
+
+  function mountDecision() {
+    if ($("#rmDecide")) return;
+    var d = el("div", "rm-decide"); d.id = "rmDecide";
+    d.innerHTML = '<div class="dh">Stand-up in 8 &middot; one first move</div>';
+    var opts = el("div", "rm-opts");
+    [
+      { k: "pull", primary: true, label: "Lead with Line 2: pull Die 4 at 07:10", sub: "40 planned minutes, on your terms" },
+      { k: "feeder", label: "Send the tech to Line 3 first", sub: "the feeder is real too. Line 2 waits its turn" },
+      { k: "run", label: "Run as planned", sub: "if it is real, quality will catch it" }
+    ].forEach(function (o) {
+      var b = el("button", "rm-opt" + (o.primary ? " primary" : ""), o.label + "<small>" + o.sub + "</small>");
+      b.type = "button";
+      b.addEventListener("click", function () {
+        Array.prototype.forEach.call(opts.children, function (x) { x.disabled = true; });
+        decide(o.k);
+      });
+      opts.appendChild(b);
+    });
+    d.appendChild(opts);
+    flow.appendChild(d);
+    d.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "nearest" });
+  }
+
+  /* ---------- the morning plays out ---------- */
+  function addendum(time, cls, html) {
+    var a = el("div", "rm-add" + (cls ? " " + cls : ""),
+      '<div class="ah">Addendum &middot; ' + time + " &middot; the-shift-reporter</div><p>" + html + "</p>");
+    $("#rmAddenda").appendChild(a);
+    a.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "nearest" });
+  }
+  function decide(k) {
+    S.stage = "played";
+    setCount(0, "07:00. You led with your call.");
+    setHint("<b>The morning is playing out.</b> Addenda land at the bottom of the report as it happens.");
+    if (k === "pull") {
+      after(1100, function () {
+        setCount(-1, "09:12. The morning, played out.");
+        addendum("09:12", "good", "Toolroom confirms: <b>hairline crack across cavity 2 of Die 4.</b> Caught on a planned 40-minute pull at 07:10. Scrap back to 0.6% by 09:40. The 02:00 to 06:00 batch passed sort. Line 2 is clean.");
+        after(1300, function () {
+          railNote("Play it back. The crack was in the report at <b>05:04</b>, with receipts. You spent your first ninety minutes deciding, not assembling. <b>40 planned minutes against a scrap run headed for the afternoon.</b> That trade is the product.");
+          after(900, mountEnd);
+        });
+      });
+    } else if (k === "feeder") {
+      after(1100, function () {
+        addendum("08:20", "good", "Line 3 feeder cleared. Micro-stops ended, cycle time recovered. Good call, that one was real.");
+        after(1400, function () {
+          setCount(-1, "09:40. The morning, played out.");
+          addendum("09:40", "", "<b>Line 2 scrap is still climbing.</b> Re-flagging with fresh data: burr trend now 8 lots long, confidence 91%. Die 4 pulled at 09:50: <b>hairline crack confirmed.</b> The wait cost roughly $900 of scrap.");
+          after(1300, function () {
+            railNote("The feeder was real, and you fixed it. But the die bled about <b>$310 an hour</b> while it waited its turn, and the Reporter <b>re-raised</b>, because a flag that gives up is not a flag. Priority is a muscle. The report is where it trains.");
+            after(900, mountEnd);
+          });
+        });
+      });
+    } else {
+      after(1100, function () {
+        setCount(-1, "10:15. The morning, played out.");
+        addendum("10:15", "", "<b>Quality hold, Line 2.</b> The 02:00 to 06:00 batch, 3,900 units, quarantined for sort. The hold record links this report&#8217;s flag 01, timestamped 05:04, confidence 84%, receipts attached.");
+        after(1300, function () {
+          railNote("Sometimes run-as-planned is the right call. This time the flag was. Friday&#8217;s review reads <b>the same report you did</b>, with the same timestamp. Facts, not memories. That is what judged-on-output means, for the agent and for you.");
+          after(900, mountEnd);
+        });
+      });
+    }
+  }
+
+  function mountEnd() {
+    var wrap = el("div", "rm-card", "");
+    wrap.style.display = "grid"; wrap.style.gap = "0.5rem";
+    var see = el("a", "rm-next", 'See how this morning happened <span aria-hidden="true">&#8595;</span>');
+    see.href = "#behind";
+    var again = el("button", "rm-ghostbtn", "Read the morning again");
+    again.type = "button";
+    again.addEventListener("click", resetAll);
+    wrap.appendChild(see); wrap.appendChild(again);
+    flow.appendChild(wrap);
+    setHint(null);
+    wrap.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "nearest" });
+  }
+
+  /* ---------- reset ---------- */
+  function resetAll() {
+    S.timers.forEach(clearTimeout); S.timers = [];
+    S.opened = {}; S.openedCount = 0; S.asked = 0; S.stage = "read"; provOpenFor = null;
+    $("#rmProv").hidden = true; $("#rmProv").innerHTML = "";
+    setHint(null);
+    document.querySelectorAll(".rm-stat").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+    $("#rmAddenda").innerHTML = ""; flow.innerHTML = "";
+    var c = $("#rmCount"); c.classList.remove("now");
+    c.querySelector(".cl").textContent = "Stand-up · 07:00";
+    setCount(20, "It is 06:40. Coffee in hand.");
+    $("#rmIntro").hidden = false;
+    document.getElementById("run").scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "start" });
+  }
+
+  $("#rmStart").addEventListener("click", start);
+  var againLink = $("#rmAgainLink");
+  if (againLink) againLink.addEventListener("click", resetAll);
+})();
+</script>
+</body>
+</html>

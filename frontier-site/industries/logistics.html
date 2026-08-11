@@ -256,6 +256,21 @@ button.ind-card:focus-visible {
   background: var(--muted-dim);
 }
 
+/* the agent cards share their row tracks, so the tag, the name, the blurb,
+   the multiplier and the HOW IT WORKS rail land on the same lines in every
+   card of the row, whatever their text lengths. Row 6 is the per-card CTA.
+   container-type must come off the slot: containment blocks subgridding.
+   row-gap: 0 keeps the outer grid's gap out of the rows inside a card. */
+@supports (grid-template-rows: subgrid) {
+  .ind-agents .card-slot {
+    container-type: normal;
+    display: grid; grid-template-rows: subgrid; grid-row: span 6; row-gap: 0;
+  }
+  .ind-agents .card { display: grid; grid-template-rows: subgrid; grid-row: span 6; row-gap: 0; }
+  /* the card-body cqi clamp lost its query container with the containment */
+  .ind-agents .card p { font-size: 0.9rem; }
+}
+
 /* -- "industry not listed" band --------------------------------------------- */
 .not-listed { text-align: center; margin-block-start: clamp(2.5rem, 6vw, 4rem); }
 .not-listed h2 { max-width: 20ch; margin-inline: auto; }

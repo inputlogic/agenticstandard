@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Morning with The Case Builder &middot; Financial Services Ops — Agentic Standard</title>
+<meta name="description" content="Knowing your customer is forty-seven checks across a dozen sources. Deciding what it all means is one signature. Work an adjudication desk beside an AI agent that builds every KYC file and is never allowed to sign one.">
+<meta property="og:title" content="A Morning with The Case Builder — Agentic Standard">
+<meta property="og:description" content="An AI agent runs every KYC check overnight and assembles the file. The approval stays with a named human. Work the desk yourself.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A Morning with The Case Builder — Agentic Standard">
+<meta name="twitter:description" content="An AI agent runs every KYC check overnight and assembles the file. The approval stays with a named human. Work the desk yourself.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<style>
+/* ==== A morning with The Case Builder ===================================
+   The adjudicator's cut for Financial Services Ops, and deliberately not
+   another watcher console. The Exception Scout waits for something to
+   happen. This agent has already done a night of work, and the demo is
+   about what it hands over: a finished file, and the three judgments it
+   is not allowed to make. Everything scoped under .cb-* so nothing here
+   leaks into site.css components. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --good: #8FAC77;
+  --warn: #C9A24B;
+}
+
+/* -- hero ------------------------------------------------------------------ */
+.hero { padding-block: clamp(3.5rem, 9vw, 6rem) clamp(2rem, 5vw, 3rem); }
+.hero h1 { max-width: 17ch; }
+.hero .lead { margin-block-start: clamp(1.1rem, 2.5vw, 1.6rem); max-width: 58ch; }
+.rise { animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.21, 1) both; }
+@keyframes rise { from { opacity: 0; translate: 0 1.4rem; } to { opacity: 1; translate: 0 0; } }
+.hero .kicker.rise { animation-delay: 0.06s; }
+.hero h1.rise { animation-delay: 0.18s; }
+.hero .lead.rise { animation-delay: 0.36s; }
+.hero .cb-controls.rise { animation-delay: 0.5s; }
+
+.cb-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: clamp(1.3rem, 3vw, 1.8rem); }
+.cb-control {
+  display: inline-flex; align-items: baseline; gap: 0.55em;
+  border: 1px solid var(--hairline-strong); padding: 0.55em 0.9em;
+  font-size: var(--text-small); color: var(--muted);
+}
+.cb-control b {
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft);
+}
+
+/* ==== THE CONSOLE ======================================================== */
+.cb-console { font-size: 14px; line-height: 1.5; }
+.cb-console button { font-family: var(--font-sans); }
+
+.cb-stage {
+  position: relative;
+  display: grid; grid-template-columns: 254px minmax(360px, 1.35fr) minmax(258px, .92fr);
+  border: 1px solid var(--hairline-strong); background: var(--panel);
+  height: min(790px, 80vh); min-height: 580px; overflow: hidden;
+}
+.cb-col { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.cb-col + .cb-col { border-inline-start: 1px solid var(--hairline); }
+.cb-head {
+  padding: 0.75rem 0.85rem; font-size: 0.62rem; letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--muted); border-block-end: 1px solid var(--hairline);
+  display: flex; align-items: center; gap: 0.55rem; flex: 0 0 auto;
+  white-space: nowrap; overflow: hidden;
+}
+.cb-head b { color: var(--fg-dim); font-weight: 600; }
+.cb-head > span:not(.cb-pulse) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cb-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--good); flex: none; }
+.cb-console.live .cb-pulse { animation: cb-breathe 1.8s ease-in-out infinite; }
+@keyframes cb-breathe { 0%, 100% { opacity: .4 } 50% { opacity: 1 } }
+@keyframes cb-rise { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+
+/* Scroll columns: children must never flex-shrink. A squeezed card clips
+   its own text instead of letting the column scroll. */
+.cb-scroll { overflow: auto; padding: 0.85rem 0.8rem 1.1rem; display: flex; flex-direction: column; gap: 0.85rem; }
+.cb-scroll > * { flex: none; }
+
+.cb-cap { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+.cb-cap::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+.cb-cap .n { color: var(--accent); font-weight: 600; letter-spacing: 0.06em; }
+
+/* ---- left: the desk ---- */
+.cb-desk { background: var(--bg-soft); }
+.cb-clockcard { border: 1px solid var(--hairline); background: var(--panel); padding: 0.7rem 0.8rem 0.6rem; }
+.cb-day { font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.cb-clockrow { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.cb-clock { font-family: var(--font-display); font-weight: 500; font-size: 2.25rem; line-height: 1.15; color: var(--fg); font-variant-numeric: tabular-nums; }
+.cb-clock .z { font-size: 0.78rem; color: var(--muted); font-family: var(--font-sans); letter-spacing: 0.08em; }
+.cb-shiftlab { margin-inline-start: auto; text-align: right; font-size: 0.58rem; color: var(--muted); line-height: 1.5; }
+.cb-shiftlab b { color: var(--fg-dim); }
+
+/* intake queue */
+.cb-qcard {
+  position: relative; width: 100%; text-align: left; appearance: none; cursor: pointer;
+  border: 1px solid var(--hairline); background: var(--panel); padding: 0.7rem 0.75rem 0.65rem;
+  transition: border-color .18s ease, translate .18s ease;
+}
+.cb-qcard:hover { border-color: var(--accent); translate: 0 -1px; }
+.cb-qcard.next { border-color: var(--accent); }
+.cb-qcard.next::after {
+  content: "pick up"; position: absolute; top: 0.6rem; inset-inline-end: 0.65rem;
+  font-size: 0.5rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent); animation: cb-breathe 1.5s ease-in-out infinite;
+}
+.cb-qcard.done { cursor: default; opacity: .85; }
+.cb-qcard.done:hover { border-color: var(--hairline); translate: 0; }
+.cb-qn { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--fg); line-height: 1.2; padding-inline-end: 3.4rem; }
+.cb-qm { font-size: 0.6rem; color: var(--muted); margin-block-start: 3px; line-height: 1.55; }
+.cb-qm b { color: var(--fg-dim); font-weight: 600; }
+.cb-qstat { display: flex; align-items: center; gap: 0.45rem; margin-block-start: 0.5rem; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.cb-qdot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.cb-qstat.ready { color: var(--warn); } .cb-qstat.ready .cb-qdot { background: var(--warn); }
+.cb-qstat.clean { color: var(--good); } .cb-qstat.clean .cb-qdot { background: var(--good); }
+.cb-qstat.build { color: var(--muted); } .cb-qstat.build .cb-qdot { background: var(--muted); animation: cb-breathe 1.4s ease-in-out infinite; }
+.cb-qstat.signed { color: var(--good); } .cb-qstat.signed .cb-qdot { background: var(--good); }
+.cb-qprog { height: 2px; background: var(--hairline-strong); margin-block-start: 0.5rem; }
+.cb-qprog i { display: block; height: 100%; background: var(--muted); transition: width .8s ease; }
+
+/* agent identity */
+.cb-id { border: 1px solid var(--hairline); background: var(--panel); padding: 0.7rem; display: flex; gap: 0.5rem 0.6rem; align-items: center; flex-wrap: wrap; }
+.cb-id .cb-av { width: 32px; height: 32px; flex: none; border: 1px solid var(--hairline); display: grid; place-items: center; }
+.cb-id .cb-av svg { width: 18px; height: 18px; }
+.cb-id .cb-nm { font-weight: 600; color: var(--fg); font-size: 0.78rem; line-height: 1.2; white-space: nowrap; }
+.cb-id .cb-tg { font-size: 0.6rem; color: var(--muted); margin-block-start: 2px; }
+.cb-chip-state {
+  margin-inline-start: auto; flex: none; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; border: 1px solid var(--hairline-strong); color: var(--muted);
+  padding: 0.3em 0.6em; white-space: nowrap; transition: color .2s ease, border-color .2s ease;
+}
+.cb-chip-state.on { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.cb-chip-state.busy { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.cb-chip-state.wait { color: var(--accent); border-color: var(--accent); animation: cb-breathe 1.4s ease-in-out infinite; }
+
+/* overnight tally */
+.cb-tally { border: 1px solid var(--hairline); background: var(--panel); }
+.cb-tally .th { padding: 0.55rem 0.7rem 0.45rem; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border-block-end: 1px solid var(--hairline); }
+.cb-tally .th b { color: var(--accent); font-weight: 600; }
+.cb-tgrid { display: grid; grid-template-columns: repeat(2, 1fr); }
+.cb-tstat { padding: 0.55rem 0.4rem 0.5rem; text-align: center; border-inline-end: 1px solid var(--hairline); border-block-end: 1px solid var(--hairline); }
+.cb-tstat:nth-child(2n) { border-inline-end: 0; }
+.cb-tstat:nth-child(n+3) { border-block-end: 0; }
+.cb-tstat .n { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.cb-tstat .n.good { color: var(--good); }
+.cb-tstat .l { font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-block-start: 4px; line-height: 1.4; }
+
+/* the P&L */
+.cb-pnl { border: 1px solid var(--hairline); background: var(--panel); }
+.cb-pnl-h { padding: 0.6rem 0.7rem 0.5rem; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border-block-end: 1px solid var(--hairline); }
+.cb-pnl-h b { color: var(--accent); font-weight: 600; }
+.cb-prow { display: grid; grid-template-columns: 58px 1fr; gap: 0.5rem; padding: 0.5rem 0.7rem; border-block-end: 1px solid var(--hairline); font-size: 0.66rem; line-height: 1.5; }
+.cb-prow:last-child { border-block-end: 0; }
+.cb-prow .k { color: var(--muted); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.56rem; padding-block-start: 2px; }
+.cb-prow .v { color: var(--muted); }
+.cb-prow .v b { color: var(--fg-dim); font-weight: 600; }
+.cb-meter { display: block; height: 3px; background: var(--hairline-strong); margin-block-start: 6px; }
+.cb-meter i { display: block; height: 100%; width: 1.5%; background: var(--accent); transition: width .6s ease; }
+.cb-spendline { display: flex; justify-content: space-between; margin-block-start: 4px; font-size: 0.58rem; color: var(--muted); }
+.cb-spendline b { color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+.cb-trailbtn { appearance: none; background: none; border: 0; padding: 0; color: var(--accent-soft); font-size: 0.66rem; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-family: var(--font-sans); }
+.cb-trailbtn:hover { color: var(--accent); }
+
+/* the fence */
+.cb-fence { border: 1px solid var(--hairline); background: var(--panel); }
+.cb-fence .fh { padding: 0.55rem 0.7rem 0.45rem; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border-block-end: 1px solid var(--hairline); }
+.cb-fence .fh b { color: var(--accent); font-weight: 600; }
+.cb-fence ul { list-style: none; margin: 0; padding: 0.45rem 0.7rem 0.6rem; display: grid; gap: 0.3rem; }
+.cb-fence li { position: relative; padding-inline-start: 0.9rem; font-size: 0.64rem; line-height: 1.5; color: var(--muted); }
+.cb-fence li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.5em; width: 5px; height: 5px; background: var(--accent); }
+.cb-fence li b { color: var(--fg-dim); font-weight: 600; }
+
+/* ---- centre: the file ---- */
+.cb-file { background: var(--panel); }
+.cb-filescroll { flex: 1; min-height: 0; overflow: auto; padding: 1rem 1.05rem 1.1rem; display: flex; flex-direction: column; gap: 0.75rem; scroll-behavior: smooth; }
+.cb-filescroll > * { flex: none; }
+.cb-empty { margin: auto; text-align: center; max-width: 44ch; color: var(--muted); padding: 1.8rem 0.6rem; }
+.cb-empty .big { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.3rem, 1.1rem + 1vw, 1.7rem); color: var(--fg); line-height: 1.25; margin-block-end: 0.6rem; text-wrap: balance; }
+.cb-empty .big em { font-style: italic; color: var(--accent); }
+.cb-empty p { font-size: 0.76rem; line-height: 1.65; margin: 0; }
+.cb-empty p b { color: var(--fg-dim); }
+
+.cb-note {
+  align-self: center; position: relative; max-width: 58ch; width: fit-content;
+  font-size: 0.72rem; line-height: 1.6; color: var(--muted);
+  padding: 0.55rem 0.8rem 0.55rem 1.75rem; border: 1px dashed var(--hairline-strong);
+  animation: cb-rise .4s ease both; text-wrap: pretty;
+}
+.cb-note::before { content: ""; position: absolute; inset-inline-start: 0.75rem; top: 0.95rem; width: 6px; height: 6px; background: var(--accent); }
+.cb-note b { color: var(--fg-dim); font-weight: 600; }
+
+/* assembly replay */
+.cb-replay { border: 1px solid var(--hairline); background: var(--bg-soft); animation: cb-rise .4s ease both; }
+.cb-replay .rh { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.85rem; border-block-end: 1px solid var(--hairline); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.cb-replay .rh .cnt { margin-inline-start: auto; color: var(--fg-dim); font-variant-numeric: tabular-nums; letter-spacing: 0.06em; }
+.cb-skipbtn { appearance: none; background: none; border: 1px solid var(--hairline-strong); color: var(--muted); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.25em 0.6em; cursor: pointer; font-family: var(--font-sans); }
+.cb-skipbtn:hover { border-color: var(--accent); color: var(--fg); }
+.cb-rstream { font-family: var(--font-mono); font-size: 0.6rem; line-height: 2; color: var(--muted); padding: 0.6rem 0.85rem; height: 225px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.cb-rstream .rr { display: block; animation: cb-rise .25s ease both; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cb-rstream .rr b { color: var(--fg-dim); font-weight: 600; }
+.cb-rstream .ok { color: var(--good); } .cb-rstream .fl { color: var(--warn); font-weight: 600; }
+.cb-rfoot { display: flex; gap: 1rem; padding: 0.55rem 0.85rem; border-block-start: 1px solid var(--hairline); font-size: 0.6rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cb-rfoot b { color: var(--fg); }
+.cb-rfoot .hum { margin-inline-start: auto; }
+.cb-rfoot .hum b { color: var(--accent); }
+
+/* the build tally */
+.cb-rtally { border: 1px solid var(--accent); background: var(--bg-soft); animation: cb-rise .45s ease both; }
+.cb-rtally .h { padding: 0.6rem 0.9rem; border-block-end: 1px solid var(--hairline); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.cb-rtally .grid { display: grid; grid-template-columns: repeat(4, 1fr); border-block-end: 1px solid var(--hairline); }
+.cb-rtally .cell { padding: 0.75rem 0.4rem 0.65rem; text-align: center; border-inline-end: 1px solid var(--hairline); }
+.cb-rtally .cell:last-child { border-inline-end: 0; }
+.cb-rtally .cell .n { font-family: var(--font-display); font-weight: 600; font-size: 1.6rem; line-height: 1; color: var(--fg); }
+.cb-rtally .cell .n.acc { color: var(--accent); }
+.cb-rtally .cell .l { font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-block-start: 5px; line-height: 1.4; }
+.cb-rtally .foot { padding: 0.65rem 0.9rem; font-size: 0.72rem; line-height: 1.6; color: var(--fg-body); }
+.cb-rtally .foot b { color: var(--fg); }
+.cb-btnrow { padding: 0 0.9rem 0.8rem; }
+
+/* dossier */
+.cb-dossier { border: 1px solid var(--hairline); background: var(--bg-soft); animation: cb-rise .4s ease both; }
+.cb-dosshead { padding: 0.85rem 0.95rem 0.75rem; border-block-end: 1px solid var(--hairline); }
+.cb-did { font-size: 0.55rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+.cb-dosshead h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; color: var(--fg); margin: 0.15rem 0 0.45rem; line-height: 1.15; }
+.cb-dmeta { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.cb-dmeta span { font-size: 0.58rem; color: var(--muted); border: 1px solid var(--hairline-strong); padding: 0.25em 0.6em; white-space: nowrap; }
+.cb-dmeta span b { color: var(--fg-dim); font-weight: 600; }
+.cb-dmeta span.risk { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); font-weight: 600; }
+.cb-dmeta span.risk.low { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.cb-dtabs { display: flex; border-block-end: 1px solid var(--hairline); overflow-x: auto; scrollbar-width: none; }
+.cb-dtabs::-webkit-scrollbar { display: none; }
+.cb-dtab {
+  appearance: none; background: none; border: 0; border-block-end: 2px solid transparent; cursor: pointer;
+  padding: 0.55rem 0.65rem 0.5rem; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); white-space: nowrap; transition: .16s ease;
+}
+.cb-dtab:hover { color: var(--fg); }
+.cb-dtab.on { color: var(--accent); border-block-end-color: var(--accent); }
+.cb-tbflag { display: inline-block; margin-inline-start: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--warn); vertical-align: 1px; }
+.cb-tabbody { padding-block: 0.15rem 0.35rem; }
+
+/* claim rows */
+.cb-crow { display: grid; grid-template-columns: 92px 1fr; gap: 0.6rem; padding: 0.55rem 0.95rem; border-block-end: 1px solid var(--hairline); font-size: 0.72rem; line-height: 1.6; }
+.cb-crow:last-child { border-block-end: 0; }
+.cb-crow .ck { color: var(--muted); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding-block-start: 3px; }
+.cb-crow .cv { color: var(--fg-body); min-width: 0; }
+.cb-crow .cv b { color: var(--fg); font-weight: 600; }
+.cb-crow .cv .w { color: var(--warn); font-weight: 600; }
+.cb-crow .cv .g { color: var(--good); font-weight: 600; }
+.cb-crow.hotrow { background: color-mix(in srgb, var(--warn) 7%, transparent); box-shadow: inset 3px 0 0 var(--warn); }
+.cb-srcchip {
+  appearance: none; cursor: pointer; display: inline-block; margin: 3px 4px 0 0; vertical-align: middle;
+  border: 1px solid var(--hairline-strong); background: var(--panel); color: var(--muted);
+  font-size: 0.54rem; font-weight: 600; letter-spacing: 0.06em; padding: 0.2em 0.6em;
+  transition: .15s ease; font-family: var(--font-mono);
+}
+.cb-srcchip:hover { border-color: var(--accent); color: var(--fg); }
+.cb-srcchip.open { border-color: var(--accent); color: var(--accent); }
+.cb-ev { margin-block-start: 5px; font-family: var(--font-mono); font-size: 0.58rem; line-height: 1.7; color: var(--muted); border-inline-start: 2px solid var(--accent); padding: 2px 0 2px 0.55rem; animation: cb-rise .3s ease both; }
+.cb-ev b { color: var(--fg-dim); font-weight: 600; }
+
+/* risk bars */
+.cb-rbars { padding: 0.3rem 0.95rem 0.5rem; display: grid; gap: 0.4rem; }
+.cb-rbar { display: grid; grid-template-columns: 148px 1fr 54px; gap: 0.6rem; align-items: center; font-size: 0.62rem; color: var(--muted); }
+.cb-rbar .lab b { color: var(--fg-dim); font-weight: 600; }
+.cb-rbar .track { height: 3px; background: var(--hairline-strong); overflow: hidden; }
+.cb-rbar .track i { display: block; height: 100%; background: var(--good); width: 0; transition: width .9s ease; }
+.cb-rbar.med .track i { background: var(--warn); }
+.cb-rbar.elev .track i { background: var(--accent); }
+.cb-rbar .lvl { text-align: right; font-size: 0.52rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.cb-rbar.low .lvl { color: var(--good); } .cb-rbar.med .lvl { color: var(--warn); } .cb-rbar.elev .lvl { color: var(--accent); }
+
+/* ownership tree */
+.cb-tree { padding: 0.55rem 0.95rem 0.6rem; display: grid; gap: 2px; }
+.cb-tnode { font-size: 0.7rem; line-height: 1.7; color: var(--fg-body); position: relative; }
+.cb-tnode b { color: var(--fg); font-weight: 600; }
+.cb-tnode.d1 { padding-inline-start: 1.3rem; }
+.cb-tnode.d2 { padding-inline-start: 2.6rem; }
+.cb-tnode.d1::before, .cb-tnode.d2::before { content: "\2514"; position: absolute; inset-inline-start: 0.35rem; top: 0; color: var(--muted-dim); font-family: var(--font-mono); font-size: 0.6rem; }
+.cb-tnode.d2::before { inset-inline-start: 1.65rem; }
+.cb-pct { font-family: var(--font-mono); font-size: 0.58rem; color: var(--accent-soft); margin-inline-start: 4px; }
+.cb-tb { display: inline-block; margin-inline-start: 6px; font-size: 0.52rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid var(--hairline-strong); padding: 0.1em 0.5em; color: var(--muted); vertical-align: 1px; }
+.cb-tb.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.cb-tb.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, transparent); }
+
+/* all-clear strip */
+.cb-clearstrip { margin: 0.6rem 0.95rem 0.75rem; border: 1px solid color-mix(in srgb, var(--good) 45%, transparent); padding: 0.6rem 0.8rem; font-size: 0.7rem; line-height: 1.6; color: var(--fg-body); background: color-mix(in srgb, var(--good) 5%, transparent); }
+.cb-clearstrip b { color: var(--good); font-weight: 600; }
+
+/* digest */
+.cb-dcard { border: 1px solid var(--hairline); background: var(--bg-soft); animation: cb-rise .4s ease both; }
+.cb-dcard .dh { padding: 0.65rem 0.9rem; border-block-end: 1px solid var(--hairline); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg); }
+.cb-dgrid { display: grid; grid-template-columns: repeat(3, 1fr); border-block-end: 1px solid var(--hairline); }
+.cb-dstat { padding: 0.7rem 0.4rem 0.6rem; text-align: center; border-inline-end: 1px solid var(--hairline); }
+.cb-dstat:nth-child(3n) { border-inline-end: 0; }
+.cb-dstat:nth-child(n+4) { border-block-start: 1px solid var(--hairline); }
+.cb-dstat .n { font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; line-height: 1; color: var(--fg); }
+.cb-dstat .n.acc { color: var(--accent); } .cb-dstat .n.good { color: var(--good); }
+.cb-dstat .l { font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-block-start: 5px; line-height: 1.45; }
+.cb-dfoot { padding: 0.65rem 0.9rem; font-size: 0.72rem; line-height: 1.65; color: var(--muted); }
+.cb-dfoot b { color: var(--fg-dim); }
+
+/* ---- right: the decision ---- */
+.cb-dec { background: var(--bg-soft); }
+.cb-decempty { margin: auto; text-align: center; color: var(--muted-dim); font-size: 0.68rem; line-height: 1.7; max-width: 30ch; padding: 1.6rem 0.5rem; }
+.cb-decempty .cap { font-family: var(--font-display); font-size: 1.1rem; color: var(--muted); font-style: italic; margin-block-end: 0.4rem; }
+
+.cb-rec { border: 1px solid var(--hairline); background: var(--panel); padding: 0.7rem 0.75rem; animation: cb-rise .4s ease both; }
+.cb-rec .rh2 { display: flex; gap: 0.5rem; align-items: center; margin-block-end: 0.45rem; }
+.cb-rec .rav { width: 24px; height: 24px; border: 1px solid var(--hairline); display: grid; place-items: center; flex: none; }
+.cb-rec .rav svg { width: 13px; height: 13px; }
+.cb-rec .rwho { font-weight: 600; color: var(--fg); font-size: 0.7rem; }
+.cb-rec .app { font-size: 0.5rem; font-weight: 600; letter-spacing: 0.1em; color: var(--muted); border: 1px solid var(--hairline-strong); padding: 1px 4px; margin-inline-start: 5px; text-transform: uppercase; }
+.cb-rec .rtx { font-size: 0.72rem; line-height: 1.62; color: var(--fg-body); }
+.cb-rec .rtx b { color: var(--fg); font-weight: 600; }
+
+/* flags */
+.cb-flag { border: 1px solid var(--hairline); background: var(--panel); animation: cb-rise .4s ease both; transition: border-color .2s ease; }
+.cb-flag.openf { border-color: var(--warn); }
+.cb-flag.donef { border-color: color-mix(in srgb, var(--good) 40%, transparent); }
+.cb-flag.sentf { border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+.cb-fhead { display: flex; align-items: center; gap: 0.5rem; width: 100%; text-align: left; appearance: none; background: none; border: 0; padding: 0.6rem 0.7rem; cursor: pointer; }
+.cb-fhead:hover .ft { color: var(--fg); }
+.cb-fdot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); flex: none; animation: cb-breathe 1.5s ease-in-out infinite; }
+.cb-flag.donef .cb-fdot { background: var(--good); animation: none; }
+.cb-flag.sentf .cb-fdot { background: var(--warn); animation: none; opacity: .7; }
+.cb-fhead .ft { font-size: 0.68rem; font-weight: 600; color: var(--fg-dim); line-height: 1.35; transition: .15s ease; }
+.cb-fhead .fi { font-family: var(--font-mono); font-size: 0.56rem; color: var(--accent); margin-inline-end: 5px; }
+.cb-fstate { margin-inline-start: auto; flex: none; font-size: 0.5rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--warn); }
+.cb-flag.donef .cb-fstate { color: var(--good); }
+.cb-fbody { border-block-start: 1px solid var(--hairline); padding: 0.65rem 0.7rem 0.75rem; display: none; }
+.cb-flag.openf .cb-fbody { display: block; }
+.cb-fbody p { margin: 0 0 0.5rem; font-size: 0.7rem; line-height: 1.62; color: var(--fg-body); }
+.cb-fbody b { color: var(--fg); font-weight: 600; }
+.cb-fjump { appearance: none; background: none; border: 0; padding: 0; margin: 0 0 0.6rem; color: var(--accent-soft); font-size: 0.66rem; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-family: var(--font-sans); }
+.cb-fjump:hover { color: var(--accent); }
+.cb-fbtns { display: grid; gap: 0.45rem; }
+.cb-fbtn { appearance: none; cursor: pointer; text-align: left; border: 1px solid var(--hairline-strong); background: var(--bg-soft); color: var(--fg); padding: 0.5rem 0.7rem; font-size: 0.7rem; font-weight: 600; line-height: 1.35; transition: .16s ease; }
+.cb-fbtn small { display: block; font-weight: 400; color: var(--muted); font-size: 0.6rem; margin-block-start: 1px; }
+.cb-fbtn:hover { border-color: var(--accent); translate: 0 -1px; }
+.cb-fbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.cb-fbtn.primary small { color: color-mix(in srgb, var(--bg) 72%, transparent); }
+.cb-fbtn.primary:hover { background: var(--accent-hover); }
+.cb-fdone { padding: 0.55rem 0.7rem 0.65rem; border-block-start: 1px solid var(--hairline); font-size: 0.64rem; line-height: 1.55; color: var(--muted); }
+.cb-fdone b { color: var(--fg-dim); }
+
+/* verdict */
+.cb-verdict { border: 1px solid var(--hairline); background: var(--panel); animation: cb-rise .4s ease both; }
+.cb-verdict .vh { padding: 0.6rem 0.7rem 0.5rem; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border-block-end: 1px solid var(--hairline); }
+.cb-verdict .vh b { color: var(--accent); font-weight: 600; }
+.cb-lockline { padding: 0.65rem 0.7rem; font-size: 0.68rem; line-height: 1.6; color: var(--muted); display: flex; gap: 0.55rem; align-items: flex-start; }
+.cb-lockline svg { width: 13px; height: 13px; flex: none; margin-block-start: 2px; color: var(--warn); }
+.cb-lockline b { color: var(--warn); }
+.cb-vbtns { padding: 0.65rem 0.7rem 0.75rem; display: grid; gap: 0.45rem; }
+.cb-vbtn { appearance: none; cursor: pointer; text-align: left; border: 1px solid var(--hairline-strong); background: var(--bg-soft); color: var(--fg); padding: 0.55rem 0.75rem; font-size: 0.74rem; font-weight: 600; line-height: 1.35; transition: .16s ease; animation: cb-rise .35s ease both; }
+.cb-vbtn small { display: block; font-weight: 400; color: var(--muted); font-size: 0.62rem; margin-block-start: 1px; }
+.cb-vbtn:hover { border-color: var(--accent); translate: 0 -1px; }
+.cb-vbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.cb-vbtn.primary small { color: color-mix(in srgb, var(--bg) 72%, transparent); }
+.cb-vbtn.primary:hover { background: var(--accent-hover); }
+.cb-vbtn.picked { border-color: var(--accent); }
+.cb-vbtn:disabled { opacity: .4; cursor: default; translate: 0 0; }
+
+/* signature */
+.cb-signcard { border: 1px solid var(--accent); background: var(--panel); padding: 0.7rem 0.75rem; animation: cb-rise .4s ease both; }
+.cb-signcard .st { font-size: 0.7rem; line-height: 1.6; color: var(--fg-body); margin-block-end: 0.6rem; }
+.cb-signcard .st b { color: var(--fg); }
+.cb-signbtn { appearance: none; cursor: pointer; width: 100%; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); padding: 0.6rem 0.8rem; font-weight: 600; font-size: 0.76rem; transition: .16s ease; }
+.cb-signbtn:hover { background: var(--accent-hover); }
+.cb-signature { display: flex; align-items: baseline; gap: 0.6rem; padding-block-start: 0.2rem; }
+.cb-signature .scr { font-family: var(--font-display); font-style: italic; font-weight: 600; color: var(--accent); font-size: 1.5rem; line-height: 1.1; rotate: -1.5deg; }
+.cb-signature .at { font-size: 0.54rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* consequences */
+.cb-conseq { border: 1px solid var(--hairline); background: var(--panel); animation: cb-rise .45s ease both; }
+.cb-conseq .ch2 { padding: 0.6rem 0.7rem; border-block-end: 1px solid var(--hairline); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--good); }
+.cb-conseq .ch2.held { color: var(--warn); }
+.cb-conseq ul { list-style: none; margin: 0; padding: 0.55rem 0.7rem; display: grid; gap: 0.45rem; }
+.cb-conseq li { position: relative; padding-inline-start: 0.95rem; font-size: 0.68rem; line-height: 1.6; color: var(--fg-body); }
+.cb-conseq li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.52em; width: 5px; height: 5px; background: var(--good); }
+.cb-conseq.held li::before { background: var(--warn); }
+.cb-conseq li b { color: var(--fg); font-weight: 600; }
+.cb-audit { margin: 0 0.7rem 0.7rem; font-family: var(--font-mono); font-size: 0.55rem; line-height: 1.75; color: var(--muted); border: 1px dashed var(--hairline-strong); padding: 0.5rem 0.6rem; }
+.cb-audit b { color: var(--fg-dim); font-weight: 600; }
+.cb-conseq .cb-btnrow { padding: 0 0.7rem 0.7rem; }
+
+.cb-nextbtn { appearance: none; cursor: pointer; width: 100%; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); padding: 0.55rem 0.75rem; font-weight: 600; font-size: 0.74rem; transition: .16s ease; animation: cb-rise .4s ease both; }
+.cb-nextbtn:hover { background: var(--accent-hover); }
+
+/* toast */
+.cb-toast {
+  position: absolute; left: 50%; bottom: 1rem; translate: -50% 0; z-index: 7;
+  background: var(--bg-soft); border: 1px solid var(--hairline-strong); color: var(--fg-body);
+  font-size: 0.7rem; padding: 0.5rem 0.85rem; max-width: min(90%, 46ch); text-align: center; line-height: 1.5;
+  animation: cb-rise .3s ease both;
+}
+.cb-toast b { color: var(--fg); }
+
+/* ---- dock ---- */
+.cb-dock { border: 1px solid var(--hairline-strong); border-block-start: 0; background: var(--panel); }
+.cb-dockbar { display: flex; align-items: center; gap: 0.85rem; padding: 0.55rem 0.9rem; flex-wrap: wrap; }
+.cb-logtog { appearance: none; background: none; border: 0; color: var(--fg-dim); font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.cb-logtog .ch { transition: rotate .25s ease; }
+.cb-logtog[aria-expanded="true"] .ch { rotate: 90deg; }
+.cb-logtog b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.cb-dockbar .sp { flex: 1; }
+.cb-prog { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.cb-ctrl { appearance: none; background: transparent; border: 1px solid var(--hairline-strong); color: var(--fg-dim); padding: 0.4rem 0.75rem; font-size: 0.68rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; transition: .16s ease; }
+.cb-ctrl:hover { border-color: var(--accent); color: var(--fg); }
+.cb-ctrl svg { width: 11px; height: 11px; }
+.cb-logbody { max-height: 0; overflow: auto; border-block-start: 1px solid transparent; transition: max-height .3s ease; font-family: var(--font-mono); font-size: 0.6rem; line-height: 1.9; color: var(--muted); }
+.cb-logbody.open { max-height: 168px; border-block-start-color: var(--hairline); }
+.cb-logbody .inner, .cb-logbody .empty { padding: 0.6rem 0.95rem; }
+.cb-logbody .empty { color: var(--muted-dim); }
+.cb-lg { display: block; white-space: pre-wrap; animation: cb-rise .3s ease both; }
+.cb-lg .t { color: var(--muted-dim); } .cb-lg .who { color: var(--fg-dim); font-weight: 600; }
+.cb-lg .who.you { color: var(--accent); } .cb-lg .c { color: var(--muted-dim); float: right; font-variant-numeric: tabular-nums; }
+
+/* ---- overlays ---- */
+.cb-ovl { position: absolute; inset: 0; z-index: 8; display: flex; align-items: center; justify-content: center; padding: clamp(1rem, 3vw, 2.2rem); overflow: auto; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.cb-ovl[hidden] { display: none; }
+.cb-ovl-card { max-width: 56ch; margin: auto; }
+.cb-ovl-card h2 { font-family: var(--font-display); font-weight: 500; color: var(--fg); font-size: clamp(1.6rem, 1.2rem + 2vw, 2.5rem); line-height: 1.1; margin: 0.5rem 0 0.7rem; text-wrap: balance; }
+.cb-ovl-card h2 em { font-style: italic; color: var(--accent); }
+.cb-ovl-card p { font-size: 0.84rem; line-height: 1.65; color: var(--fg-body); margin: 0 0 0.8rem; }
+.cb-ovl-card p b { color: var(--fg); }
+.cb-go { appearance: none; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); font-weight: 600; font-size: 0.82rem; padding: 0.7rem 1.2rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: .16s ease; text-decoration: none; }
+.cb-go:hover { background: var(--accent-hover); translate: 0 -1px; }
+.cb-ghost { appearance: none; cursor: pointer; border: 1px solid var(--hairline-strong); background: transparent; color: var(--fg); font-weight: 600; font-size: 0.76rem; padding: 0.65rem 1rem; transition: .16s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem; }
+.cb-ghost:hover { border-color: var(--accent); }
+.cb-ovl-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: 1rem; }
+.cb-finstats { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-block: 0.9rem; }
+.cb-finstats span { font-size: 0.66rem; color: var(--muted); border: 1px solid var(--hairline-strong); padding: 0.4em 0.7em; }
+.cb-finstats b { color: var(--fg); font-weight: 600; }
+.cb-finstats b.hot { color: var(--accent); }
+
+/* ==== THE ARCHITECTURE SECTION =========================================== */
+.cb-arch-wrap { border: 1px solid var(--hairline); background: var(--panel); padding: clamp(1rem, 3vw, 1.6rem); margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem); }
+.cb-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-block-end: 1.1rem; }
+.cb-chip { appearance: none; cursor: pointer; border: 1px solid var(--hairline-strong); background: transparent; color: var(--fg-dim); padding: 0.42em 0.85em; font-size: 0.78rem; font-weight: 600; font-family: var(--font-sans); transition: .16s ease; }
+.cb-chip:hover { border-color: var(--accent); color: var(--fg); }
+.cb-chip[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.cb-archrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.1rem 1.4rem; }
+@media (min-width: 900px) { .cb-archrow { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 560px) and (max-width: 899px) { .cb-archrow { grid-template-columns: repeat(2, 1fr); } }
+.cb-anode .an { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg); display: flex; gap: 0.5rem; align-items: baseline; margin-block-end: 0.35rem; }
+.cb-anode .an .ai { font-family: var(--font-mono); font-size: 0.6rem; color: var(--accent); }
+.cb-anode:nth-child(5) .an { color: var(--accent); }
+.cb-anode .ag { font-size: 0.72rem; color: var(--muted); line-height: 1.5; margin-block-end: 0.5rem; }
+.cb-anode .av { font-size: 0.76rem; color: var(--fg-body); line-height: 1.55; border-block-start: 1px solid var(--hairline); padding-block-start: 0.5rem; }
+.cb-archline { margin-block-start: 1.1rem; padding-block-start: 0.9rem; border-block-start: 1px solid var(--hairline); font-size: var(--text-small); line-height: 1.6; color: var(--muted); }
+.cb-archline b { color: var(--fg-dim); }
+
+.honest-note { position: relative; max-width: var(--reading); color: var(--muted); font-size: var(--text-small); line-height: 1.6; text-wrap: pretty; margin-block: clamp(1.1rem, 2.5vw, 1.6rem) 0; padding-inline-start: 1.2rem; }
+.honest-note::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.5em; width: 8px; height: 8px; background: var(--accent); }
+
+.cta-final { text-align: center; }
+.cta-final h2 { max-width: 24ch; margin-inline: auto; }
+.cta-final .cta-sub { max-width: 56ch; margin: 0 auto clamp(1.75rem, 4vw, 2.5rem); }
+
+/* ---- responsive ---- */
+@media (max-width: 1000px) {
+  .cb-stage { grid-template-columns: 1fr; grid-template-rows: auto auto auto; height: auto; min-height: 0; }
+  .cb-col + .cb-col { border-inline-start: 0; border-block-start: 1px solid var(--hairline); }
+  .cb-desk { order: 1; } .cb-file { order: 2; } .cb-dec { order: 3; }
+  .cb-scroll { overflow: visible; }
+  .cb-filescroll { min-height: 52vh; }
+  .cb-ovl { position: sticky; top: 0; min-height: 62vh; }
+  .cb-crow { grid-template-columns: 1fr; gap: 2px; }
+  .cb-crow .ck { padding-block-start: 0; }
+  .cb-rbar { grid-template-columns: 106px 1fr 50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise, .cb-note, .cb-replay, .cb-rtally, .cb-dossier, .cb-flag, .cb-verdict, .cb-conseq, .cb-lg, .cb-rstream .rr { animation: none !important; }
+  .cb-filescroll { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="/" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/standard">Standard</a>
+      <a href="/foundation">Foundation</a>
+      <a href="/continuum">Continuum</a>
+      <a href="/about">About</a>
+      <a href="/industries" aria-current="page">Industries</a>
+      <a class="nav-cta" href="/book">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="container">
+      <p><a class="text-link" href="/industries/finops"><span aria-hidden="true">&#8592;</span> Back to Financial Services Ops</a></p>
+      <div class="kicker accent rise" style="margin-block-start: 1.4rem;">Live Demo &middot; Agent 04 &middot; Financial Services Ops</div>
+      <h1 class="rise">A morning with <em>The Case Builder</em>.</h1>
+      <p class="lead rise">Knowing your customer is forty-seven checks across a dozen sources. That is more than a person should carry. Deciding what it all means is the part only a person should own. You are the senior KYC analyst at Sable Harbour Bank, three files assembled themselves overnight, and the pen is yours alone.</p>
+      <div class="cb-controls rise" aria-label="How this demo works">
+        <span class="cb-control"><b>Your clicks</b> work the desk</span>
+        <span class="cb-control"><b>3 flags</b> only you can dispose</span>
+        <span class="cb-control"><b>3 min</b> start to finish</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- the console -->
+  <section class="section" id="run" style="padding-block-start: 0;">
+    <div class="container">
+      <div class="cb-console" id="cbConsole">
+        <div class="cb-stage" role="group" aria-label="A morning with The Case Builder, interactive">
+
+          <!-- left: the desk -->
+          <div class="cb-col cb-desk">
+            <div class="cb-head"><span class="cb-pulse"></span><span>Your desk &middot; Sable Harbour Bank</span></div>
+            <div class="cb-scroll">
+              <div class="cb-clockcard">
+                <div class="cb-day">Wednesday &middot; adjudication desk</div>
+                <div class="cb-clockrow">
+                  <div class="cb-clock" id="cbClock">09:02<span class="z"> ET</span></div>
+                  <div class="cb-shiftlab">your block <b>09:00 to 11:00</b><br>the builder&#8217;s shift <b>always</b></div>
+                </div>
+              </div>
+
+              <div class="cb-cap">Intake &middot; <span class="n">3 files</span></div>
+
+              <button class="cb-qcard" id="cbQ1" type="button">
+                <div class="cb-qn">Tessaro Building Supply Ltd.</div>
+                <div class="cb-qm">F-2214 &middot; commercial &middot; <b>KYB</b> &middot; applied 26h ago &middot; SLA 48h</div>
+                <div class="cb-qstat ready" id="cbQs1"><span class="cb-qdot"></span>Ready &middot; 3 flags for you</div>
+              </button>
+
+              <button class="cb-qcard" id="cbQ2" type="button">
+                <div class="cb-qn">Priya Raman</div>
+                <div class="cb-qm">F-2215 &middot; retail &middot; <b>KYC</b> &middot; applied 57m ago &middot; chequing + TFSA</div>
+                <div class="cb-qstat clean" id="cbQs2"><span class="cb-qdot"></span>Ready &middot; clean file</div>
+              </button>
+
+              <button class="cb-qcard" id="cbQ3" type="button">
+                <div class="cb-qn">Northgate Freight Brokers Inc.</div>
+                <div class="cb-qm">F-2216 &middot; commercial &middot; <b>KYB</b> &middot; applied 3h ago</div>
+                <div class="cb-qstat build" id="cbQs3"><span class="cb-qdot"></span><span id="cbQs3txt">Assembling &middot; check 31 of 44</span></div>
+                <div class="cb-qprog"><i id="cbQp3" style="width:70%"></i></div>
+              </button>
+
+              <div class="cb-id">
+                <span class="cb-av" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" fill="none">
+                    <g stroke="currentColor" stroke-linecap="square" stroke-width="9"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g>
+                    <circle cx="60" cy="60" r="7" fill="var(--accent)"/>
+                  </svg>
+                </span>
+                <div>
+                  <div class="cb-nm">the-case-builder</div>
+                  <div class="cb-tg">Agent 04 &middot; builds the file, never signs it</div>
+                </div>
+                <span class="cb-chip-state on" id="cbState">Building</span>
+              </div>
+
+              <div class="cb-tally">
+                <div class="th">Overnight &middot; <b>while you slept</b></div>
+                <div class="cb-tgrid">
+                  <div class="cb-tstat"><div class="n">3</div><div class="l">files assembled</div></div>
+                  <div class="cb-tstat"><div class="n">100</div><div class="l">checks run</div></div>
+                  <div class="cb-tstat"><div class="n">31</div><div class="l">sources read</div></div>
+                  <div class="cb-tstat"><div class="n good">0</div><div class="l">accounts opened</div></div>
+                </div>
+              </div>
+
+              <div class="cb-pnl" aria-label="The agent's P and L">
+                <div class="cb-pnl-h">The agent&#8217;s <b>P&amp;L</b> &middot; five lines, written before it touched real work</div>
+                <div class="cb-prow"><span class="k">Scope</span><span class="v">Build the file. Recommend. <b>Nothing opens, closes or files</b> without a human signature.</span></div>
+                <div class="cb-prow"><span class="k">Owner</span><span class="v"><b>You.</b> Senior KYC analyst. One named human, not a committee.</span></div>
+                <div class="cb-prow"><span class="k">Budget</span><span class="v">
+                  <b>$2.50 a file</b>, enforced in the request path itself.
+                  <span class="cb-meter"><i id="cbSpendBar"></i></span>
+                  <span class="cb-spendline"><span>this file</span><b id="cbSpendNum">$0.00</b></span>
+                </span></div>
+                <div class="cb-prow"><span class="k">Review</span><span class="v">First Friday, monthly. Judged on <b>false positives, missed flags</b> and files aged past SLA.</span></div>
+                <div class="cb-prow"><span class="k">Paper trail</span><span class="v">On since day one. <button class="cb-trailbtn" id="cbTrailBtn" type="button"><span id="cbTrailCount">0 entries</span> today &middot; open it</button></span></div>
+              </div>
+
+              <div class="cb-fence">
+                <div class="fh">The fence &middot; <b>what it can never do</b></div>
+                <ul>
+                  <li><b>Approve or decline</b> an account. It has no pen.</li>
+                  <li><b>Clear a screening hit</b> on its own. Hits go to a human or to enhanced due diligence, never to a wastebasket.</li>
+                  <li><b>Skip a failed check quietly.</b> A source that will not answer becomes a flag, not a gap.</li>
+                  <li><b>File the regulatory report.</b> It drafts. A named officer files.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- centre: the file -->
+          <div class="cb-col cb-file">
+            <div class="cb-head" id="cbFileHead"><span><b>The file</b> &middot; nothing on the desk yet</span></div>
+            <div class="cb-filescroll" id="cbFileScroll">
+              <div class="cb-empty" id="cbEmptyDesk">
+                <div class="big">The files build <em>themselves</em>.<br>The verdicts do not.</div>
+                <p>Three onboarding files came in. The builder worked them overnight: identity, ownership, screening, documents, expected activity. Checked, sourced, logged. Pick up the <b>Tessaro</b> file from the intake pile.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- right: the decision -->
+          <div class="cb-col cb-dec">
+            <div class="cb-head"><span>The decision &middot; only you</span></div>
+            <div class="cb-scroll" id="cbDecScroll">
+              <div class="cb-decempty" id="cbDecEmpty">
+                <div class="cap">The pen stays capped.</div>
+                No file on the desk. When one is open, the builder&#8217;s recommendation and every flag it is not allowed to touch land here.
+              </div>
+            </div>
+          </div>
+
+          <!-- intro overlay -->
+          <div class="cb-ovl" id="cbIntro">
+            <div class="cb-ovl-card">
+              <div class="kicker accent">Wednesday, 09:02</div>
+              <h2>Three files. A hundred checks. <em>One</em> pen.</h2>
+              <p>Overnight the builder verified identities, unwrapped ownership two layers deep, screened four sanctions lists, read the documents and modelled the expected activity. <b>Nobody opened an account. Nobody can, except you.</b></p>
+              <p>Pick up a file, read what it found, and dispose the flags it is <b>not allowed</b> to touch.</p>
+              <div class="cb-ovl-row">
+                <button class="cb-go" id="cbStart" type="button">Sit down at 09:02 <span aria-hidden="true">&#8594;</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- finale overlay -->
+          <div class="cb-ovl" id="cbFinale" hidden>
+            <div class="cb-ovl-card">
+              <div class="kicker accent">Morning complete &middot; 09:17</div>
+              <h2>It carried the knowing. You carried the <em>deciding</em>.</h2>
+              <p id="cbFinaleLine">Sixty-nine checks across a dozen sources, so that fifteen minutes of your morning could go to the three judgments that actually needed a person.</p>
+              <div class="cb-finstats" id="cbFinStats"></div>
+              <div class="cb-ovl-row">
+                <a class="cb-go" href="/book">Map this onto your desk <span aria-hidden="true">&#8594;</span></a>
+                <button class="cb-ghost" id="cbSeeArch" type="button">See the architecture <span aria-hidden="true">&#8595;</span></button>
+                <button class="cb-ghost" id="cbAgain" type="button">Run it again</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- dock -->
+        <div class="cb-dock" aria-label="Paper trail">
+          <div class="cb-dockbar">
+            <button class="cb-logtog" id="cbLogTog" aria-expanded="false" aria-controls="cbLogBody">
+              <svg class="ch" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Paper trail <b id="cbLogCount">0 entries</b>
+            </button>
+            <span class="sp"></span>
+            <span class="cb-prog" id="cbProg">Sit down to start</span>
+            <button class="cb-ctrl" id="cbRestart" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg>
+              Restart
+            </button>
+          </div>
+          <div class="cb-logbody" id="cbLogBody"><div class="empty">Every check, every source, every disposition and every dollar lands here. The audit trail is on before the agent is.</div></div>
+        </div>
+      </div>
+
+      <p class="honest-note">Simulated bank, real anatomy. Sable Harbour Bank, Tessaro Building Supply and every person in these files are invented, and the numbers are illustrative. The checks are ordinary KYC practice, and the fence, the spend cap, the flag lock and where the signature sits are exactly how the production build is wired.</p>
+    </div>
+  </section>
+
+  <!-- the architecture -->
+  <section class="section section-rule" id="architecture" aria-labelledby="arch-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker">The Architecture</div>
+        <h2 id="arch-title">One desk. <em>Any</em> gatekeeper.</h2>
+        <p class="lead">Everything in that morning was one pattern: work arriving as work, a read-only sweep of the sources, cheap checks before expensive thinking, a file assembled with a recommendation attached, a named human holding the verdict, and a log written for the regulator as much as for you. Swap the sources and the checklist, and the same desk vets anyone your business has to trust.</p>
+      </div>
+      <div class="cb-arch-wrap reveal reveal-late">
+        <div class="cb-chips" id="cbChips" role="tablist" aria-label="See the desk for another kind of file"></div>
+        <div class="cb-archrow" id="cbArchRow"></div>
+        <p class="cb-archline" id="cbArchLine"></p>
+      </div>
+      <p class="honest-note">Every file type above is an example build. Which one is worth running first on your desk is exactly what the Readiness Map answers.</p>
+      <p style="margin-block-start: clamp(1.25rem, 3vw, 1.75rem);"><a class="text-link" href="/industries/finops">See the other three agents on this desk <span aria-hidden="true">&#8594;</span></a></p>
+    </div>
+  </section>
+
+  <!-- final CTA -->
+  <section class="section inverted cta-final">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Real Numbers</div>
+        <h2>Enough simulations. Get <em>your</em> number.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead cta-sub">Every number in that morning is an estimate, because every book is different. The Readiness Map makes it exact: your workflows, your multipliers, your first agents, with names and owners.</p>
+        <a class="btn" href="/book">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="/">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We put AI agents to work inside your company, and prove it in six weeks.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="/foundation">The Foundation</a>
+        <a href="/continuum">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="/standard">The Standard</a>
+        <a href="/about">About</a>
+        <a href="/industries">Industries</a>
+        <a href="/book">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ============================================================
+   A MORNING WITH THE CASE BUILDER
+   The adjudicator's cut. You play the analyst who holds the pen;
+   the agent plays the night of work you no longer do. Everything
+   is scoped to #cbConsole and the cb* ids.
+   ============================================================ */
+(function () {
+
+var $ = function (s) { return document.querySelector(s); };
+var el = function (t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+
+var S = {
+  timers: [], clock: 9 * 60 + 2, spend: 0, logs: 0, fileOpen: null,
+  flagsLeft: 3, esc: 0, disp: {}, verdict: null, case1: false, case2: false,
+  replayToken: 0,
+  fast: matchMedia("(prefers-reduced-motion: reduce)").matches
+};
+function after(ms, fn) { var id = setTimeout(fn, S.fast ? Math.min(ms, 40) : ms); S.timers.push(id); return id; }
+function seq(steps) { var t = 0; steps.forEach(function (s) { t += s[0]; after(t, s[1]); }); return t; }
+
+/* ---------------- clock and money ---------------- */
+function fmtClock(min) { var h = Math.floor(min / 60) % 24, m = min % 60; return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0"); }
+function setClock(min) { S.clock = min; $("#cbClock").innerHTML = fmtClock(min) + '<span class="z"> ET</span>'; }
+function money(v) { return "$" + v.toFixed(2); }
+function setSpend(v) {
+  S.spend = v;
+  $("#cbSpendNum").textContent = money(v);
+  $("#cbSpendBar").style.width = Math.max(1.5, (v / 2.50) * 100) + "%";
+}
+
+/* ---------------- the paper trail ---------------- */
+function log(actor, action, cost) {
+  var body = $("#cbLogBody");
+  if (!body.dataset.init) { body.innerHTML = '<div class="inner"></div>'; body.dataset.init = 1; }
+  var inner = body.querySelector(".inner");
+  inner.appendChild(el("span", "cb-lg",
+    '<span class="t">' + fmtClock(S.clock) + '</span>  <span class="who' + (actor === "you" ? " you" : "") + '">' +
+    (actor === "you" ? "you" : "builder") + '</span>  ' + action +
+    (cost != null ? '<span class="c">' + (cost === 0 ? "$0" : "$" + cost.toFixed(2)) + '</span>' : "")));
+  S.logs++;
+  var n = S.logs + (S.logs === 1 ? " entry" : " entries");
+  $("#cbLogCount").textContent = n;
+  $("#cbTrailCount").textContent = n;
+  body.scrollTop = body.scrollHeight;
+}
+
+/* ---------------- chrome helpers ---------------- */
+function setState(txt, cls) { var c = $("#cbState"); c.textContent = txt; c.className = "cb-chip-state " + cls; }
+function prog(t) { $("#cbProg").textContent = t; }
+function toast(html) {
+  var old = document.querySelector(".cb-toast"); if (old) old.remove();
+  var t = el("div", "cb-toast", html);
+  document.querySelector(".cb-stage").appendChild(t);
+  after(3400, function () { t.remove(); });
+}
+function cnote(html) { var n = el("div", "cb-note", html); $("#cbFileScroll").appendChild(n); scrollFile(); return n; }
+function scrollFile() { var c = $("#cbFileScroll"); c.scrollTop = c.scrollHeight; }
+function scrollDec() { var c = $("#cbDecScroll"); c.scrollTop = c.scrollHeight; }
+var AV = '<svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-linecap="square" stroke-width="9"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g><circle cx="60" cy="60" r="7" fill="var(--accent)"/></svg>';
+
+/* ============================================================
+   THE DOSSIER
+   ============================================================ */
+var SRC = {
+  reg: "corp registry &middot; 06:12",
+  idv: "ID verification &middot; 06:14",
+  scr: "screening feed &middot; 06:17",
+  fin: "financials &middot; 06:22",
+  web: "open web &middot; 06:24",
+  doc: "document read &middot; 06:19"
+};
+function crow(k, v, src, ev, id, hot) {
+  return '<div class="cb-crow' + (hot ? " hotrow" : "") + '"' + (id ? ' id="' + id + '"' : "") + '><span class="ck">' + k + '</span><div class="cv">' + v +
+    (src ? '<br><button class="cb-srcchip" type="button">' + src + '</button><div class="cb-ev hide" hidden>' + ev + '</div>' : "") + '</div></div>';
+}
+var TABS1 = {
+  summary: { label: "Summary", html: function () { return (
+crow("The ask", "Operating account and a payables rail. About <b>$340k a month</b> inbound from trade customers, payables to around 30 vendors, payroll for 28.", null) +
+    '<div class="cb-rbars">' +
+      '<div class="cb-rbar med"><span class="lab"><b>Industry</b> &middot; building materials</span><span class="track"><i data-w="52%"></i></span><span class="lvl">medium</span></div>' +
+      '<div class="cb-rbar low"><span class="lab"><b>Geography</b> &middot; ON and QC only</span><span class="track"><i data-w="22%"></i></span><span class="lvl">low</span></div>' +
+      '<div class="cb-rbar med"><span class="lab"><b>Product</b> &middot; payments rail</span><span class="track"><i data-w="48%"></i></span><span class="lvl">medium</span></div>' +
+      '<div class="cb-rbar elev"><span class="lab"><b>Ownership</b> &middot; two layers</span><span class="track"><i data-w="68%"></i></span><span class="lvl">elevated</span></div>' +
+      '<div class="cb-rbar elev"><span class="lab"><b>Screening</b> &middot; 2 open items</span><span class="track"><i data-w="72%"></i></span><span class="lvl">elevated</span></div>' +
+    '</div>' +
+    crow("The score", "Provisional <b>61 of 100, medium-high</b>. The score is an input, not a verdict. It cannot see what you are about to read in the flags.", null) +
+    crow("On your desk", '<span class="w">3 flags</span> &middot; an adverse media possible match, a PEP association, and one stale document. Dispose them and the verdict unlocks.', null)); } },
+  identity: { label: "Identity", html: function () { return (
+crow("Legal entity", "<b>Tessaro Building Supply Ltd.</b> &middot; BN 88213 4471 &middot; incorporated 2012 &middot; status <span class=\"g\">active</span>", SRC.reg, "registry extract #A-7741 &middot; no changes pending &middot; pulled 06:12 &middot; <b>$0.04</b>") +
+    crow("Addresses", "Registered: 41 Grindstone Way, Hamilton ON. Matches the registry and the signed lease.", SRC.doc, "lease read in full &middot; counterparty verified &middot; term through 2028") +
+    crow("Nadia Tessaro", "CEO &middot; 38% &middot; passport verified: <span class=\"g\">MRZ checksum valid</span> &middot; liveness match <b>0.98</b> &middot; address confirmed", SRC.idv, "document template and hologram pattern pass &middot; credit header address match &middot; <b>$0.11</b>") +
+    crow("Marco Tessaro", "Warehouse manager &middot; 9% &middot; driver&#8217;s licence verified &middot; born <b>1987</b>, Hamilton", SRC.idv, "licence template valid &middot; date of birth cross-checked on two documents &middot; this row feeds <b>flag 01</b>") +
+    crow("Dominic Shaw", "Investor &middot; 27% via Bright Harbour Holdings &middot; passport verified &middot; liveness match <b>0.97</b>", SRC.idv, "second-layer beneficial owner &middot; identity confirmed before screening ran")); } },
+  ownership: { label: "Ownership", flag: true, html: function () { return (
+'<div class="cb-tree">' +
+      '<div class="cb-tnode"><b>Tessaro Building Supply Ltd.</b><span class="cb-tb">operating co &middot; Hamilton</span></div>' +
+      '<div class="cb-tnode d1">Nadia Tessaro <span class="cb-pct">38%</span><span class="cb-tb ok">owner &middot; ID verified</span></div>' +
+      '<div class="cb-tnode d1">Bright Harbour Holdings Inc. <span class="cb-pct">27%</span><span class="cb-tb">layer 2 &middot; registry pulled</span></div>' +
+      '<div class="cb-tnode d2" id="cbRowF2">Dominic Shaw <span class="cb-pct">100% of holdco</span><span class="cb-tb ok">owner &middot; ID verified</span><span class="cb-tb warn">PEP association &middot; flag 02</span></div>' +
+      '<div class="cb-tnode d1">Tessaro Family Trust <span class="cb-pct">14%</span><span class="cb-tb">deed read &middot; trustee N. Tessaro</span></div>' +
+      '<div class="cb-tnode d1">Marco Tessaro <span class="cb-pct">9%</span><span class="cb-tb warn">adverse media &middot; flag 01</span></div>' +
+      '<div class="cb-tnode d1">3 employees <span class="cb-pct">12% combined</span><span class="cb-tb">below the 25% threshold</span></div>' +
+    '</div>' +
+    crow("Method", "Both layers unwrapped against the registry. <b>2 beneficial owners</b> at the 25% threshold, both identity-verified before screening ran.", SRC.reg, "Bright Harbour Holdings &middot; registry extract #A-7749 &middot; sole shareholder D. Shaw &middot; <b>$0.04</b>") +
+    crow("Directors", "N. Tessaro, D. Shaw, R. Whitfield. Matches the registry filing. All three screened.", null)); } },
+  screening: { label: "Screening", flag: true, html: function () { return (
+crow("Sanctions", "Entity and 4 persons against <b>OFAC SDN, UN, EU and SEMA (Canada)</b> &middot; <span class=\"g\">all clear</span>", SRC.scr, "list versions 2026-08-12 &middot; fuzzy threshold 0.85 &middot; 0 hits &middot; re-screens nightly for the life of the account") +
+    crow("PEP", '<span class="w">1 association hit.</span> D. Shaw&#8217;s spouse is the mayor of Aldermere, ON. A domestic politically exposed person under FINTRAC guidance. <b>Flag 02.</b>', SRC.scr, "match confidence high &middot; relationship confirmed against a public registry, not inferred", null, true) +
+    crow("Adverse media", '<span class="w">1 possible match.</span> A 2019 Windsor court report names a &#8220;Marco Tessaro&#8221; in a renovation deposit fraud. <b>Flag 01.</b>', SRC.web, "court report read in full &middot; 214 words &middot; age in article about 61, so born about 1958 &middot; our M. Tessaro born 1987 &middot; photos disagree", "cbRowF1", true) +
+    crow("Watchlists", 'Internal watchlist, prior relationships and the fraud consortium: <span class="g">clear</span>. No suspicious transaction report history on any name.', SRC.scr, "device and application velocity checks also clear &middot; no synthetic identity signals")); } },
+  activity: { label: "Activity", html: function () { return (
+crow("Declared", "About $340k a month inbound from roughly 200 trade customers, payables to around 30 building-trade vendors, payroll for 28.", null) +
+    crow("Modelled", "Consistent with sector peers at this size. <b>Cash intensity: low.</b> Invoice-based business to business, no cash handling declared.", SRC.fin, "two years of statements read &middot; revenue and margins inside the sector band") +
+    crow("Source of funds", "Operating revenue since 2012. Fourteen years of filings and statements attached to the file.", SRC.fin, "no unexplained capital injections &middot; shareholder loans documented") +
+    crow("Monitoring plan", "Drafted, not armed. Alerts if inbound breaks the declared band, counterparties appear outside ON and QC, or <b>any</b> cash pattern shows up.", null)); } },
+  documents: { label: "Documents", flag: true, html: function () { return (
+crow("Articles of incorporation", '<span class="g">Verified</span> against the registry, not against the applicant&#8217;s upload.', SRC.reg, "hash of the registry copy matches the filed original") +
+    crow("Business licence", '<span class="g">Valid</span> &middot; City of Hamilton &middot; current year.', SRC.doc, "municipal lookup &middot; licence #BL-44172") +
+    crow("Lease and bank reference", '<span class="g">Both verified.</span> The lease runs through 2028. The reference from their current institution is confirmed.', SRC.doc, "reference letterhead and signatory verified against a callback record") +
+    crow("Financial statements", '<span class="g">Read.</span> Two years, accountant-prepared. The numbers feed the activity model.', SRC.fin, "prepared by a licensed CPA firm &middot; engagement letter sighted") +
+    crow("Shareholder register", '<span class="w">Stale.</span> Bright Harbour&#8217;s register is <b>14 months old</b> against a 12-month policy. The registry shows no change filed since. <b>Flag 03.</b>', SRC.reg, "policy DOC-7 &middot; refresh window 12 months &middot; last filed change 2025-06", "cbRowF3", true)); } }
+};
+var TABS2 = {
+  summary: { label: "Summary", html: function () { return (
+crow("The ask", "Chequing and a TFSA. Direct deposit from her employer, a Toronto physio clinic. Declared about $4,600 a month in salary.", null) +
+    crow("Identity", 'Passport verified: <span class="g">MRZ valid</span> &middot; liveness match <b>0.99</b> &middot; address confirmed against the credit header.', SRC.idv, "document template pass &middot; no velocity or device flags &middot; <b>$0.06</b>") +
+    crow("Screening", 'Sanctions, PEP, adverse media and watchlists: <span class="g">all clear</span> across OFAC SDN, UN, EU and SEMA.', SRC.scr, "list versions 2026-08-12 &middot; 0 hits &middot; nightly re-screen armed") +
+    crow("Activity", 'Salary deposits, everyday spending, TFSA contributions inside the annual limit. Model: <span class="g">consistent</span>.', null) +
+    crow("Documents", "All current. Nothing stale, nothing missing, nothing chased.", null) +
+    '<div class="cb-clearstrip"><b>22 checks &middot; 6 sources &middot; all clear.</b> About 45 minutes of a person&#8217;s day, carried. No flags. The pen is yours.</div>'); } }
+};
+
+function buildDossier(which) {
+  var d = which === 1 ? {
+    id: "File F-2214 &middot; commercial onboarding &middot; KYB",
+    name: "Tessaro Building Supply Ltd.",
+    meta: '<span>applied <b>Tue 07:12</b> &middot; 26h ago</span><span>SLA <b>48h</b></span><span>Hamilton, ON</span><span class="risk">provisional risk 61 &middot; medium-high</span>',
+    tabs: TABS1
+  } : {
+    id: "File F-2215 &middot; retail onboarding &middot; KYC",
+    name: "Priya Raman",
+    meta: '<span>applied <b>08:12</b> today</span><span>Toronto, ON</span><span>chequing + TFSA</span><span class="risk low">provisional risk 12 &middot; low</span>',
+    tabs: TABS2
+  };
+  var box = el("div", "cb-dossier"), tabBtns = "";
+  Object.keys(d.tabs).forEach(function (k, i) {
+    tabBtns += '<button class="cb-dtab' + (i === 0 ? " on" : "") + '" type="button" data-tab="' + k + '">' + d.tabs[k].label + (d.tabs[k].flag ? '<span class="cb-tbflag"></span>' : "") + '</button>';
+  });
+  box.innerHTML = '<div class="cb-dosshead"><div class="cb-did">' + d.id + '</div><h2>' + d.name + '</h2><div class="cb-dmeta">' + d.meta + '</div></div>' +
+    '<div class="cb-dtabs">' + tabBtns + '</div><div class="cb-tabbody" id="cbTabBody"></div>';
+  $("#cbFileScroll").appendChild(box);
+  box.querySelectorAll(".cb-dtab").forEach(function (b) {
+    b.addEventListener("click", function () { showTab(which, b.dataset.tab); });
+  });
+  showTab(which, Object.keys(d.tabs)[0]);
+  return box;
+}
+function showTab(which, key) {
+  var tabs = which === 1 ? TABS1 : TABS2;
+  document.querySelectorAll(".cb-dtab").forEach(function (b) { b.classList.toggle("on", b.dataset.tab === key); });
+  var body = $("#cbTabBody");
+  body.innerHTML = tabs[key].html();
+  body.querySelectorAll(".cb-srcchip").forEach(function (ch) {
+    ch.addEventListener("click", function () {
+      var ev = ch.nextElementSibling;
+      var open = ev.hidden;
+      ev.hidden = !open;
+      ch.classList.toggle("open", open);
+    });
+  });
+  body.querySelectorAll(".cb-rbar .track i").forEach(function (bar) {
+    requestAnimationFrame(function () { requestAnimationFrame(function () { bar.style.width = bar.dataset.w; }); });
+  });
+}
+function focusRow(which, tab, rowId) {
+  showTab(which, tab);
+  after(60, function () {
+    var r = document.getElementById(rowId);
+    if (r) r.scrollIntoView({ behavior: S.fast ? "auto" : "smooth", block: "center" });
+  });
+}
+
+/* ============================================================
+   THE ASSEMBLY REPLAY
+   ============================================================ */
+var REPLAY1 = [
+  ["<b>identity</b> &middot; legal name against the corporate registry", '<span class="ok">match</span>'],
+  ["<b>identity</b> &middot; BN 88213 4471 &middot; registry status", '<span class="ok">active</span>'],
+  ["<b>documents</b> &middot; articles of incorporation", '<span class="ok">authentic</span>'],
+  ["<b>documents</b> &middot; business licence &middot; City of Hamilton", '<span class="ok">valid</span>'],
+  ["<b>identity</b> &middot; passport MRZ &middot; N. Tessaro", '<span class="ok">checksum valid</span>'],
+  ["<b>identity</b> &middot; liveness match 0.98 &middot; N. Tessaro", '<span class="ok">pass</span>'],
+  ["<b>identity</b> &middot; driver&#8217;s licence &middot; M. Tessaro", '<span class="ok">template valid</span>'],
+  ["<b>ownership</b> &middot; shareholder register parsed &middot; 5 holders", '<span class="ok">done</span>'],
+  ["<b>ownership</b> &middot; layer 2 &middot; Bright Harbour Holdings", '<span class="ok">registry pulled</span>'],
+  ["<b>ownership</b> &middot; 25% beneficial owner threshold applied", '<span class="ok">2 identified</span>'],
+  ["<b>screening</b> &middot; OFAC SDN v2026-08-12 &middot; entity + 4 persons", '<span class="ok">clear</span>'],
+  ["<b>screening</b> &middot; UN consolidated list", '<span class="ok">clear</span>'],
+  ["<b>screening</b> &middot; EU consolidated list", '<span class="ok">clear</span>'],
+  ["<b>screening</b> &middot; SEMA (Canada)", '<span class="ok">clear</span>'],
+  ["<b>screening</b> &middot; PEP registry &middot; 1 association hit", '<span class="fl">to a flag</span>'],
+  ["<b>screening</b> &middot; adverse media &middot; 1 possible match", '<span class="fl">to a flag</span>'],
+  ["<b>activity</b> &middot; declared volumes against the sector model", '<span class="ok">consistent</span>'],
+  ["<b>activity</b> &middot; source of funds &middot; 14 years of filings", '<span class="ok">consistent</span>'],
+  ["<b>documents</b> &middot; shareholder register age &middot; 14 months", '<span class="fl">to a flag</span>'],
+  ["<b>web</b> &middot; storefront, 214 reviews, live site", '<span class="ok">consistent</span>'],
+  ["<b>risk</b> &middot; provisional score 61 &middot; medium-high", '<span class="ok">drafted</span>']
+];
+var REPLAY2 = [
+  ["<b>identity</b> &middot; passport MRZ &middot; P. Raman", '<span class="ok">checksum valid</span>'],
+  ["<b>identity</b> &middot; liveness match 0.99", '<span class="ok">pass</span>'],
+  ["<b>identity</b> &middot; address against the credit header", '<span class="ok">match</span>'],
+  ["<b>screening</b> &middot; OFAC SDN, UN, EU, SEMA", '<span class="ok">clear</span>'],
+  ["<b>screening</b> &middot; PEP, adverse media, watchlists", '<span class="ok">clear</span>'],
+  ["<b>activity</b> &middot; declared salary against the model", '<span class="ok">consistent</span>'],
+  ["<b>risk</b> &middot; provisional score 12 &middot; low", '<span class="ok">drafted</span>']
+];
+function fmtHm(min) { var h = Math.floor(min / 60), m = min % 60; return h + "h " + String(m).padStart(2, "0") + "m"; }
+function runReplay(which, done) {
+  var lines = which === 1 ? REPLAY1 : REPLAY2;
+  var total = which === 1 ? 47 : 22;
+  var humTotal = which === 1 ? 230 : 45;
+  var spendTotal = which === 1 ? 0.84 : 0.31;
+  var token = ++S.replayToken;
+  var box = el("div", "cb-replay");
+  box.innerHTML = '<div class="rh"><span>Replaying the build &middot; ' + (which === 1 ? "overnight, 04:58 to 06:24" : "this morning, 08:12 to 08:31") + '</span>' +
+    '<span class="cnt" id="cbRCnt">check 0 / ' + total + '</span><button class="cb-skipbtn" id="cbRSkip" type="button">Skip</button></div>' +
+    '<div class="cb-rstream" id="cbRStream"></div>' +
+    '<div class="cb-rfoot"><span>spend <b id="cbRSpend">$0.00</b></span><span class="hum">a person&#8217;s hours, carried: <b id="cbRHum">0h 00m</b></span></div>';
+  $("#cbFileScroll").appendChild(box); scrollFile();
+  var stream = box.querySelector("#cbRStream");
+  var i = 0, finished = false;
+  var stepMs = S.fast ? 18 : 170;
+  function fin() {
+    if (finished || token !== S.replayToken) return;
+    finished = true;
+    box.querySelector("#cbRCnt").textContent = "check " + total + " / " + total;
+    box.querySelector("#cbRHum").textContent = fmtHm(humTotal);
+    box.querySelector("#cbRSpend").textContent = money(spendTotal);
+    var sk = box.querySelector("#cbRSkip"); if (sk) sk.remove();
+    done(box);
+  }
+  box.querySelector("#cbRSkip").addEventListener("click", fin);
+  (function step() {
+    if (finished || token !== S.replayToken) return;
+    if (i >= lines.length) { fin(); return; }
+    stream.appendChild(el("span", "rr", lines[i][0] + "  &middot;  " + lines[i][1]));
+    while (stream.children.length > 10) stream.removeChild(stream.firstChild);
+    i++;
+    var p = i / lines.length;
+    box.querySelector("#cbRCnt").textContent = "check " + Math.round(p * total) + " / " + total;
+    box.querySelector("#cbRHum").textContent = fmtHm(Math.round(p * humTotal));
+    box.querySelector("#cbRSpend").textContent = money(p * spendTotal);
+    after(stepMs, step);
+  })();
+}
+
+/* ============================================================
+   THE FLAGS
+   ============================================================ */
+var FLAGS = [
+  { n: 1, title: "Adverse media &middot; possible match", tab: "screening", row: "cbRowF1",
+    body: '<p>The screening feed matched <b>&#8220;Marco Tessaro&#8221;</b> to a 2019 Windsor court report on renovation deposit fraud. Your Marco Tessaro holds 9% and runs the warehouse.</p>' +
+          '<p><b>Against the match:</b> the article&#8217;s subject was 61 in 2019, so born about 1958. Yours was born in 1987, in Hamilton, and the photos disagree. <b>My read: a different man, 92%.</b></p>' +
+          '<p>I do not clear screening hits. That is a design choice, not a shortfall.</p>',
+    jump: "Read the evidence in Screening &#8594;",
+    a: { label: "Clear it &middot; false positive", sub: "date of birth, city and photo all disagree", primary: true,
+         done: "Cleared by you &middot; <b>false positive</b> &middot; the mismatch is on file.", logline: "flag 01 cleared: adverse media false positive &middot; date of birth, city and photo mismatch" },
+    b: { label: "Not convinced &middot; send it onward", sub: "enhanced due diligence, about 2 days",
+         done: "Sent onward &middot; <b>enhanced due diligence will run it down</b> &middot; your caution is on file.", logline: "flag 01 sent to enhanced due diligence: adverse media match not cleared", esc: true } },
+  { n: 2, title: "PEP association &middot; D. Shaw", tab: "ownership", row: "cbRowF2",
+    body: '<p><b>Dominic Shaw</b>, 27% through Bright Harbour Holdings, is married to the mayor of Aldermere. Under FINTRAC guidance that makes him <b>associated with a politically exposed person</b>. A category, not an accusation.</p>' +
+          '<p>Policy asks two things: source of funds on file, and a senior sign-off. The first is done, fourteen years of operating revenue with statements attached. <b>The second is you.</b></p>',
+    jump: "See him in the ownership tree &#8594;",
+    a: { label: "Acknowledge &middot; enhanced monitoring", sub: "sign-off recorded, tighter alerts armed", primary: true,
+         done: "Acknowledged by you &middot; <b>enhanced monitoring</b> attaches to the account.", logline: "flag 02 acknowledged: PEP association &middot; enhanced monitoring applied" },
+    b: { label: "Escalate &middot; full diligence", sub: "source of wealth, the long form",
+         done: "Escalated &middot; <b>full enhanced diligence</b> &middot; the builder drafts the package tonight.", logline: "flag 02 escalated: PEP association to full enhanced due diligence", esc: true } },
+  { n: 3, title: "Stale document &middot; shareholder register", tab: "documents", row: "cbRowF3",
+    body: '<p>Bright Harbour&#8217;s shareholder register is <b>14 months old</b> against a 12-month policy. The registry shows no change filed since, so the risk is low.</p>' +
+          '<p>But the rule is the rule, so it lands here instead of getting quietly waved through. That is the difference between a gap and a flag.</p>',
+    jump: "See it in Documents &#8594;",
+    a: { label: "Accept &middot; refresh due in 30 days", sub: "a chase task, drafted and dated", primary: true,
+         done: "Accepted by you &middot; <b>refresh due Sep 12</b> &middot; the chase drafts itself.", logline: "flag 03 accepted: register refresh due Sep 12" },
+    b: { label: "Hold the file until refreshed", sub: "Tessaro waits on the paperwork",
+         done: "Held &middot; <b>the file waits</b> on the refreshed register.", logline: "flag 03 held: file waits on register refresh", esc: true } }
+];
+
+function buildDecision1() {
+  var dec = $("#cbDecScroll");
+  dec.innerHTML = "";
+  var rec = el("div", "cb-rec");
+  rec.innerHTML = '<div class="rh2"><span class="rav">' + AV + '</span><span class="rwho">the-case-builder<span class="app">agent</span></span></div>' +
+    '<div class="rtx"><b>My read: approve, with conditions.</b> The company is what it says it is. Two screening items I am not allowed to clear and one stale document are yours. Dispose the three flags and the verdict unlocks.</div>';
+  dec.appendChild(rec);
+  dec.appendChild(el("div", "cb-cap", 'Flags &middot; <span class="n">dispose each one</span>'));
+  FLAGS.forEach(function (f) {
+    var card = el("div", "cb-flag");
+    card.id = "cbFlag" + f.n;
+    card.innerHTML = '<button class="cb-fhead" type="button"><span class="cb-fdot"></span><span class="ft"><span class="fi">0' + f.n + '</span>' + f.title + '</span><span class="cb-fstate">open</span></button>' +
+      '<div class="cb-fbody">' + f.body +
+      '<button class="cb-fjump" type="button">' + f.jump + '</button>' +
+      '<div class="cb-fbtns">' +
+        '<button class="cb-fbtn primary" type="button" data-c="a">' + f.a.label + '<small>' + f.a.sub + '</small></button>' +
+        '<button class="cb-fbtn" type="button" data-c="b">' + f.b.label + '<small>' + f.b.sub + '</small></button>' +
+      '</div></div>';
+    dec.appendChild(card);
+    card.querySelector(".cb-fhead").addEventListener("click", function () {
+      if (S.disp[f.n]) return;
+      var opening = !card.classList.contains("openf");
+      document.querySelectorAll(".cb-flag.openf").forEach(function (x) { x.classList.remove("openf"); });
+      if (opening) { card.classList.add("openf"); focusRow(1, f.tab, f.row); }
+    });
+    card.querySelector(".cb-fjump").addEventListener("click", function () { focusRow(1, f.tab, f.row); });
+    card.querySelectorAll(".cb-fbtn").forEach(function (b) {
+      b.addEventListener("click", function () { disposeFlag(f, b.dataset.c === "a" ? f.a : f.b, card); });
+    });
+  });
+  var v = el("div", "cb-verdict");
+  v.id = "cbVerdictCard";
+  v.innerHTML = '<div class="vh"><b>The verdict</b> &middot; the part that is a person</div>' +
+    '<div class="cb-lockline" id="cbLockLine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>' +
+    '<span><b>3 flags open.</b> The pen stays capped until a human has read each one and said what it means.</span></div>';
+  dec.appendChild(v);
+  dec.scrollTop = 0;
+}
+function disposeFlag(f, choice, card) {
+  if (S.disp[f.n]) return;
+  S.disp[f.n] = choice;
+  if (choice.esc) S.esc++;
+  S.flagsLeft--;
+  setClock(S.clock + 2);
+  card.classList.remove("openf");
+  card.classList.add(choice.esc ? "sentf" : "donef");
+  card.querySelector(".cb-fstate").textContent = choice.esc ? "sent onward" : "cleared";
+  card.querySelector(".cb-fbody").remove();
+  card.appendChild(el("div", "cb-fdone", choice.done));
+  log("you", choice.logline, 0);
+  if (S.flagsLeft > 0) {
+    $("#cbLockLine").querySelector("span").innerHTML = "<b>" + S.flagsLeft + " flag" + (S.flagsLeft > 1 ? "s" : "") +
+      " open.</b> The pen stays capped until a human has read each one and said what it means.";
+  } else {
+    unlockVerdict();
+  }
+  scrollDec();
+}
+function unlockVerdict() {
+  prog("09:12 &middot; the verdict");
+  setClock(9 * 60 + 12);
+  var v = $("#cbVerdictCard");
+  $("#cbLockLine").remove();
+  var wrap = el("div", "cb-vbtns");
+  function mk(label, sub, primary, go) {
+    var b = el("button", "cb-vbtn" + (primary ? " primary" : ""), label + "<small>" + sub + "</small>");
+    b.type = "button";
+    b.addEventListener("click", function () { chooseVerdict(label, go, wrap, b); });
+    return b;
+  }
+  if (S.esc > 0) {
+    wrap.appendChild(mk("Hold for deeper diligence", "you sent " + S.esc + " item" + (S.esc > 1 ? "s" : "") + " onward &middot; about 2 days", true, "hold"));
+    wrap.appendChild(mk("Approve with conditions", "overrides your own escalation &middot; recorded either way", false, "approve"));
+  } else {
+    wrap.appendChild(mk("Approve with conditions", "opens today &middot; monitoring and a dated refresh attach", true, "approve"));
+    wrap.appendChild(mk("Hold for deeper diligence", "never wrong to slow down &middot; about 2 days", false, "hold"));
+  }
+  wrap.appendChild(mk("Decline", "thin on this evidence &middot; recorded, reviewed Friday", false, "decline"));
+  v.appendChild(wrap);
+  cnote("All three flags carry <b>your name</b> now, not the model&#8217;s. That is the design: the agent brings the evidence and both readings, and the disposition is a human speaking on the record.");
+  scrollDec();
+}
+function chooseVerdict(label, kind, wrap, btn) {
+  S.verdict = kind;
+  Array.prototype.forEach.call(wrap.children, function (x) { x.disabled = true; x.classList.remove("primary"); });
+  btn.classList.add("picked");
+  log("you", "verdict on F-2214: " + label.toLowerCase(), 0);
+  var sc = el("div", "cb-signcard");
+  sc.innerHTML = '<div class="st"><b>Sign it.</b> The decision, your three dispositions and the forty-seven checks underneath go on the record together, in language a regulator can read.</div>' +
+    '<button class="cb-signbtn" id="cbSignBtn" type="button">Sign the decision &middot; J. Doyle</button>';
+  $("#cbDecScroll").appendChild(sc); scrollDec();
+  $("#cbSignBtn").addEventListener("click", function () { signFile1(sc); });
+}
+function signFile1(sc) {
+  setClock(9 * 60 + 14);
+  prog("09:14 &middot; signed");
+  sc.querySelector(".cb-signbtn").remove();
+  sc.appendChild(el("div", "cb-signature", '<span class="scr">J. Doyle</span><span class="at">signed &middot; 09:14 &middot; on the record</span>'));
+  log("you", "signed F-2214 &middot; " + S.verdict, 0);
+  var k = S.verdict, head, lis, audit;
+  if (k === "approve") {
+    head = "Signed &middot; approve with conditions";
+    lis = "<li>The account opens <b>today</b>. Tessaro waited <b>26 hours</b>. Files like this average 3 to 6 weeks.</li>" +
+          "<li>Monitoring armed to the declared pattern: band breaks, new geographies, <b>any</b> cash.</li>" +
+          "<li>Register refresh task created, <b>due Sep 12</b>. Annual review Aug 2027.</li>";
+    audit = "<b>09:14 &middot; F-2214 &middot; decision: approve with conditions &middot; adjudicator: J. Doyle</b> &middot; flags: 3 disposed (adverse media false positive; PEP association acknowledged, enhanced monitoring applied; register refresh due Sep 12) &middot; basis: 47 checks, 12 sources, attached &middot; next review Aug 2027";
+  } else if (k === "hold") {
+    head = "Signed &middot; hold for deeper diligence";
+    lis = "<li>The file goes onward <b>with everything attached</b>. Nobody re-gathers what is already in it.</li>" +
+          "<li>Tonight the builder drafts the source-of-wealth questionnaire, the register chase and a site brief.</li>" +
+          "<li>Tessaro waits about <b>2 more days</b>. Slower, and defensible. Both are on the record.</li>";
+    audit = "<b>09:14 &middot; F-2214 &middot; decision: hold for enhanced due diligence &middot; adjudicator: J. Doyle</b> &middot; items onward: " + S.esc + " &middot; package drafting overnight &middot; basis: 47 checks, 12 sources, attached";
+  } else {
+    head = "Signed &middot; decline";
+    lis = "<li>Recorded, with your reasons attached. The customer can reapply.</li>" +
+          "<li>The builder noted in the log that the evidence for a decline is <b>thin</b>. It does not argue. It records.</li>" +
+          "<li>The pattern goes to the <b>first Friday review</b>. If the regulator or the customer asks why, the answer is on file, not in somebody&#8217;s memory.</li>";
+    audit = "<b>09:14 &middot; F-2214 &middot; decision: decline &middot; adjudicator: J. Doyle</b> &middot; builder note: evidence thin for decline, recorded &middot; flags: 3 disposed &middot; basis: 47 checks, 12 sources, attached";
+  }
+  var c = el("div", "cb-conseq" + (k === "approve" ? "" : " held"));
+  c.innerHTML = '<div class="ch2' + (k === "approve" ? "" : " held") + '">' + head + '</div><ul>' + lis + '</ul><div class="cb-audit">' + audit + '</div>' +
+    '<div class="cb-btnrow"><button class="cb-nextbtn" id="cbBackQueue" type="button">Back to the queue &#8594;</button></div>';
+  $("#cbDecScroll").appendChild(c); scrollDec();
+  log("builder", k === "approve" ? "monitoring armed &middot; refresh task Sep 12 &middot; file archived" : "tasks drafted overnight &middot; file routed", 0.01);
+  setSpend(S.spend + 0.01);
+  setState("On the next build", "on");
+  if (k === "approve") {
+    cnote("Play it back. Twenty-six hours ago this was a web form. The agent carried <b>47 checks and 3h 50m</b> of gathering. You carried <b>three judgments and a signature</b>. That split is the whole product.");
+  } else if (k === "hold") {
+    cnote("Nothing was lost by slowing down. The file keeps every check it already has, and the deeper review starts from evidence instead of from zero. <b>Caution costs days, not weeks,</b> when the gathering is already done.");
+  } else {
+    cnote("The agent did not argue. It <b>recorded</b>. Bounded autonomy means the human can be wrong out loud, on the record, and Friday&#8217;s review runs on facts instead of memories.");
+  }
+  $("#cbBackQueue").addEventListener("click", backToQueue);
+  S.case1 = true;
+  var q1 = $("#cbQ1");
+  q1.classList.remove("next"); q1.classList.add("done");
+  $("#cbQs1").className = "cb-qstat signed";
+  $("#cbQs1").innerHTML = '<span class="cb-qdot"></span>Signed &middot; ' + (k === "approve" ? "approved with conditions" : k === "hold" ? "held for diligence" : "declined");
+  after(2600, function () {
+    $("#cbQp3").style.width = "100%";
+    $("#cbQs3").className = "cb-qstat ready";
+    $("#cbQs3").innerHTML = '<span class="cb-qdot"></span>Ready &middot; 2 flags &middot; queued 13:00';
+    log("builder", "F-2216 Northgate assembled &middot; 44 checks &middot; 2 flags &middot; queued for your 13:00 block", null);
+  });
+}
+
+/* ---------------- back to the queue, then the clean file ---------------- */
+function backToQueue() {
+  S.fileOpen = null;
+  $("#cbFileScroll").innerHTML = "";
+  $("#cbFileHead").innerHTML = "<span><b>The file</b> &middot; nothing on the desk</span>";
+  $("#cbDecScroll").innerHTML = '<div class="cb-decempty"><div class="cap">One down.</div>The Tessaro decision is filed. The clean one is next, and it will not need much of you. That is the point.</div>';
+  $("#cbQ2").classList.add("next");
+  prog("09:15 &middot; next file");
+  setClock(9 * 60 + 15);
+  cnote("Next: <b>Priya Raman</b>, the retail file. Watch how long a clean one takes when the gathering is already done.");
+}
+function openCase2() {
+  if (S.fileOpen) return;
+  S.fileOpen = 2;
+  $("#cbQ2").classList.remove("next");
+  setSpend(0.31);
+  setClock(9 * 60 + 16);
+  prog("09:16 &middot; the clean file");
+  setState("Replaying", "busy");
+  log("you", "picked up F-2215 &middot; Priya Raman", 0);
+  $("#cbFileScroll").innerHTML = "";
+  $("#cbFileHead").innerHTML = "<span><b>File F-2215</b> &middot; Priya Raman &middot; retail KYC</span>";
+  runReplay(2, function (box) {
+    setState("Waiting on you", "wait");
+    after(650, function () {
+      box.remove();
+      buildDossier(2);
+      buildDecision2();
+      $("#cbFileScroll").scrollTop = 0;
+    });
+  });
+}
+function buildDecision2() {
+  var dec = $("#cbDecScroll");
+  dec.innerHTML = "";
+  var rec = el("div", "cb-rec");
+  rec.innerHTML = '<div class="rh2"><span class="rav">' + AV + '</span><span class="rwho">the-case-builder<span class="app">agent</span></span></div>' +
+    '<div class="rtx"><b>Clean. My read: approve.</b> Twenty-two checks, six sources, nothing to flag. No flags means no lock. The pen is yours.</div>';
+  dec.appendChild(rec);
+  var v = el("div", "cb-verdict");
+  v.innerHTML = '<div class="vh"><b>The verdict</b> &middot; no flags &middot; unlocked</div>';
+  var wrap = el("div", "cb-vbtns");
+  function mk(label, sub, primary, go) {
+    var b = el("button", "cb-vbtn" + (primary ? " primary" : ""), label + "<small>" + sub + "</small>");
+    b.type = "button";
+    b.addEventListener("click", function () {
+      Array.prototype.forEach.call(wrap.children, function (x) { x.disabled = true; x.classList.remove("primary"); });
+      b.classList.add("picked");
+      log("you", "verdict on F-2215: " + label.toLowerCase(), 0);
+      signFile2(go);
+    });
+    return b;
+  }
+  wrap.appendChild(mk("Approve", "clean file &middot; opens now", true, "approve"));
+  wrap.appendChild(mk("Hold", "you can always slow one down", false, "hold"));
+  wrap.appendChild(mk("Decline", "recorded &middot; reviewed Friday", false, "decline"));
+  v.appendChild(wrap);
+  dec.appendChild(v);
+  dec.scrollTop = 0;
+}
+function signFile2(kind) {
+  var sc = el("div", "cb-signcard");
+  sc.innerHTML = '<div class="st"><b>Sign it.</b> Same record, shorter story.</div>' +
+    '<button class="cb-signbtn" id="cbSignBtn2" type="button">Sign the decision &middot; J. Doyle</button>';
+  $("#cbDecScroll").appendChild(sc); scrollDec();
+  $("#cbSignBtn2").addEventListener("click", function () {
+    setClock(9 * 60 + 17);
+    prog("09:17 &middot; signed");
+    sc.querySelector(".cb-signbtn").remove();
+    sc.appendChild(el("div", "cb-signature", '<span class="scr">J. Doyle</span><span class="at">signed &middot; 09:17 &middot; on the record</span>'));
+    log("you", "signed F-2215 &middot; " + kind, 0);
+    var c = el("div", "cb-conseq" + (kind === "approve" ? "" : " held"));
+    if (kind === "approve") {
+      c.innerHTML = '<div class="ch2">Signed &middot; approved</div><ul>' +
+        "<li>Account open. Priya&#8217;s wait, end to end: <b>63 minutes</b>.</li>" +
+        "<li>Nightly re-screening and the activity model are <b>armed for the life of the account</b>. Onboarding ends. Monitoring never does.</li>" +
+        '</ul><div class="cb-audit"><b>09:17 &middot; F-2215 &middot; decision: approve &middot; adjudicator: J. Doyle</b> &middot; 22 checks, 6 sources, 0 flags &middot; basis attached</div>' +
+        '<div class="cb-btnrow"><button class="cb-nextbtn" id="cbDigestBtn" type="button">Close the morning &#8594;</button></div>';
+    } else {
+      c.innerHTML = '<div class="ch2 held">Signed &middot; ' + (kind === "hold" ? "held" : "declined") + '</div><ul>' +
+        "<li>Your call, recorded. The builder noted the file was clean, and <b>did not argue</b>.</li>" +
+        "<li>The pattern goes to Friday&#8217;s review: a clean file slowed down is a cost too, and it is on the record now.</li>" +
+        '</ul><div class="cb-audit"><b>09:17 &middot; F-2215 &middot; decision: ' + kind + ' &middot; adjudicator: J. Doyle</b> &middot; builder note: 0 flags, clean file &middot; basis attached</div>' +
+        '<div class="cb-btnrow"><button class="cb-nextbtn" id="cbDigestBtn" type="button">Close the morning &#8594;</button></div>';
+    }
+    $("#cbDecScroll").appendChild(c); scrollDec();
+    log("builder", "F-2215 filed &middot; nightly re-screen armed", 0.01);
+    setSpend(S.spend + 0.01);
+    S.case2 = true;
+    $("#cbQ2").classList.add("done");
+    $("#cbQs2").className = "cb-qstat signed";
+    $("#cbQs2").innerHTML = '<span class="cb-qdot"></span>Signed &middot; ' + (kind === "approve" ? "approved" : kind);
+    cnote(kind === "approve"
+      ? "<b>Ninety seconds.</b> This is most of the job now: the clean ones take seconds because the gathering is already done, and the hard ones arrive with the evidence attached. Your hours moved from hunting to judging."
+      : "Even the clean ones stay yours to slow down. The system&#8217;s job is to make your caution <b>cheap</b>, not to talk you out of it.");
+    $("#cbDigestBtn").addEventListener("click", showDigest);
+  });
+}
+
+/* ---------------- the digest and the finale ---------------- */
+function showDigest() {
+  setState("Building", "on");
+  prog("The record");
+  var d = el("div", "cb-dcard");
+  d.innerHTML = '<div class="dh">The morning, on the record &middot; 09:02 to 09:17</div>' +
+    '<div class="cb-dgrid">' +
+      '<div class="cb-dstat"><div class="n">2</div><div class="l">files signed</div></div>' +
+      '<div class="cb-dstat"><div class="n">69</div><div class="l">checks carried</div></div>' +
+      '<div class="cb-dstat"><div class="n acc">3</div><div class="l">flags disposed by you</div></div>' +
+      '<div class="cb-dstat"><div class="n">15</div><div class="l">minutes of your morning</div></div>' +
+      '<div class="cb-dstat"><div class="n">4h 35m</div><div class="l">carried for you</div></div>' +
+      '<div class="cb-dstat"><div class="n good">$1.17</div><div class="l">spent &middot; $2.50 per file cap</div></div>' +
+    '</div>' +
+    '<div class="cb-dfoot"><b>Northgate Freight Brokers</b> hits your 13:00 block with 2 flags waiting. The builder does not clock out. The signature never leaves your desk.</div>' +
+    '<div class="cb-btnrow"><button class="cb-nextbtn" id="cbCloseBtn" type="button">Close the morning &#8594;</button></div>';
+  $("#cbFileScroll").appendChild(d); scrollFile();
+  log("builder", "morning digest delivered &middot; 2 signed &middot; 1 queued", null);
+  $("#cbCloseBtn").addEventListener("click", showFinale);
+}
+function showFinale() {
+  prog("Morning complete");
+  $("#cbFinStats").innerHTML =
+    "<span><b>2</b> files signed</span>" +
+    "<span><b>69</b> checks carried</span>" +
+    '<span><b class="hot">3</b> judgments, yours</span>' +
+    "<span><b>15 min</b> of your morning</span>" +
+    "<span><b>$1.17</b> spent</span>";
+  $("#cbFinale").hidden = false;
+}
+
+/* ---------------- the architecture ---------------- */
+var GENERIC = [
+  { n: "Trigger", g: "a file opens. An application, a renewal, a risk event. Work arrives as work." },
+  { n: "Read", g: "registries, documents, screening lists, the open web. Read-only, every source logged." },
+  { n: "Think", g: "deterministic checks first. The model reads the contradictions and writes out both readings." },
+  { n: "Act", g: "assemble the file, attach a recommendation. It cannot open, close or file anything." },
+  { n: "Human", g: "the verdict. Flags disposed one by one, then a named adjudicator signs." },
+  { n: "Log", g: "every check, every source, every disposition, every dollar. Written for the regulator too." }
+];
+var KINDS = [
+  { name: "Banking &middot; this file", line: "The Case Builder, the file you just signed: 47 checks carried by the agent, three judgments and one signature carried by you.",
+    map: ["Tessaro&#8217;s application landing Tuesday 07:12", "the registry, ID documents, 4 sanctions lists, the open web", "checks first, the model on 2 contradictions", "one file, one recommendation, zero accounts opened", "you disposed 3 flags and signed at 09:14", "47 checks, 12 sources, every disposition on file"] },
+  { name: "Vendor onboarding", line: "The same desk pointed at your supply chain: who owns the vendor, who sanctions them, who is still insured, and your name on the approval.",
+    map: ["a new vendor request from procurement", "corporate registry, sanctions lists, certificates, financials", "solvency and ownership checks, the model on the gaps", "a vendor file with a recommendation attached", "procurement signs, exceptions escalate", "every vendor decision defensible at audit"] },
+  { name: "Merchant underwriting", line: "Every merchant application arrives as a finished risk file, and the underwriter spends the day setting limits instead of hunting documents.",
+    map: ["a merchant application at signup", "know your business checks, processing history, the site and the product", "rule screens, the model on the edge cases", "a risk file with proposed limits", "the underwriter sets the limits", "every approval and every limit, reasoned"] },
+  { name: "Tenant screening", line: "An applicant file that is complete, sourced and consistent before a human reads it, and the call stays with the property manager.",
+    map: ["a completed rental application", "identity, income documents, references", "completeness checks, the model on inconsistencies", "one applicant file, verified and sourced", "the property manager makes the call", "reasons on file, every time"] },
+  { name: "Credentialing", line: "Licences, registries, exclusion lists and references gathered nightly, and the medical director signs privileges off evidence instead of folders.",
+    map: ["a clinician joining the roster", "licence boards, registries, exclusion lists, references", "expiry and status checks, the model on discrepancies", "a credentials file with the gaps flagged", "the medical director signs the privileges", "every licence, every check date, on record"] },
+  { name: "Contractor vetting", line: "Every sub bidding on work arrives pre-vetted: licence, insurance, safety record, and the ops manager approves the crew.",
+    map: ["a sub-contractor bidding on work", "licences, insurance certificates, safety record", "expiry and coverage checks, the model on claims history", "a vetting file with a recommendation", "the ops manager approves the crew", "every certificate, every expiry, tracked"] }
+];
+function paintArch(i) {
+  var k = KINDS[i], row = $("#cbArchRow");
+  row.innerHTML = "";
+  GENERIC.forEach(function (g, j) {
+    row.appendChild(el("div", "cb-anode",
+      '<div class="an"><span class="ai">0' + (j + 1) + '</span>' + g.n + '</div><div class="ag">' + g.g + '</div><div class="av">' + k.map[j] + '</div>'));
+  });
+  $("#cbArchLine").innerHTML = "<b>" + k.name.replace(" &middot; this file", "") + ":</b> " + k.line;
+}
+(function buildChips() {
+  var chips = $("#cbChips");
+  KINDS.forEach(function (k, i) {
+    var c = el("button", "cb-chip", k.name);
+    c.type = "button";
+    c.setAttribute("role", "tab");
+    c.setAttribute("aria-selected", i === 0 ? "true" : "false");
+    c.addEventListener("click", function () {
+      Array.prototype.forEach.call(chips.children, function (x) { x.setAttribute("aria-selected", "false"); });
+      c.setAttribute("aria-selected", "true");
+      paintArch(i);
+    });
+    chips.appendChild(c);
+  });
+  paintArch(0);
+})();
+
+/* ============================================================
+   OPENING THE FIRST FILE, AND SITTING DOWN
+   ============================================================ */
+function openCase1() {
+  if (S.fileOpen || S.case1) return;
+  S.fileOpen = 1;
+  $("#cbQ1").classList.remove("next");
+  setClock(9 * 60 + 3);
+  prog("09:03 &middot; replaying the build");
+  setState("Replaying", "busy");
+  setSpend(0.84);
+  log("you", "picked up F-2214 &middot; Tessaro Building Supply", 0);
+  var ed = $("#cbEmptyDesk"); if (ed) ed.remove();
+  $("#cbFileHead").innerHTML = "<span><b>File F-2214</b> &middot; Tessaro Building Supply Ltd. &middot; commercial KYB</span>";
+  runReplay(1, function (box) {
+    var tally = el("div", "cb-rtally");
+    tally.innerHTML = '<div class="h">The build &middot; what it carried so you would not</div>' +
+      '<div class="grid">' +
+        '<div class="cell"><div class="n">47</div><div class="l">checks run</div></div>' +
+        '<div class="cell"><div class="n">12</div><div class="l">sources read</div></div>' +
+        '<div class="cell"><div class="n acc">3h 50m</div><div class="l">of a person&#8217;s day, carried</div></div>' +
+        '<div class="cell"><div class="n">$0.84</div><div class="l">spend &middot; $2.50 cap</div></div>' +
+      '</div>' +
+      '<div class="foot">Forty-four answers it could stand behind. <b>Two things it is not allowed to decide, and one policy breach,</b> are waiting on your desk. That is the design working, not failing.</div>' +
+      '<div class="cb-btnrow"><button class="cb-nextbtn" id="cbOpenFile1" type="button">Open the file &#8594;</button></div>';
+    $("#cbFileScroll").appendChild(tally); scrollFile();
+    log("builder", "build replayed for the adjudicator &middot; 47 checks &middot; 12 sources", null);
+    $("#cbOpenFile1").addEventListener("click", function () {
+      box.remove();
+      tally.querySelector(".cb-btnrow").remove();
+      setClock(9 * 60 + 6);
+      prog("09:06 &middot; 3 flags &middot; your read");
+      setState("Waiting on you", "wait");
+      buildDossier(1);
+      buildDecision1();
+      cnote("Everything in this file has a <b>source chip</b>. Click one and the raw evidence opens under the claim. Trust is a thing you can audit, or it is not a thing at all. The three flags wait on the right.");
+      after(200, function () { $("#cbFileScroll").scrollTop = 0; });
+    });
+  });
+}
+
+function sitDown() {
+  $("#cbIntro").hidden = true;
+  $("#cbConsole").classList.add("live");
+  prog("09:02 &middot; at the desk");
+  setClock(9 * 60 + 2);
+  log("builder", "overnight &middot; 3 files worked &middot; 100 checks &middot; 31 sources &middot; 0 accounts opened", 2.31);
+  log("you", "sat down &middot; adjudication block 09:00 to 11:00", 0);
+  $("#cbQ1").classList.add("next");
+  setState("Building", "on");
+  var ng = 31;
+  (function creep() {
+    after(9000, function () {
+      if (S.case1) return;
+      ng = Math.min(ng + 1, 34);
+      $("#cbQs3txt").textContent = "Assembling &middot; check " + ng + " of 44";
+      $("#cbQp3").style.width = Math.round(ng / 44 * 100) + "%";
+      creep();
+    });
+  })();
+}
+
+/* ---------------- queue clicks ---------------- */
+$("#cbQ1").addEventListener("click", function () {
+  if (S.case1) { toast("Signed and filed. <b>F-2214</b> is on the record."); return; }
+  if (S.fileOpen) return;
+  openCase1();
+});
+$("#cbQ2").addEventListener("click", function () {
+  if (S.case2) { toast("Signed and filed. <b>F-2215</b> is on the record."); return; }
+  if (!S.case1) { toast("Work the <b>Tessaro</b> file first. It is the one with flags, and the flags are the job."); return; }
+  if (S.fileOpen) return;
+  openCase2();
+});
+$("#cbQ3").addEventListener("click", function () {
+  if (S.case1) toast("<b>Northgate</b> is queued for your 13:00 block, 2 flags waiting. This morning ends before then.");
+  else toast("Still assembling, a registry callback is pending. <b>It will be ready before you need it.</b>");
+});
+
+/* ---------------- chrome ---------------- */
+$("#cbStart").addEventListener("click", sitDown);
+$("#cbAgain").addEventListener("click", function () { location.reload(); });
+$("#cbRestart").addEventListener("click", function () { location.reload(); });
+$("#cbSeeArch").addEventListener("click", function () {
+  $("#cbFinale").hidden = true;
+  document.getElementById("architecture").scrollIntoView({ behavior: S.fast ? "auto" : "smooth", block: "start" });
+});
+$("#cbLogTog").addEventListener("click", function () {
+  var open = $("#cbLogBody").classList.toggle("open");
+  $("#cbLogTog").setAttribute("aria-expanded", open);
+  if (open) $("#cbLogBody").scrollTop = $("#cbLogBody").scrollHeight;
+});
+$("#cbTrailBtn").addEventListener("click", function () {
+  if (!$("#cbLogBody").classList.contains("open")) $("#cbLogTog").click();
+  $("#cbLogBody").scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+/* debug hook, used to drive the demo headlessly in testing */
+window.__cb = {
+  start: sitDown, open1: openCase1, open2: openCase2,
+  flags: function () { FLAGS.forEach(function (f) { var c = document.getElementById("cbFlag" + f.n); if (c && !S.disp[f.n]) disposeFlag(f, f.a, c); }); },
+  S: S
+};
+
+})();
+</script>
+</body>
+</html>

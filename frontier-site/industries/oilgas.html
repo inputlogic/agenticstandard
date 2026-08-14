@@ -311,6 +311,25 @@ button.ind-card:focus-visible {
 .ind-panel-head h1 { font-size: var(--text-h2); margin-block-end: 0; max-width: 24ch; }
 a.ind-back { text-decoration: none; }
 
+/* ==== agent card alignment ===============================================
+   The multiplier, How it works and the demo link should sit on shared lines
+   across all three cards. They only do that when the three descriptions
+   wrap to the same number of lines, and these three sit close enough to a
+   wrap boundary that they fall out of step at some widths.
+
+   Subgrid would be the obvious fix, but .card-slot carries container-type
+   for the type scale, and containment disables subgrid. So the description
+   simply reserves the tallest line count its band needs. Shorter copy
+   leaves a little space instead of pulling the row beneath it up.
+
+   Bands come from measuring the real wrap points; revisit them if this copy
+   changes materially. */
+@supports (height: 1lh) {
+  @container card (max-width: 279px)                          { .ind-agents .card > h3 + p { min-height: 5lh; } }
+  @container card (min-width: 280px) and (max-width: 355px)   { .ind-agents .card > h3 + p { min-height: 4lh; } }
+  @container card (min-width: 356px)                          { .ind-agents .card > h3 + p { min-height: 3lh; } }
+}
+
 /* ==== live demo teaser (#roundsman-demo) ================================
    One card that should read as a door, not a paragraph: a warm spotlight
    tracks the pointer, and a slow accent arc marks the way in. */
@@ -466,8 +485,8 @@ a.ind-back { text-decoration: none; }
             <article class="card">
               <div class="card-tag">Agent 01</div>
               <h3>The Ticket Reconciler</h3>
-              <p>Checks every field ticket against AFE and PO coding. Variances come back flagged, paperwork attached, before they ever hit the JIB.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Checks all field tickets against coding, daily.</span></p>
+              <p>Checks every field ticket against AFE and PO coding. Variances come back flagged, the paperwork attached, before they hit the JIB.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Checks every field ticket against coding, daily, and forgets none.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
@@ -488,8 +507,8 @@ a.ind-back { text-decoration: none; }
             <article class="card">
               <div class="card-tag">Agent 02</div>
               <h3>The Permit Watch</h3>
-              <p>Watches filing windows, license renewals, and regulator portal status, rolled into one worklist. Nothing lapses quietly.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Watches every filing window and license, nothing lapses.</span></p>
+              <p>Watches filing windows, license renewals, and regulator portal status, rolled into one dated worklist. Nothing lapses quietly on your lease.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">8&#215;</span><span class="agent-stat-gloss">Watches every filing window and license renewal, so nothing lapses.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
@@ -510,7 +529,7 @@ a.ind-back { text-decoration: none; }
             <article class="card">
               <div class="card-tag">Agent 03</div>
               <h3>The Roundsman</h3>
-              <p>Walks every tag on every well, line and vessel on a five minute loop. Finds the drift that lives between alarms, pins it to the asset with the evidence attached, and drafts the work order. It proposes. It never actuates.</p>
+              <p>Walks every tag on every well, line and vessel every five minutes. Pins the drift that lives between alarms. It proposes, never actuates.</p>
               <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">12&#215;</span><span class="agent-stat-gloss">Walks every asset on the field, every five minutes, overnight included.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>

@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Walk With The Roundsman &middot; Oil &amp; Gas — Agentic Standard</title>
+<meta name="description" content="Walk an oil and gas field in 3D. Wells, buried lines, caverns and plant, drawn from the SCADA and land data you already hold. An agent walks every tag every five minutes and pins what it finds. The judgment stays yours.">
+<meta property="og:title" content="A Walk With The Roundsman — Agentic Standard">
+<meta property="og:description" content="Walk a field in 3D. An agent reads every tag every five minutes, pins what it finds, and hands the decision back to you.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A Walk With The Roundsman — Agentic Standard">
+<meta name="twitter:description" content="Walk a field in 3D. An agent reads every tag every five minutes, pins what it finds, and hands the decision back to you.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-G8dLSoHsvMzCZqnnk7Fmv.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+} }
+</script>
+<style>
+/* ==== A Walk With The Roundsman ==========================================
+   The operator's cut for Oil & Gas, and the fifth perspective in the set:
+   logistics put you beside an agent, manufacturing handed you its finished
+   work, e-commerce made you the customer, and here THE AGENT LIVES ON THE
+   MAP. A 3D field you orbit and click, with the agent's findings pinned to
+   the assets they belong to.
+
+   Everything below is scoped under .rm-app so none of it reaches the rest
+   of the page, and the page's own tokens do not reach in. Dark only: the
+   site has no light mode. */
+.rm-app{
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:'Instrument Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:ui-monospace,'Cascadia Mono','Segoe UI Mono',Consolas,monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --r:14px;
+  --bg:#100D0A; --fg:#E8E1D4; --body:#CEC6B8; --muted:#968C7C; --muted-2:#6d6355;
+  --accent:#D27A3F; --accent-soft:#b9794d; --hair:#463E34; --hair-soft:#2c2620;
+  --panel:#1B1611; --panel-2:#221b15; --panel-3:#191410; --good:#8FAC77; --warn:#C9A24B;
+  --accent-ink:#1a120b; --veil:rgba(16,13,10,.74);
+  position:relative;
+  color:var(--body); font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.rm-app *{box-sizing:border-box}
+.rm-app ::selection{background:var(--accent); color:var(--bg)}
+.rm-app button{font-family:var(--sans)}
+.rm-app p{margin:0}
+
+/* ============================ SHELL ============================
+   On the site the page scrolls, so the console is a bounded block rather
+   than a full viewport app. */
+.shell{position:relative; z-index:1; width:100%; height:min(860px, 82vh); min-height:600px; display:flex; flex-direction:column}
+.bracket{position:absolute; width:clamp(24px,2.6vw,38px); height:clamp(24px,2.6vw,38px); color:var(--fg); opacity:.9; pointer-events:none; z-index:5}
+.bracket.tl{top:-7px;left:-7px} .bracket.br{bottom:-7px;right:-7px}
+
+/* ============================ TOPBAR ============================ */
+.topbar{display:flex; align-items:center; gap:12px; padding:2px 4px 11px}
+.lockup{display:flex; align-items:center; gap:9px; color:var(--fg); font-weight:600; letter-spacing:.01em; font-size:15px; text-decoration:none; flex:none}
+.lockup .mark{width:21px;height:21px;display:block}
+.lockup .dot{color:var(--accent)}
+.topbar .sep{width:1px;height:20px;background:var(--hair); flex:none}
+.topbar .role{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.topbar .spacer{flex:1}
+.envchip{flex:none; display:flex; align-items:center; gap:7px; border:1px solid var(--hair); border-radius:99px; padding:5px 11px; font-size:11px; color:var(--muted); white-space:nowrap}
+.envchip b{color:var(--body); font-weight:600; font-variant-numeric:tabular-nums}
+.envchip .cl{font-family:var(--mono); font-size:11.5px; color:var(--fg)}
+.iconbtn{
+  appearance:none; background:transparent; border:1px solid var(--hair); color:var(--body);
+  width:33px;height:33px;border-radius:9px; cursor:pointer; display:grid;place-items:center; flex:none;
+  transition:.18s var(--ease);
+}
+.iconbtn:hover{border-color:var(--accent); color:var(--fg)}
+.iconbtn svg{width:15px;height:15px}
+.wordbtn{
+  appearance:none; background:transparent; border:1px solid var(--hair); color:var(--body); flex:none;
+  height:33px; border-radius:9px; padding:0 13px; cursor:pointer; font-size:11px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; transition:.18s var(--ease); white-space:nowrap;
+}
+.wordbtn:hover{border-color:var(--accent); color:var(--fg)}
+.wordbtn.glow{color:var(--accent); border-color:var(--accent); animation:breathe 1.5s var(--ease) infinite}
+.wordbtn[hidden]{display:none}
+@keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ============================ STAGE ============================ */
+.stage{flex:1; min-height:0; position:relative; display:flex; border:1px solid var(--hair); border-radius:var(--r); overflow:hidden; background:var(--panel)}
+
+/* ---------------- LEFT · RAIL ---------------- */
+.rail{width:288px; flex:none; background:var(--panel-3); border-right:1px solid var(--hair); display:flex; flex-direction:column; min-height:0}
+.rail-head{padding:12px 15px; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hair-soft); display:flex; align-items:center; gap:8px; flex:none; white-space:nowrap}
+.rail-head b{color:var(--body); font-weight:600}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--good); flex:none}
+.rm-app.live .pulse{animation:breathe 1.8s var(--ease) infinite}
+.rail-scroll{overflow-y:auto; overflow-x:hidden; padding:13px 12px 18px; display:flex; flex-direction:column; gap:13px; min-height:0}
+
+.agent-id{border:1px solid var(--hair); border-radius:11px; padding:11px; background:var(--panel); display:flex; gap:10px; align-items:center}
+.agent-id .avatar{width:34px;height:34px; flex:none; border-radius:9px; background:var(--panel-2); display:grid; place-items:center; border:1px solid var(--hair)}
+.agent-id .avatar svg{width:19px;height:19px}
+.agent-id .nm{font-weight:600; color:var(--fg); font-size:12.5px; line-height:1.2}
+.agent-id .tg{font-size:10px; color:var(--muted); letter-spacing:.06em; margin-top:2px}
+.statechip{margin-left:auto; flex:none; font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--hair); color:var(--muted); border-radius:99px; padding:4px 8px; white-space:nowrap; transition:.2s var(--ease)}
+.statechip.on{color:var(--good); border-color:color-mix(in srgb, var(--good) 45%, transparent)}
+.statechip.busy{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 55%, transparent)}
+.statechip.wait{color:var(--accent); border-color:var(--accent); animation:breathe 1.4s var(--ease) infinite}
+
+.statgrid{display:grid; grid-template-columns:1fr 1fr; gap:7px}
+.sstat{border:1px solid var(--hair-soft); border-radius:9px; padding:8px 10px; background:var(--panel)}
+.sstat .n{font-family:var(--mono); font-size:15px; color:var(--fg); font-variant-numeric:tabular-nums}
+.sstat .n.acc{color:var(--accent)}
+.sstat .l{font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:3px}
+
+.panelcap{font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.panelcap::after{content:""; flex:1; height:1px; background:var(--hair-soft)}
+.panelcap .cnt{color:var(--accent); font-weight:600}
+
+/* findings board */
+.board{display:flex; flex-direction:column; gap:7px}
+.bcard{
+  text-align:left; appearance:none; width:100%; border:1px solid var(--hair); border-radius:10px;
+  background:var(--panel); padding:9px 11px; cursor:pointer; color:var(--body);
+  display:flex; flex-direction:column; gap:5px; transition:.16s var(--ease);
+}
+.bcard:hover{border-color:var(--accent)}
+.bcard .r1{display:flex; align-items:center; gap:7px}
+.bcard .aname{font-size:11.5px; font-weight:600; color:var(--fg); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bcard .line{font-size:11px; color:var(--muted); line-height:1.45}
+.bcard.settled{opacity:.62}
+.bcard.settled:hover{opacity:.9}
+.sev{flex:none; font-size:8.5px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; border-radius:99px; padding:2.5px 7px; border:1px solid}
+.sev.watch{color:var(--warn); border-color:color-mix(in srgb, var(--warn) 50%, transparent)}
+.sev.ask{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 60%, transparent)}
+.sev.now{color:var(--accent); border-color:var(--accent); animation:breathe 1.1s var(--ease) infinite}
+.sev.done{color:var(--good); border-color:color-mix(in srgb, var(--good) 45%, transparent)}
+.board .empty{font-size:11px; color:var(--muted-2); padding:2px 2px}
+
+/* asset index */
+.idx{display:flex; flex-direction:column; gap:3px}
+.idx .grp{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-2); padding:7px 2px 3px}
+.irow{
+  appearance:none; width:100%; text-align:left; background:transparent; border:0; border-radius:8px;
+  padding:5.5px 8px; cursor:pointer; color:var(--body); font-size:12px;
+  display:flex; align-items:center; gap:8px; transition:background .14s var(--ease);
+}
+.irow:hover{background:var(--panel-2)}
+.irow.sel{background:var(--panel-2); color:var(--fg)}
+.irow .dot{width:5px;height:5px;border-radius:50%; background:var(--muted-2); flex:none}
+.irow .dot.ok{background:var(--good); opacity:.75}
+.irow .dot.flag{background:var(--accent)}
+.irow .dot.mov{background:var(--body); animation:breathe 2s var(--ease) infinite}
+.irow .sub{margin-left:auto; font-size:9.5px; color:var(--muted-2); font-family:var(--mono)}
+
+/* ---------------- CENTER · 3D VIEW ---------------- */
+.view{flex:1; min-width:0; position:relative; overflow:hidden; background:var(--panel)}
+.view canvas{display:block; width:100%; height:100%; outline:none; touch-action:none}
+.view .vignette{position:absolute; inset:0; pointer-events:none; z-index:2; background:radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0,0,0,.22) 100%)}
+
+.viewtogs{position:absolute; top:12px; left:12px; z-index:6; display:flex; border:1px solid var(--hair); border-radius:9px; overflow:hidden; background:color-mix(in srgb, var(--panel) 82%, transparent); backdrop-filter:blur(6px)}
+.vtog{appearance:none; border:0; background:transparent; color:var(--muted); font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:7px 12px; cursor:pointer; transition:.16s var(--ease)}
+.vtog + .vtog{border-left:1px solid var(--hair-soft)}
+.vtog.on{color:var(--fg); background:var(--panel-2)}
+.vtog:hover{color:var(--fg)}
+
+.hint{position:absolute; left:12px; bottom:12px; z-index:6; font-size:10.5px; color:var(--muted); background:color-mix(in srgb, var(--panel) 78%, transparent); border:1px solid var(--hair-soft); border-radius:9px; padding:6px 11px; pointer-events:none; backdrop-filter:blur(6px)}
+.hint b{color:var(--body); font-weight:600}
+
+.wx{position:absolute; top:12px; right:12px; z-index:6; font-size:10.5px; color:var(--muted); background:color-mix(in srgb, var(--panel) 78%, transparent); border:1px solid var(--hair-soft); border-radius:9px; padding:6px 11px; pointer-events:none; backdrop-filter:blur(6px)}
+.wx b{color:var(--body); font-variant-numeric:tabular-nums}
+
+/* 3D labels */
+#labels{position:absolute; inset:0; z-index:4; overflow:hidden; pointer-events:none}
+.lbl{
+  position:absolute; transform:translate(-50%,-130%); pointer-events:auto; cursor:pointer;
+  display:flex; align-items:center; gap:5px; white-space:nowrap;
+  font-size:10px; letter-spacing:.05em; color:var(--body);
+  background:color-mix(in srgb, var(--bg) 55%, transparent); border:1px solid var(--hair-soft);
+  border-radius:99px; padding:2.5px 8px 2.5px 6px; transition:opacity .2s linear, border-color .15s var(--ease);
+}
+.lbl:hover{border-color:var(--accent); color:var(--fg)}
+.lbl .d{width:4px;height:4px;border-radius:50%;background:var(--muted); flex:none}
+.lbl.flag .d{background:var(--accent)}
+.lbl.flag{color:var(--fg)}
+.lbl.sel{border-color:var(--accent); color:var(--fg)}
+.lbl.kp{font-size:8.5px; color:var(--muted-2); padding:1.5px 6px; pointer-events:none; background:transparent; border-color:transparent}
+.lbl.zone{
+  font-family:var(--serif); font-style:italic; font-size:13px; letter-spacing:.04em; color:var(--muted);
+  background:transparent; border:0; pointer-events:none; transform:translate(-50%,-50%);
+}
+.lbl.mover{font-family:var(--mono); font-size:9px; color:var(--fg); border-color:var(--hair)}
+.lbl.mover .d{background:var(--accent); animation:breathe 1.6s var(--ease) infinite}
+
+#tip{position:absolute; z-index:7; pointer-events:none; font-size:10.5px; color:var(--fg); background:color-mix(in srgb, var(--bg) 82%, transparent); border:1px solid var(--hair); border-radius:8px; padding:4px 9px; opacity:0; transition:opacity .12s linear; white-space:nowrap}
+
+/* toast */
+.toast{
+  position:absolute; left:50%; bottom:18px; translate:-50% 0; z-index:8;
+  background:var(--panel-2); border:1px solid var(--accent); border-radius:12px; padding:11px 13px;
+  display:flex; align-items:center; gap:12px; max-width:min(92%, 520px);
+  box-shadow:0 12px 40px rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:.3s var(--ease); transform:translateY(8px);
+}
+.toast.on{opacity:1; pointer-events:auto; transform:translateY(0)}
+.toast .tx{font-size:12px; color:var(--body); line-height:1.45}
+.toast .tx b{color:var(--fg)}
+.toast .go{appearance:none; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:11px; letter-spacing:.06em; border-radius:8px; padding:7px 12px; cursor:pointer; white-space:nowrap}
+.toast .no{appearance:none; border:1px solid var(--hair); background:transparent; color:var(--muted); font-size:11px; border-radius:8px; padding:7px 10px; cursor:pointer; white-space:nowrap}
+
+/* ---------------- RIGHT · DETAIL PANEL ---------------- */
+.panel{
+  position:absolute; top:0; right:0; bottom:0; width:min(392px, 94%); z-index:9;
+  background:var(--panel-3); border-left:1px solid var(--hair);
+  transform:translateX(103%); transition:transform .34s var(--ease);
+  display:flex; flex-direction:column; min-height:0;
+}
+.panel.open{transform:translateX(0)}
+.phead{padding:13px 16px 12px; border-bottom:1px solid var(--hair-soft); display:flex; align-items:flex-start; gap:10px; flex:none}
+.phead .k{font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+.phead .nm{font-family:var(--serif); font-size:21px; font-weight:600; color:var(--fg); line-height:1.1; margin-top:3px}
+.phead .sub{font-size:10.5px; color:var(--muted); margin-top:4px; font-family:var(--mono)}
+.phead .x{margin-left:auto; flex:none}
+.pscroll{overflow-y:auto; padding:14px 16px 22px; display:flex; flex-direction:column; gap:15px; min-height:0}
+
+.tagtbl{display:flex; flex-direction:column; border:1px solid var(--hair-soft); border-radius:10px; overflow:hidden}
+.trow{display:flex; align-items:center; gap:9px; padding:7px 11px; background:var(--panel)}
+.trow:nth-child(even){background:var(--panel-3)}
+.trow .tk{flex:1; min-width:0; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.trow .tv{font-family:var(--mono); font-size:11.5px; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap}
+.trow .tv .u{color:var(--muted-2); font-size:9.5px; margin-left:3px}
+.trow .tv.warm{color:var(--accent)}
+.trow canvas{flex:none; opacity:.9}
+.geo{border:1px solid var(--hair-soft); border-radius:10px; padding:10px 12px; display:grid; grid-template-columns:auto 1fr; gap:4px 14px; background:var(--panel)}
+.geo .gk{font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-2); padding-top:1px}
+.geo .gv{font-size:11px; color:var(--body); font-family:var(--mono)}
+.pnote{font-size:12px; line-height:1.55; color:var(--muted)}
+.pnote b{color:var(--body); font-weight:600}
+.pnote .who{color:var(--accent)}
+
+/* finding card */
+.find{border:1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius:12px; background:color-mix(in srgb, var(--accent) 5%, var(--panel)); padding:12px 13px; display:flex; flex-direction:column; gap:10px}
+.find .fr1{display:flex; align-items:center; gap:8px}
+.find .ftime{margin-left:auto; font-size:9.5px; color:var(--muted-2); font-family:var(--mono)}
+.find .ftitle{font-family:var(--serif); font-style:italic; font-size:19px; color:var(--fg); line-height:1.15}
+.fsec .fk{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:5px}
+.fsec .ft{font-size:12px; line-height:1.55; color:var(--body)}
+.fsec ul{margin:0; padding:0 0 0 1px; list-style:none; display:flex; flex-direction:column; gap:4px}
+.fsec li{font-size:11.5px; line-height:1.5; color:var(--body); position:relative; padding-left:13px}
+.fsec li::before{content:""; position:absolute; left:0; top:.5em; width:5px; height:5px; background:var(--accent); opacity:.7}
+.fsec li b{color:var(--fg); font-family:var(--mono); font-weight:600; font-size:10.8px}
+.bigspark{border:1px solid var(--hair-soft); border-radius:9px; background:var(--panel); padding:8px 10px 6px; margin-top:7px}
+.bigspark .cap{display:flex; justify-content:space-between; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-2); margin-bottom:4px}
+.bigspark .cap b{color:var(--accent); font-family:var(--mono); letter-spacing:0}
+.fork{display:flex; flex-direction:column; gap:7px; margin-top:2px}
+.fbtn{appearance:none; text-align:left; border-radius:9px; padding:9px 12px; cursor:pointer; font-size:12px; font-weight:600; line-height:1.4; transition:.16s var(--ease)}
+.fbtn.pri{border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink)}
+.fbtn.pri:hover{filter:brightness(1.08)}
+.fbtn.sec{border:1px solid var(--hair); background:transparent; color:var(--body)}
+.fbtn.sec:hover{border-color:var(--accent); color:var(--fg)}
+.fbtn .s2{display:block; font-weight:400; font-size:10.5px; color:inherit; opacity:.75; margin-top:2px}
+.fdone{border-top:1px solid var(--hair-soft); padding-top:9px; font-size:11.5px; line-height:1.55; color:var(--body)}
+.fdone b{color:var(--good)}
+.fdone .lg{display:block; margin-top:5px; font-size:10px; color:var(--muted-2); font-family:var(--mono)}
+.fwait{font-size:11px; color:var(--warn); border-top:1px solid var(--hair-soft); padding-top:9px}
+
+/* ---------------- DOCK · ticker + trail ---------------- */
+.dock{flex:none; margin-top:11px; border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); overflow:hidden}
+.dockbar{display:flex; align-items:center; gap:11px; padding:8px 13px}
+.logtog{appearance:none; background:transparent; border:0; color:var(--muted); display:flex; align-items:center; gap:7px; font-size:10px; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; padding:2px; flex:none}
+.logtog:hover{color:var(--fg)}
+.logtog .ch{transition:transform .25s var(--ease)}
+.logtog[aria-expanded="true"] .ch{transform:rotate(90deg)}
+.logtog .n{color:var(--accent); font-weight:600}
+.tickline{flex:1; min-width:0; font-size:11.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums}
+.tickline b{color:var(--body); font-weight:600}
+.tickline .t{font-family:var(--mono); color:var(--muted-2); font-size:10.5px; margin-right:7px}
+.trail{max-height:0; overflow:hidden; transition:max-height .3s var(--ease)}
+.trail.open{max-height:170px; overflow-y:auto; border-top:1px solid var(--hair-soft)}
+.trail .rows{padding:9px 13px; display:flex; flex-direction:column; gap:5px}
+.lrow{font-size:11px; line-height:1.5; color:var(--muted); display:flex; gap:9px}
+.lrow .t{font-family:var(--mono); color:var(--muted-2); font-size:10px; flex:none; padding-top:1px}
+.lrow.find .x{color:var(--accent)}
+.lrow.you .x{color:var(--fg); font-weight:600}
+.lrow.field .x{color:var(--good)}
+
+/* ---------------- OVERLAYS ---------------- */
+.ovl{position:fixed; inset:0; z-index:80; background:var(--veil); backdrop-filter:blur(7px); display:grid; place-items:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .3s var(--ease)}
+.ovl.on{opacity:1; pointer-events:auto}
+/* .ocard, not .card: site.css owns .card and would leak height:100% + grid into it */
+.ovl .ocard{
+  position:relative; width:min(660px, 100%); max-height:min(88vh, 820px); overflow-y:auto;
+  background:var(--panel); border:1px solid var(--hair); border-radius:16px; padding:clamp(22px,4vw,38px);
+  box-shadow:0 30px 90px rgba(0,0,0,.4);
+}
+.ovl .ocard.wide{width:min(780px,100%)}
+.okick{font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent); margin-bottom:14px}
+.ohead{font-family:var(--serif); font-weight:600; font-size:clamp(27px,4.4vw,38px); line-height:1.06; color:var(--fg); letter-spacing:-.01em; margin:0 0 14px}
+.ohead em{font-style:italic; color:var(--accent)}
+.olead{font-size:13.5px; line-height:1.65; color:var(--body); margin:0 0 16px}
+.olead b{color:var(--fg); font-weight:600}
+.ctrls{display:flex; flex-wrap:wrap; gap:7px; margin:16px 0 6px}
+.cchip{font-size:10.5px; color:var(--muted); border:1px solid var(--hair); border-radius:99px; padding:5px 11px}
+.cchip b{color:var(--body); font-weight:600}
+.fine{font-size:10.5px; line-height:1.6; color:var(--muted-2); margin-top:16px}
+.obtns{display:flex; align-items:center; gap:13px; margin-top:20px; flex-wrap:wrap}
+.btn-go{appearance:none; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; border-radius:10px; padding:12px 22px; cursor:pointer; transition:.16s var(--ease)}
+.btn-go:hover{filter:brightness(1.07)}
+.btn-quiet{appearance:none; border:0; background:transparent; color:var(--muted); font-family:var(--serif); font-style:italic; font-size:15px; cursor:pointer}
+.btn-quiet:hover{color:var(--accent)}
+.ovl .x{position:absolute; top:14px; right:14px}
+
+/* under the hood: loop + pnl + fence */
+.hood-grid{display:flex; flex-direction:column; gap:20px}
+.loop{display:flex; flex-direction:column}
+.lnode{display:grid; grid-template-columns:26px 1fr; gap:10px; padding:6px 2px; position:relative}
+.lnode::before{content:""; position:absolute; left:12.5px; top:30px; bottom:-4px; width:2px; background:var(--hair-soft)}
+.lnode:last-child::before{display:none}
+.ldot{width:26px;height:26px;border-radius:8px; border:1px solid var(--hair); background:var(--panel-2); display:grid; place-items:center; color:var(--muted)}
+.ldot svg{width:13px;height:13px}
+.lname{font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--fg); padding-top:1px}
+.lgloss{font-size:11.5px; color:var(--muted); line-height:1.5; margin-top:2px}
+.pnl{border:1px solid var(--hair); border-radius:12px; overflow:hidden}
+.pnl .ph{padding:10px 13px; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hair-soft); background:var(--panel-2)}
+.pnl .ph b{color:var(--accent)}
+.prow{display:grid; grid-template-columns:86px 1fr; gap:12px; padding:9px 13px; border-bottom:1px solid var(--hair-soft); font-size:11.5px; line-height:1.55}
+.prow:last-child{border-bottom:0}
+.prow .k{font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-2); padding-top:2px}
+.prow .v{color:var(--muted)}
+.prow .v b{color:var(--body); font-weight:600}
+.meter{display:block; height:4px; border-radius:99px; background:var(--hair-soft); margin:7px 0 4px; overflow:hidden}
+.meter i{display:block; height:100%; width:4%; background:var(--accent); border-radius:99px; transition:width .5s var(--ease)}
+.spendline{display:flex; justify-content:space-between; font-size:10px; color:var(--muted-2)}
+.spendline b{font-family:var(--mono); color:var(--body)}
+.fence{border:1px solid var(--hair); border-radius:12px; padding:13px 15px}
+.fence .fh{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:9px}
+.fence ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+.fence li{font-size:12px; line-height:1.55; color:var(--body); position:relative; padding-left:15px}
+.fence li::before{content:""; position:absolute; left:0; top:.52em; width:6px; height:6px; background:var(--accent)}
+.fence li b{color:var(--fg); font-weight:600}
+
+/* digest */
+.dgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:6px 0 18px}
+.dstat{border:1px solid var(--hair-soft); border-radius:10px; padding:11px 12px; background:var(--panel-3)}
+.dstat .n{font-family:var(--mono); font-size:19px; color:var(--fg); font-variant-numeric:tabular-nums}
+.dstat .n.acc{color:var(--accent)} .dstat .n.gd{color:var(--good)}
+.dstat .l{font-size:9px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); margin-top:4px; line-height:1.45}
+.dquote{border-left:2px solid var(--accent); padding:2px 0 2px 14px; margin:16px 0; font-family:var(--serif); font-style:italic; font-size:17px; line-height:1.45; color:var(--body)}
+.chips{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px}
+.chip{border:1px solid var(--hair-soft); border-radius:10px; padding:10px 12px; background:var(--panel-3)}
+.chip .cn{font-size:11px; font-weight:600; color:var(--fg); margin-bottom:3px}
+.chip .cl2{font-size:10.5px; line-height:1.5; color:var(--muted)}
+.cta-row{display:flex; align-items:center; gap:15px; margin-top:22px; flex-wrap:wrap}
+a.btn-go{text-decoration:none; display:inline-block}
+
+/* fail note */
+.fail{position:absolute; inset:0; display:grid; place-items:center; padding:30px; z-index:3}
+.fail .in{max-width:420px; text-align:center; font-size:13px; line-height:1.6; color:var(--muted)}
+.fail .in b{color:var(--fg)}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 1060px){ .rail{width:246px} }
+@media (max-width: 900px){
+  .shell{height:min(660px, 78vh); min-height:520px}
+  .topbar .role{display:none}
+  .rail{position:absolute; z-index:12; top:0; bottom:0; left:0; transform:translateX(-103%); transition:transform .3s var(--ease); width:min(300px,86%)}
+  .rail.open{transform:translateX(0)}
+  .hint{display:none}
+}
+#railTog{display:none; position:absolute; top:12px; left:12px; z-index:11}
+/* after the base rule, or equal ID specificity would leave the rail
+   permanently unreachable on narrow screens */
+@media (max-width:900px){
+  #railTog{display:grid}
+  .viewtogs{left:56px}
+}
+@media (prefers-reduced-motion: reduce){
+  .rm-app *{animation:none !important; transition:none !important}
+}
+
+/* ==== page furniture around the console (site tokens, not the app's) ==== */
+.hero { padding-block: clamp(4.5rem, 12vw, 7.5rem) clamp(2.5rem, 6vw, 4rem); }
+.hero h1 { max-width: 15ch; }
+.hero .lead { margin-block-start: clamp(1.2rem, 3vw, 1.7rem); max-width: 60ch; }
+.rise { animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.21, 1) both; }
+@keyframes rise { from { opacity: 0; translate: 0 1.4rem; } to { opacity: 1; translate: 0 0; } }
+.hero .kicker.rise { animation-delay: 0.06s; }
+.hero h1.rise { animation-delay: 0.18s; }
+.hero .lead.rise { animation-delay: 0.34s; }
+.hero .rm-controls.rise { animation-delay: 0.5s; }
+.hero .rm-honest.rise { animation-delay: 0.62s; }
+
+.rm-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: clamp(1.3rem, 3vw, 1.8rem); }
+.rm-control {
+  display: inline-flex; align-items: baseline; gap: 0.55em;
+  border: 1px solid var(--hairline-strong); padding: 0.55em 0.9em;
+  font-size: var(--text-small); color: var(--muted);
+}
+.rm-control b {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft);
+}
+.rm-honest {
+  display: flex; align-items: flex-start; gap: 0.7rem;
+  max-width: 68ch; color: var(--muted); font-size: var(--text-small);
+  margin-block-start: clamp(1.2rem, 3vw, 1.7rem); line-height: 1.6;
+}
+.rm-honest::before {
+  content: ""; flex: none; width: 8px; height: 8px;
+  margin-block-start: 0.5em; background: var(--accent);
+}
+.rm-next { text-align: center; margin-block-start: clamp(2rem, 5vw, 3rem); }
+.rm-next .lead { max-width: 56ch; margin-inline: auto; }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none !important; } }
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="/" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/standard">Standard</a>
+      <a href="/foundation">Foundation</a>
+      <a href="/continuum">Continuum</a>
+      <a href="/about">About</a>
+      <a href="/industries" aria-current="page">Industries</a>
+      <a class="nav-cta" href="/book">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="container">
+      <p><a class="text-link" href="/industries/oilgas"><span aria-hidden="true">&#8592;</span> Back to Oil &amp; Gas</a></p>
+      <div class="kicker accent rise" style="margin-block-start: 1.4rem;">Live Demo &middot; Agent 03 &middot; Oil &amp; Gas</div>
+      <h1 class="rise">The field you can <em>see through</em>.</h1>
+      <p class="lead rise">You are the field superintendent at Wolf Willow: six wells, three gathering lines, a plant, a compressor station, and two salt caverns under the east block. Every shape below is drawn from the same SCADA and land data your systems already hold, paired and put on one map.</p>
+      <p class="lead rise">The agent that walks it is the Roundsman. Every five minutes it reads every tag, checks every trend against its tolerance, and pins what it finds to the asset it belongs to. It proposes. It drafts the paperwork. It cannot touch a valve. Every decision on this field stays with a person: today, you.</p>
+      <div class="rm-controls rise" aria-label="How this demo works">
+        <span class="rm-control"><b>Drag</b> to orbit</span>
+        <span class="rm-control"><b>Scroll</b> to zoom</span>
+        <span class="rm-control"><b>Click</b> anything for its live settings</span>
+        <span class="rm-control"><b>Orange pins</b> are findings</span>
+      </div>
+      <p class="rm-honest rise">A fictional producer with invented numbers. Depth is compressed about eight to one so the underground reads at a glance; the figures on the panels are the real-world kind. Nothing in this pattern touches process control or safety systems: the Roundsman reads a mirror of the historian and writes paperwork. People, and the systems they already trust, do all the moving.</p>
+    </div>
+  </section>
+
+  <!-- the console -->
+  <section class="section" id="run" style="padding-block-start: 0;">
+    <div class="container">
+
+<div class="rm-app live" id="rmApp">
+<div class="shell">
+  <svg class="bracket tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+  <svg class="bracket br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <span class="role">Wolf Willow field &middot; you own the Roundsman</span>
+    <span class="spacer"></span>
+    <span class="envchip" title="Field time"><span class="cl" id="clock">05:52</span><span>field time</span></span>
+    <span class="envchip" title="Agent spend against its daily cap">spend <b id="spendChip">$0.21</b><span>/ $5.00</span></span>
+    <button class="wordbtn glow" id="digestBtn" hidden>The walk, written up</button>
+    <button class="wordbtn" id="hoodBtn">Under the hood</button>
+    <button class="iconbtn" id="resetBtn" title="Run it again" aria-label="Restart the demo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ STAGE ============ -->
+  <section class="stage" aria-label="The field">
+
+    <!-- LEFT · RAIL -->
+    <div class="rail" id="rail">
+      <div class="rail-head"><span class="pulse"></span> The agent · always on the field</div>
+      <div class="rail-scroll">
+        <div class="agent-id">
+          <span class="avatar" aria-hidden="true">
+            <svg viewBox="0 0 120 120" fill="none">
+              <g stroke="currentColor" stroke-linecap="square" stroke-width="9">
+                <path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/>
+              </g>
+              <circle cx="60" cy="60" r="7" fill="#D27A3F"/>
+            </svg>
+          </span>
+          <div>
+            <div class="nm">the-roundsman</div>
+            <div class="tg">Agent 03 · lives on the map</div>
+          </div>
+          <span class="statechip on" id="stateChip">Walking</span>
+        </div>
+
+        <div class="statgrid" aria-label="The walk so far">
+          <div class="sstat"><div class="n" id="stWalks">70</div><div class="l">walks today</div></div>
+          <div class="sstat"><div class="n" id="stTags">100.4k</div><div class="l">tags read</div></div>
+          <div class="sstat"><div class="n acc" id="stPins">3</div><div class="l">pins up</div></div>
+          <div class="sstat"><div class="n" id="stCalls">0</div><div class="l">your calls</div></div>
+        </div>
+
+        <div>
+          <div class="panelcap">Pinned to the map <span class="cnt" id="findCount">3</span></div>
+          <div class="board" id="board" style="margin-top:9px"></div>
+        </div>
+
+        <div>
+          <div class="panelcap">The asset index</div>
+          <div class="idx" id="idx" style="margin-top:5px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER · 3D -->
+    <div class="view" id="view">
+      <div class="vignette" aria-hidden="true"></div>
+      <button class="iconbtn" id="railTog" aria-label="Open the agent rail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="viewtogs" role="group" aria-label="View mode">
+        <button class="vtog on" id="tgXray">See through the ground</button>
+        <button class="vtog" id="tgSurf">Surface only</button>
+      </div>
+      <div class="wx" id="wx">Thursday · first light 07:41 · <b>&minus;4&deg;C</b> · NW 18 km/h</div>
+      <div class="hint"><b>Drag</b> to orbit · <b>scroll</b> to zoom · <b>click</b> anything for its live settings · orange pins are the agent's findings</div>
+      <div id="labels" aria-hidden="true"></div>
+      <div id="tip"></div>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+
+    <!-- RIGHT · DETAIL -->
+    <aside class="panel" id="panel" aria-label="Asset detail">
+      <div class="phead">
+        <div style="min-width:0">
+          <div class="k" id="pKind">Asset</div>
+          <div class="nm" id="pName">&nbsp;</div>
+          <div class="sub" id="pSub"></div>
+        </div>
+        <button class="iconbtn x" id="pClose" aria-label="Close panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="pscroll" id="pBody"></div>
+    </aside>
+  </section>
+
+  <!-- ============ DOCK ============ -->
+  <section class="dock" aria-label="The paper trail">
+    <div class="dockbar">
+      <button class="logtog" id="logTog" aria-expanded="false">
+        <svg class="ch" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Paper trail · <span class="n" id="trailCount">0</span>
+      </button>
+      <div class="tickline" id="tick"><span class="t">05:52</span>walk #2,181 queued · the field is quiet · that is the normal state</div>
+    </div>
+    <div class="trail" id="trail"><div class="rows" id="trailRows"></div></div>
+  </section>
+</div>
+
+<!-- ============ UNDER THE HOOD ============ -->
+<div class="ovl" id="hood">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="hood" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">Under the hood</div>
+    <h2 class="ohead" style="font-size:clamp(24px,3.6vw,32px)">One loop. The same one on <em>every</em> desk we deploy.</h2>
+    <div class="hood-grid">
+      <div>
+        <div class="panelcap" style="margin-bottom:8px">The loop it walks</div>
+        <div class="loop">
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+            <div><div class="lname">Trigger</div><div class="lgloss">a clock. Every five minutes, plus a fresh pass whenever the weather turns. No human needed.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></span>
+            <div><div class="lname">Read</div><div class="lgloss">a mirror of the historian, the GIS layer, the CMMS backlog, the weather feed. Read-only, every one.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 7a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5 5 5 0 0 1-5-5v0a5 5 0 0 1 5-5z"/><path d="M12 17v4M7.5 9.5 4 7.5M16.5 9.5 20 7.5M7.5 14.5 4 16.5M16.5 14.5 20 16.5"/></svg></span>
+            <div><div class="lname">Think</div><div class="lgloss">tolerance math on every tag first, which costs nearly nothing. The model only wakes for the ones that drift.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-3.5-7.5L3 10z"/></svg></span>
+            <div><div class="lname">Act</div><div class="lgloss">a pin on the map with the evidence attached, and a drafted work order. Or nothing. Most walks end in nothing.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20.5c.8-4 3.5-6 7-6s6.2 2 7 6"/></svg></span>
+            <div><div class="lname">Your call</div><div class="lgloss">approve, hold, overrule. A named human. Nothing on this field moves because software wanted it to.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9.5 13h6M9.5 16.5h6M9.5 9.5H12"/></svg></span>
+            <div><div class="lname">Log</div><div class="lgloss">every tag read, every pin, every decision, every dollar. On the record from day one.</div></div></div>
+        </div>
+      </div>
+
+      <div class="pnl" aria-label="The agent's P&amp;L">
+        <div class="ph">The agent's <b>P&amp;L</b> · five lines before it touched real work</div>
+        <div class="prow"><span class="k">Scope</span><span class="v">Walk every tag on the mirror. Pin findings with evidence and a drafted order. <b>Nothing else.</b></span></div>
+        <div class="prow"><span class="k">Owner</span><span class="v"><b>You.</b> Field superintendent. One named human, not a committee.</span></div>
+        <div class="prow"><span class="k">Budget</span><span class="v"><b>$5.00 a day</b>, enforced in the request path itself. A quiet walk costs about a third of a cent.
+          <span class="meter"><i id="spendBar"></i></span>
+          <span class="spendline"><span>spent today</span><b id="spendNum">$0.21</b></span>
+        </span></div>
+        <div class="prow"><span class="k">Review</span><span class="v">First Friday, monthly. Judged on <b>finds that held up</b>, like any hire.</span></div>
+        <div class="prow"><span class="k">Paper trail</span><span class="v">On since day one. <b id="trailCount2">0 entries</b> this shift, in the dock below the map.</span></div>
+      </div>
+
+      <div class="fence">
+        <div class="fh">The fence around it · why this is safe to own</div>
+        <ul>
+          <li>It reads a <b>mirror</b> of the historian. The control network does not know it exists.</li>
+          <li>It cannot open a valve, change a setpoint, start or stop anything. <b>The permission does not exist</b>, so it cannot be misused.</li>
+          <li>The alarm panel keeps its job. The Roundsman works <b>the space between alarms</b>, where trends live and shutdowns are still cheap.</li>
+          <li>Every find ships with its evidence. <b>No black boxes</b> on a regulated asset.</li>
+          <li>Spend is capped in the request path. Every read and every pin is on the record.</li>
+        </ul>
+      </div>
+      <p class="fine" style="margin-top:2px">A fictional field, invented numbers, depth compressed for the model. The loop is the product; swap the map and the feed, and the same six boxes run a freight desk, a factory floor, or a storefront.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DIGEST ============ -->
+<div class="ovl" id="digest">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="digest" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">The walk, written up</div>
+    <h2 class="ohead" style="font-size:clamp(24px,3.6vw,32px)">Nobody walked the field today. <em>Everything</em> got walked.</h2>
+    <div class="dgrid" id="dgrid"></div>
+    <p class="olead" id="dline"></p>
+    <div class="dquote">"The expensive version of today was two alarms: a hydrate plug on GL-2 over the weekend, and K-200B tripping on vibration at month end. Neither of those days will happen now, and the paper trail shows exactly why."</div>
+    <div class="panelcap" style="margin:18px 0 8px">Same walker · other maps</div>
+    <div class="chips">
+      <div class="chip"><div class="cn">Midstream &amp; pipelines</div><div class="cl2">This demo, as shipped: gathering, plants, caverns, and the export line between them.</div></div>
+      <div class="chip"><div class="cn">Power &amp; renewables</div><div class="cl2">Turbine fleets drift long before they trip. Same walk, different map.</div></div>
+      <div class="chip"><div class="cn">Mining</div><div class="cl2">Crushers, conveyors, tailings lines. The plant hums; the Roundsman listens for the note that changed.</div></div>
+      <div class="chip"><div class="cn">Water utilities</div><div class="cl2">Pump stations and mains at 3am. Nobody walks those. It does.</div></div>
+      <div class="chip"><div class="cn">Data centres</div><div class="cl2">Cooling loops and UPS strings, watched in the space between alarms.</div></div>
+      <div class="chip"><div class="cn">Cold chain</div><div class="cl2">Reefer boxes on the road are just assets that move. Pins follow them.</div></div>
+    </div>
+    <div class="cta-row">
+      <a class="btn-go" href="/book">Book the call</a>
+      <button class="btn-quiet" id="againBtn">run the walk again</button>
+    </div>
+    <p class="fine">The map was the demo. The loop is the product: a trigger, a read-only look, cheap rules before expensive thinking, one bounded action, a named human, a log. The Readiness Map prices it against your real field.</p>
+  </div>
+</div>
+</div><!-- /.rm-app -->
+
+    </div>
+  </section>
+
+  <!-- what this was -->
+  <section class="section section-rule rm-next">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Same Loop</div>
+        <h2>The map was the demo. The <em>loop</em> is the product.</h2>
+        <p class="lead">A trigger the agent waits on, a read-only look at systems you already run, cheap rules before expensive thinking, one bounded action, a named human holding the judgment, and a log of all of it. Swap the map and the feed, and the same six boxes run a freight desk, a factory floor, or a storefront.</p>
+        <p class="ind-cta" style="margin-block-start: 1.4rem;"><a class="text-link" href="/industries/oilgas">See the other two agents on this desk <span aria-hidden="true">&#8594;</span></a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- final CTA -->
+  <section class="section inverted cta-final" style="text-align:center;">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Real Numbers</div>
+        <h2 style="max-width:24ch; margin-inline:auto;">Enough demos. Get <em>your</em> number.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead" style="max-width:56ch; margin:0 auto clamp(1.75rem, 4vw, 2.5rem);">Wolf Willow is invented. Your field is not. The Readiness Map makes it exact: your tags, your tolerances, your first agents, with names and owners.</p>
+        <a class="btn" href="/book">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="/">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We put AI agents to work inside your company, and prove it in six weeks.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="/foundation">The Foundation</a>
+        <a href="/continuum">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="/standard">The Standard</a>
+        <a href="/about">About</a>
+        <a href="/industries">Industries</a>
+        <a href="/book">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+window.__threeOK = true;
+
+/* ============================ TINY HELPERS ============================ */
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className = cls; if(html != null) e.innerHTML = html; return e; };
+const fmt = n => Math.round(n).toLocaleString('en-CA');
+const f1d = n => (Math.round(n*10)/10).toLocaleString('en-CA', {minimumFractionDigits:1, maximumFractionDigits:1});
+const money = n => '$' + n.toFixed(2);
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const lerp = (a,b,t) => a + (b-a)*t;
+
+/* ============================ SIM STATE ============================ */
+const S = {
+  m: 352,              // sim minutes since midnight · 05:52
+  started: false,
+  walks: 70, tags: 100380, spend: 0.21,
+  pins: 3, calls: 0, drafts: 0,
+  sel: null,           // selected asset id
+  xray: true,
+  ended: false,
+};
+const fmtClock = m => { const h = Math.floor(m/60)%24, mm = Math.floor(m%60); return String(h).padStart(2,'0') + ':' + String(mm).padStart(2,'0'); };
+const wig = (seed, amp) => amp * (Math.sin(S.m*0.61 + seed) + Math.sin(S.m*0.171 + seed*1.7)) * 0.5;
+
+/* event queue keyed on sim minutes */
+const EVQ = [];
+const at = (m, fn) => EVQ.push({m, fn});
+const after = (dm, fn) => EVQ.push({m: S.m + dm, fn});
+
+/* ============================ F4 · LIVE EVENT CLOCKWORK ============================ */
+const F4T = { start: 379, holdAt: null, reduceAt: null, swapped: false, fixed: false };
+const cv2inj = () => {
+  if (S.m < F4T.start) return 240 + wig(3, 2.4);
+  if (F4T.holdAt != null) return Math.max(0, 146 - (S.m - F4T.holdAt) * 36) + (S.m - F4T.holdAt > 4 ? 0 : wig(3,1.5));
+  const base = 240 - 94 * clamp01((S.m - F4T.start) / 12);
+  if (F4T.reduceAt != null) return Math.min(base, 146 - 26 * clamp01((S.m - F4T.reduceAt) / 3)) + wig(3, 1.2);
+  return base + wig(3, 1.8);
+};
+const cv2whp = () => {
+  let v = 10050 + wig(7, 9);
+  if (S.m >= F4T.start) v += 640 * clamp01((S.m - F4T.start) / 22);
+  if (F4T.reduceAt != null) v += 140 * clamp01((S.m - F4T.reduceAt) / 25);
+  if (F4T.holdAt != null) v = Math.max(9950 + wig(7,6), v - (S.m - F4T.holdAt) * 26);
+  return v;
+};
+const cv1inj = () => (F4T.swapped ? 236 * clamp01((S.m - (F4T.holdAt + 3)) / 8) + wig(4, 1.6) : 0);
+const gl2out = () => {
+  const worse = 1735 - (S.m - 352) * 0.10;
+  const f2 = FIND.f2;
+  if (f2.status === 'settled' && f2.chosen === 'both') {
+    const t = clamp01((S.m - f2.settledAt) / 90);
+    return lerp(worse, 2120, t) + wig(9, 6);
+  }
+  return worse + wig(9, 6);
+};
+const w4ann = () => 1240 + (S.m - 352) * 0.06 + wig(5, 4);
+const k200vib = () => 4.6 + (S.m - 352) * 0.0015 + wig(11, 0.06);
+
+/* ============================ SPARKS ============================ */
+const SP = {};
+function spark(id, opts){ SP[id] = Object.assign({arr: [], cap: 46, live: null, seeded: false}, opts); return id; }
+function seedSparks(){
+  for (const id in SP){ const s = SP[id];
+    if (s.seed){ for (let i = 0; i < s.cap; i++) s.arr.push(s.seed(i / (s.cap - 1))); }
+    else if (s.live){ for (let i = 0; i < s.cap; i++) s.arr.push(s.live() + (Math.random() - 0.5) * (s.jit || 0)); }
+  }
+}
+function pushSparks(){ for (const id in SP){ const s = SP[id]; if (s.live){ s.arr.push(s.live()); if (s.arr.length > s.cap) s.arr.shift(); } } }
+spark('sp_w4ann',  { live: w4ann,  seed: t => 640 + 600 * Math.pow(t, 1.35) + (Math.random()-0.5)*26 });   // 7 d climb
+spark('sp_gl2op',  { live: gl2out, seed: t => 2120 - 385 * Math.pow(t, 1.8) + (Math.random()-0.5)*18 });   // 18 h fall
+spark('sp_vib',    { live: k200vib, seed: t => 3.1 + (t < 0.4 ? t*0.5 : 0.2 + (t-0.4)*2.17) + (Math.random()-0.5)*0.12 }); // 72 h
+spark('sp_whp',    { live: cv2whp, jit: 14 });   // seeded flat from live; the ramp draws itself
+spark('sp_inj',    { live: cv2inj, jit: 3 });
+spark('sp_gas4',   { live: () => 121 + wig(13, 2.2), jit: 2 });
+spark('sp_plin',   { live: () => 505 + wig(15, 5) - (FIND.f4 && F4T.holdAt == null && S.m >= F4T.start ? 0 : 0), jit: 4 });
+
+/* ============================ WORLD LAYOUT ============================ */
+const PT = {
+  padA: [-196, -96], padB: [-132, 64], padC: [96, -124],
+  comp: [-44, -8], plant: [80, 36], batt: [128, 64],
+  stor: [198, -54], cv1: [190, -60], cv2: [206, -48],
+  bv7: [178, 106], rect: [224, 130],
+};
+const LINES = {
+  gl1:  [[-196,-96], [-160,-74], [-108,-42], [-44,-8]],
+  gl2:  [[-132,64], [-102,44], [-72,20], [-44,-8]],
+  gl3:  [[96,-124], [108,-62], [122,-4], [128,58]],
+  trunk:[[-44,-8], [12,10], [80,36]],
+  stln: [[80,36], [114,16], [156,-20], [198,-54]],
+  exp:  [[80,36], [122,66], [178,106], [232,140], [272,162]],
+  creek:[[-268,-44], [-180,-24], [-96,-6], [-58,6], [-6,-16], [60,-58], [140,-96], [240,-124]],
+  roadS:[[24,182], [52,120], [80,36]],
+};
+
+/* ============================ FINDINGS ============================ */
+const FIND = {
+  f1: {
+    id:'f1', aid:'w4', sev:'watch', t:'pinned 03:12', title:'The annulus is whispering.',
+    line:'Annulus pressure up 94% in seven days. Tubing flat. I think the tubing is talking to the casing.',
+    saw:['Annulus <b>640 &rarr; 1,240 kPa</b> over seven days, a steady climb, no steps','Tubing pressure flat at <b>6,040 kPa</b> the whole window','Gas rate unchanged · <b>121 e3m3/d</b>, so this is not the reservoir','Last workover <b>2023</b>: packer and tubing swap, from the well file'],
+    sparkId:'sp_w4ann', sparkCap:'Annulus pressure · last 7 days', sparkUnit:'kPa',
+    why:'A steady annulus climb under a flat tubing curve is the signature of a small tubing-to-casing leak, not a thermal effect. It is nowhere near its relief setting. That is the point: right now this is a scheduled job. Discovered at the relief setting, it is an emergency one.',
+    ask:'Book a pressure survey on the next operator run, and move this well up the workover list before breakup closes the road.',
+    opts:[
+      {id:'book', pri:1, label:'Draft the survey and reshuffle the list', sub:'work order to your CMMS, workover list re-ranked, both wait for your signature'},
+      {id:'hold', pri:0, label:'Keep watching, tighter threshold', sub:'it re-raises at 1,400 kPa or in 7 days, whichever lands first'},
+    ],
+    outcome:{
+      book:'Survey drafted onto the Pad B run sheet. Workover list re-ranked with 103/07-22 ahead of breakup. <b>Nothing was signed by software</b>: both sit in your queue.',
+      hold:'Threshold tightened. <b>It keeps counting</b>: 1,400 kPa or seven days, whichever comes first, and it re-raises with the same evidence attached.',
+    },
+    logs:{
+      book:[[2,'find','survey request drafted onto the Pad B operator run sheet'],[4,'find','workover list re-ranked: 103/07-22 moves ahead of breakup · awaiting your signature']],
+      hold:[[1,'find','threshold tightened on 103/07-22 · re-raise at 1,400 kPa or plus seven days']],
+    },
+    status:'open', chosen:null,
+  },
+  f2: {
+    id:'f2', aid:'gl2', sev:'ask', t:'pinned 04:41', title:'GL-2 is fighting itself.',
+    line:'Pressure drop across KP 8 to 13 nearly doubled in 18 hours. Flow is flat. Hydrates at the creek crossing is my bet.',
+    saw:['&Delta;P across KP 8 to 13: <b>360 &rarr; 690 kPa</b> in 18 hours','Flow flat at <b>238 e3m3/d</b>: the line is working harder for the same gas','Overnight low <b>&minus;9&deg;C</b>, ground frost deepening · weather feed','The low point sits at the <b>KP 11 creek crossing</b> · GIS profile'],
+    sparkId:'sp_gl2op', sparkCap:'Outlet pressure · last 18 h', sparkUnit:'kPa',
+    why:'Rising differential under flat flow means the bore is shrinking. On a cold week, at a wet low point, that is hydrate ice forming a ring. Left alone it plugs, and a plugged sour-service line on a weekend is a flare-and-thaw operation with the field down behind it.',
+    ask:'A methanol batch on today’s run, and a cleaning pig through the line this week while it is still a maintenance job.',
+    opts:[
+      {id:'both', pri:1, label:'Approve both, draft the orders', sub:'methanol on today’s truck, pig run booked with the integrity crew'},
+      {id:'meoh', pri:0, label:'Methanol only for now', sub:'it re-raises if the differential holds past tomorrow'},
+    ],
+    outcome:{
+      both:'Methanol batch on today’s run and a pig booked Thursday, launcher at Pad B. <b>The differential is the test</b>: watch this panel ease over the next hours.',
+      meoh:'Methanol drafted for today’s run. The pig stays unbooked. <b>It keeps score</b> and re-raises if the &Delta;P holds past tomorrow.',
+    },
+    logs:{
+      both:[[2,'find','methanol batch order drafted for today’s run'],[5,'find','cleaning pig booked Thursday with the integrity crew · launcher at Pad B'],[40,'field','GL-2 &Delta;P easing · the methanol is winning']],
+      meoh:[[2,'find','methanol batch order drafted · pig unbooked, I keep score on the &Delta;P']],
+    },
+    status:'open', chosen:null,
+  },
+  f3: {
+    id:'f3', aid:'comp', sev:'watch', t:'pinned 05:05', title:'K-200B, inside the alarm, outside its habit.',
+    line:'Axial vibration up 48% in 72 hours. The alarm will not fire for weeks. The trend says bearing.',
+    saw:['Axial vibration unit B: <b>3.1 &rarr; 4.6 mm/s</b> over 72 h · alarm sits at <b>7.1</b>','Discharge temperature <b>+6&deg;C</b> on the same window, suction unchanged','Speed and load flat: <b>11,940 rpm</b>, so the change is mechanical','Unit A, same service, same weather: <b>flat at 2.2</b>. This is the machine, not the season'],
+    sparkId:'sp_vib', sparkCap:'Axial vibration · last 72 h', sparkUnit:'mm/s',
+    why:'SCADA alarms fire at limits. Machines confess in trends, weeks earlier. Caught here, this is a scheduled swing on Tuesday day shift. Caught at 7.1, it is a hard trip, a cold restart, and the field flaring behind a dead station.',
+    ask:'Pull the vibration route forward to this week, and stage the seal kit that is already on the shelf in Red Deer.',
+    opts:[
+      {id:'move', pri:1, label:'Draft the work order, stage the kit', sub:'vibe tech route moved up, parts picked, your signature closes it'},
+      {id:'wait', pri:0, label:'Wait for the monthly route', sub:'11 days out · it keeps counting either way'},
+    ],
+    outcome:{
+      move:'Route moved up, kit staged, and a swing window penciled for Tuesday day shift. <b>A shutdown that will never make the morning call.</b>',
+      wait:'Noted, and on the record. The monthly route lands in 11 days. <b>It keeps counting</b>, and the trend is on this panel when you want it.',
+    },
+    logs:{
+      move:[[2,'find','vibration route moved up · seal kit staged from the Red Deer shelf'],[6,'find','K-200B swing penciled for Tuesday day shift · awaiting your signature']],
+      wait:[[1,'find','your call logged: monthly route stands, 11 days out · I keep counting']],
+    },
+    status:'open', chosen:null,
+  },
+  f4: {
+    id:'f4', aid:'cv2', sev:'now', t:null, title:'Two readings that cannot both be true.',
+    line:'CV-2 taking 39% less gas than nominated while its header valve swears it is wide open. Pressure climbing against the fill curve.',
+    saw:['Injection nominated <b>240 e3m3/d</b> · actual fell to <b>146</b> in forty minutes','Header valve HV-201 reports <b>100% open</b>, unchanged','Wellhead pressure <b>10,050 &rarr; 10,690 kPa</b> and climbing · max operating is <b>11,600</b>','Fill curve deviation <b>+2.1%</b> and widening · nomination schedule'],
+    sparkId:'sp_whp', sparkCap:'CV-2 wellhead pressure · live', sparkUnit:'kPa',
+    why:'The valve says open. The flow says throttled. One of them is lying, and the pressure is siding with the flow. If the valve is stuck part-closed and reporting open, every hour of injection pushes the wellhead closer to its ceiling on bad information.',
+    ask:'Hold CV-2, swap the nomination to CV-1, and send measurement to look at HV-201. The switch order is drafted for ops. Nothing moves until a person moves it.',
+    opts:[
+      {id:'swap', pri:1, label:'Hold CV-2, swap injection to CV-1', sub:'recommended · switch order to ops, measurement tech dispatched'},
+      {id:'watch', pri:0, label:'Reduce rate and watch 30 more minutes', sub:'your right to be wrong is part of the job'},
+    ],
+    outcome:{
+      swap:'Ops holds CV-2 and swings injection to CV-1. <b>Their hands on the valves, not mine.</b> Watch the wellhead pressure walk back down this panel.',
+      watch:'Rate reduced on your call. <b>It watches with you</b>, and if the curve keeps climbing this comes back as an ask, not a watch.',
+    },
+    logs:{
+      swap:[[3,'field','ops swaps injection to CV-1 · their hands on the valves, not mine'],[9,'field','CV-2 wellhead pressure off the fill curve and falling'],[31,'field','measurement tech at Carden Lake: HV-201 pilot solenoid passing, seat scored'],[34,'find','WO-88214 drafted for your sign-off · parts on the Wednesday truck']],
+      watch:[[2,'you','rate reduced at CV-2 · the Roundsman watches with you']],
+    },
+    status:'hidden', chosen:null,
+  },
+};
+const FORDER = ['f4','f2','f1','f3'];
+const findByAsset = aid => Object.values(FIND).find(f => f.aid === aid && f.status !== 'hidden');
+
+/* ============================ ASSET DEFS ============================ */
+const gasTags = (tub, ann, gas, cond, wht, choke, seed) => () => [
+  {k:'Tubing pressure', v: fmt(tub + wig(seed, 18)), u:'kPa'},
+  {k:'Annulus pressure', v: fmt(ann + wig(seed+1, 6)), u:'kPa'},
+  {k:'Gas rate', v: f1d(gas + wig(seed+2, 1.8)), u:'e3m3/d'},
+  {k:'Condensate', v: f1d(cond + wig(seed+3, 0.4)), u:'m3/d'},
+  {k:'Wellhead temp', v: f1d(wht + wig(seed+4, 0.4)), u:'&deg;C'},
+  {k:'Choke', v: fmt(choke), u:'%'},
+  {k:'Status', v:'flowing · plunger auto'},
+];
+const DEFS = [
+  {id:'w1', grp:'Wells', kind:'Gas well · Pad A', name:'100/03-14', sub:'100/03-14-062-08 W6 · Bluestone shale',
+    at:[-203,-99], tags: gasTags(6420,380,128,11.8,8,42, 21),
+    geo:[['Surface','100/03-14-062-08 W6'],['TVD / MD','2,241 / 4,306 m'],['Lateral','1,905 m · azimuth 318&deg;'],['Formation','Bluestone shale'],['Licence','KRE-0441022'],['On stream','2022-11']],
+    note:'Nothing on this one. Its plunger cycles are the tidiest on the pad. Last pin here was <b>41 days ago</b>, a false positive I logged and learned from.'},
+  {id:'w2', grp:'Wells', kind:'Gas well · Pad A', name:'102/03-14', sub:'102/03-14-062-08 W6 · Bluestone shale',
+    at:[-193,-94], tags: gasTags(6180,410,141,9.1,9,48, 27),
+    geo:[['Surface','102/03-14-062-08 W6'],['TVD / MD','2,238 / 4,410 m'],['Lateral','2,010 m · azimuth 296&deg;'],['Formation','Bluestone shale'],['Licence','KRE-0441165'],['On stream','2023-02']],
+    note:'Best well on the field this month. I watch its decline curve so the forecast never has to be a surprise.'},
+  {id:'w3', grp:'Wells', kind:'Gas well · Pad B', name:'100/07-22', sub:'100/07-22-062-08 W6 · Bluestone shale',
+    at:[-139,61], tags: gasTags(5950,365,117,8.2,7,38, 33),
+    geo:[['Surface','100/07-22-062-08 W6'],['TVD / MD','2,244 / 4,180 m'],['Lateral','1,780 m · azimuth 152&deg;'],['Formation','Bluestone shale'],['Licence','KRE-0439871'],['On stream','2022-06']],
+    note:'Quiet. Its annulus sits at 365 kPa like it was painted there, which is exactly why its neighbour’s climb stood out.'},
+  {id:'w4', grp:'Wells', kind:'Gas well · Pad B', name:'103/07-22', sub:'103/07-22-062-08 W6 · Bluestone shale', flag:1,
+    at:[-128,67], tags: () => [
+      {k:'Tubing pressure', v: fmt(6040 + wig(39, 16)), u:'kPa'},
+      {k:'Annulus pressure', v: fmt(w4ann()), u:'kPa', warm:1, spark:'sp_w4ann'},
+      {k:'Gas rate', v: f1d(121 + wig(40, 2.2)), u:'e3m3/d', spark:'sp_gas4'},
+      {k:'Condensate', v: f1d(9.6 + wig(41, 0.4)), u:'m3/d'},
+      {k:'Wellhead temp', v: f1d(8 + wig(42, 0.4)), u:'&deg;C'},
+      {k:'Annulus relief set', v:'2,800', u:'kPa'},
+      {k:'Status', v:'flowing · watch pinned', warm:1},
+    ],
+    geo:[['Surface','103/07-22-062-08 W6'],['TVD / MD','2,246 / 4,395 m'],['Lateral','1,995 m · azimuth 148&deg;'],['Formation','Bluestone shale'],['Licence','KRE-0440612'],['Last workover','2023 · packer + tubing']],
+    note:null},
+  {id:'w5', grp:'Wells', kind:'Oil well · Pad C', name:'100/11-09', sub:'100/11-09-061-07 W6 · Teal sand',
+    at:[89,-127], tags: () => [
+      {k:'Strokes', v: f1d(6.2 + wig(45,0.1)), u:'spm'},
+      {k:'Fluid rate', v: f1d(18.4 + wig(46,0.5)), u:'m3/d'},
+      {k:'Pump fillage', v: fmt(84 + wig(47,1.5)), u:'%'},
+      {k:'Casing pressure', v: fmt(210 + wig(48,5)), u:'kPa'},
+      {k:'Rod load', v: fmt(68 + wig(49,1.2)), u:'%'},
+      {k:'Runtime · 30 d', v:'97', u:'%'},
+      {k:'Status', v:'pumping'},
+    ],
+    geo:[['Surface','100/11-09-061-07 W6'],['TVD','1,184 m · vertical'],['Formation','Teal sand'],['Licence','KRE-0398410'],['On stream','2014-08'],['Battery','Teal Lake 11-09']],
+    note:'Its dyna cards drift a little every spring when the road bans slow the flush trucks. I know its habits; that is the job.'},
+  {id:'w6', grp:'Wells', kind:'Oil well · Pad C', name:'102/11-09', sub:'102/11-09-061-07 W6 · Teal sand',
+    at:[101,-121], tags: () => [
+      {k:'Strokes', v: f1d(5.8 + wig(51,0.1)), u:'spm'},
+      {k:'Fluid rate', v: f1d(15.9 + wig(52,0.5)), u:'m3/d'},
+      {k:'Pump fillage', v: fmt(79 + wig(53,1.5)), u:'%'},
+      {k:'Casing pressure', v: fmt(230 + wig(54,5)), u:'kPa'},
+      {k:'Rod load', v: fmt(72 + wig(55,1.2)), u:'%'},
+      {k:'Runtime · 30 d', v:'94', u:'%'},
+      {k:'Status', v:'pumping'},
+    ],
+    geo:[['Surface','102/11-09-061-07 W6'],['TVD','1,181 m · vertical'],['Formation','Teal sand'],['Licence','KRE-0399102'],['On stream','2015-03'],['Battery','Teal Lake 11-09']],
+    note:'Fillage runs four points behind its twin. Not a finding, just a fact I carry so a real change has something to stand against.'},
+  {id:'gl1', grp:'Gathering', kind:'Gathering line', name:'GL-1', sub:'Pad A &rarr; Cutthroat Creek comp · 11.8 km',
+    line:'gl1', tags: () => [
+      {k:'Inlet pressure', v: fmt(2480 + wig(57,12)), u:'kPa'},
+      {k:'Outlet pressure', v: fmt(2140 + wig(58,12)), u:'kPa'},
+      {k:'Differential', v: fmt(340 + wig(59,8)), u:'kPa'},
+      {k:'Flow', v: f1d(269 + wig(60,3)), u:'e3m3/d'},
+      {k:'CP potential', v:'&minus;0.94', u:'V'},
+      {k:'Last pig', v:'41 days ago'},
+    ],
+    geo:[['Length','11.8 km'],['OD','168.3 mm · 6&Prime;'],['Product','sweet gas + liquids'],['MOP','9,930 kPa'],['Depth of cover','1.2 m'],['Built','2021 · composite']],
+    note:'Walks clean. The creek crossing at KP 7 has 1.9 m of cover; I re-check it after every freshet with the survey layer.'},
+  {id:'gl2', grp:'Gathering', kind:'Gathering line', name:'GL-2', sub:'Pad B &rarr; Cutthroat Creek comp · 14.6 km', flag:1,
+    line:'gl2', tags: () => [
+      {k:'Inlet pressure', v: fmt(2445 + wig(61,10)), u:'kPa'},
+      {k:'Outlet pressure', v: fmt(gl2out()), u:'kPa', warm:1, spark:'sp_gl2op'},
+      {k:'Differential', v: fmt(2445 + wig(61,10) - gl2out()), u:'kPa', warm:1},
+      {k:'Flow', v: f1d(238 + wig(63,2.5)), u:'e3m3/d'},
+      {k:'CP potential', v:'&minus;0.92', u:'V'},
+      {k:'Last pig', v:'67 days ago', warm:1},
+    ],
+    geo:[['Length','14.6 km'],['OD','168.3 mm · 6&Prime;'],['Product','sour gas · 2.1% H2S'],['MOP','9,930 kPa'],['Low point','KP 11 · creek crossing'],['Built','2019 · steel']],
+    note:null},
+  {id:'gl3', grp:'Gathering', kind:'Emulsion line', name:'GL-3', sub:'Pad C &rarr; Teal Lake battery · 9.1 km',
+    line:'gl3', tags: () => [
+      {k:'Pressure', v: fmt(1210 + wig(65,10)), u:'kPa'},
+      {k:'Flow', v: f1d(34.3 + wig(66,0.6)), u:'m3/d'},
+      {k:'Temperature', v: f1d(32 + wig(67,0.5)), u:'&deg;C'},
+      {k:'Water cut', v:'12', u:'%'},
+      {k:'Last scrape', v:'12 days ago'},
+    ],
+    geo:[['Length','9.1 km'],['OD','114.3 mm · 4&Prime;'],['Product','oil emulsion'],['MOP','4,960 kPa'],['Depth of cover','1.0 m'],['Built','2014 · steel, coated']],
+    note:'Wax is the enemy here, not ice. Scrape cadence holds at 14 days; I move it up whenever the line temperature sags.'},
+  {id:'trunk', grp:'Gathering', kind:'Trunk line', name:'TL-1', sub:'comp &rarr; Wolf Willow plant · 8.4 km',
+    line:'trunk', tags: () => [
+      {k:'Comp discharge', v: fmt(6890 + wig(69,14)), u:'kPa'},
+      {k:'Plant inlet', v: fmt(6410 + wig(70,14)), u:'kPa'},
+      {k:'Flow', v: f1d(505 + wig(71,5)), u:'e3m3/d', spark:'sp_plin'},
+      {k:'MOP', v:'9,930', u:'kPa'},
+    ],
+    geo:[['Length','8.4 km'],['OD','273.1 mm · 10&Prime;'],['Product','sweetened gas'],['MOP','9,930 kPa'],['Depth of cover','1.4 m'],['Built','2019 · steel']],
+    note:'The field’s aorta. It gets the boring kind of attention, which is the best kind.'},
+  {id:'comp', grp:'Plant &amp; compression', kind:'Compressor station', name:'K-200 · Cutthroat Creek', sub:'2 &times; 1,850 kW recip', flag:1,
+    at: PT.comp, tags: () => [
+      {k:'Unit A · vibration', v: f1d(2.2 + wig(73,0.05)), u:'mm/s'},
+      {k:'Unit B · vibration', v: f1d(k200vib()), u:'mm/s', warm:1, spark:'sp_vib'},
+      {k:'Unit B · alarm at', v:'7.1', u:'mm/s'},
+      {k:'Suction', v: fmt(2110 + wig(75,10)), u:'kPa'},
+      {k:'Discharge', v: fmt(6885 + wig(76,12)), u:'kPa'},
+      {k:'Unit B · disch temp', v: fmt(102 + wig(77,0.8)), u:'&deg;C', warm:1},
+      {k:'Speed', v: fmt(11940 + wig(78,20)), u:'rpm'},
+      {k:'Next planned PM', v:'11 days'},
+    ],
+    geo:[['LSD','06-28-062-08 W6'],['Units','2 &times; 1,850 kW recip'],['Service','field boost · 2,100 &rarr; 6,900 kPa'],['Licence','KRE-F-2208'],['Commissioned','2019'],['Crew','unmanned · daily visit']],
+    note:null},
+  {id:'plant', grp:'Plant &amp; compression', kind:'Gas plant', name:'Wolf Willow plant', sub:'shallow-cut · 620 e3m3/d nameplate',
+    at: PT.plant, tags: () => [
+      {k:'Inlet', v: f1d(505 + wig(80,5)), u:'e3m3/d', spark:'sp_plin'},
+      {k:'Sales gas', v: f1d(468 + wig(81,4)), u:'e3m3/d'},
+      {k:'Sales dewpoint', v:'&minus;11', u:'&deg;C'},
+      {k:'Inlet H2S', v: f1d(2.1 + wig(82,0.05)), u:'ppm'},
+      {k:'Flare', v:'pilot only', good:1},
+      {k:'Trains', v:'2 of 2 running'},
+    ],
+    geo:[['LSD','10-30-062-07 W6'],['Nameplate','620 e3m3/d'],['Process','dehy + shallow cut refrig'],['Licence','KRE-F-1966'],['Commissioned','2019'],['Ops','manned · day shift']],
+    note:'The plant has its own DCS and its own alarms, and they keep their jobs. I read the historian mirror and watch the drift the panel is too busy to see.'},
+  {id:'batt', grp:'Plant &amp; compression', kind:'Tank battery', name:'Teal Lake battery', sub:'3 &times; 400 bbl + LACT',
+    at: PT.batt, tags: () => [
+      {k:'T-101 level', v: fmt(61 + wig(84,0.8)), u:'%'},
+      {k:'T-102 level', v: fmt(44 + wig(85,0.8)), u:'%'},
+      {k:'T-103 level', v: fmt(18 + wig(86,0.8)), u:'%'},
+      {k:'S&amp;W', v:'0.4', u:'%'},
+      {k:'Last haul', v:'03:40 · 28.1 m3'},
+      {k:'Vapour recovery', v:'on', good:1},
+    ],
+    geo:[['LSD','11-09-061-07 W6'],['Tanks','3 &times; 400 bbl, fixed roof'],['Custody','LACT to trucking'],['Licence','KRE-F-1421'],['Built','2014'],['Containment','lined berm · 110%']],
+    note:'Haul math is where tickets go to lie. Every load gets checked against level deltas; the reconciler agent and I share notes.'},
+  {id:'stor', grp:'Storage', kind:'Storage site', name:'Carden Lake header', sub:'2 caverns · inj/withdrawal header',
+    at: PT.stor, tags: () => [
+      {k:'Header pressure', v: fmt(10020 + wig(88,14)), u:'kPa'},
+      {k:'HV-201 · CV-2 leg', v: (F4T.fixed ? 'isolated for service' : '100% open (reported)'), warm: (S.m >= F4T.start && !F4T.fixed) ? 1 : 0},
+      {k:'HV-101 · CV-1 leg', v: (F4T.swapped ? 'open · injecting' : 'closed'), good: F4T.swapped ? 1 : 0},
+      {k:'Brine pond', v:'2.41 m · in range'},
+      {k:'Site power', v:'grid · ok', good:1},
+    ],
+    geo:[['LSD','04-19-061-06 W6'],['Service','gas storage · 2 caverns'],['Header','273.1 mm · 10&Prime;'],['Licence','KRE-S-0119'],['Commissioned','2016'],['Crew','unmanned · SCADA + cameras']],
+    note:'The header is where paperwork meets rock. Every nomination gets checked against what the wellheads actually swallow.'},
+  {id:'cv1', grp:'Storage', kind:'Salt cavern', name:'Cavern CV-1', sub:'Carden salt · 1,730 to 1,804 m',
+    at: PT.cv1, under:-62, tags: () => [
+      {k:'Inventory', v: f1d(18.2), u:'e6m3'},
+      {k:'Wellhead pressure', v: fmt(9410 + wig(90,10) + (F4T.swapped ? 90*clamp01((S.m-(F4T.holdAt+3))/30) : 0)), u:'kPa'},
+      {k:'Max operating', v:'11,600', u:'kPa'},
+      {k:'Injection', v: f1d(cv1inj()), u:'e3m3/d', good: F4T.swapped ? 1 : 0},
+      {k:'Last MIT', v:'2024 · passed', good:1},
+      {k:'Last sonar', v:'2023 · stable'},
+    ],
+    geo:[['Cavern interval','1,730 to 1,804 m'],['Salt','Carden salt'],['Working gas','24.0 e6m3'],['Cushion','9.5 e6m3'],['Licence','KRE-S-0119A'],['Solution mined','2014 to 2016']],
+    note:'Idle by plan this week. If CV-2 needs to rest, this one takes the nomination; that swap is exactly the drill ops rehearses.'},
+  {id:'cv2', grp:'Storage', kind:'Salt cavern', name:'Cavern CV-2', sub:'Carden salt · 1,741 to 1,822 m', flagLive:1,
+    at: PT.cv2, under:-58, tags: () => [
+      {k:'Inventory', v: f1d(21.7), u:'e6m3'},
+      {k:'Wellhead pressure', v: fmt(cv2whp()), u:'kPa', warm: S.m >= F4T.start && !F4T.fixed ? 1 : 0, spark:'sp_whp'},
+      {k:'Max operating', v:'11,600', u:'kPa'},
+      {k:'Nominated', v:'240.0', u:'e3m3/d'},
+      {k:'Injection actual', v: f1d(cv2inj()), u:'e3m3/d', warm: S.m >= F4T.start && F4T.holdAt == null ? 1 : 0, spark:'sp_inj'},
+      {k:'Fill curve dev', v: (S.m < F4T.start ? '+0.2%' : (F4T.holdAt != null ? 'recovering' : '+' + f1d(2.1 + (S.m - F4T.start)*0.08) + '%')), warm: S.m >= F4T.start && F4T.holdAt == null ? 1 : 0},
+    ],
+    geo:[['Cavern interval','1,741 to 1,822 m'],['Salt','Carden salt'],['Working gas','26.5 e6m3'],['Cushion','10.1 e6m3'],['Licence','KRE-S-0119B'],['Solution mined','2015 to 2017']],
+    note:'Taking this week’s injection nomination. The fill curve is the contract; I check the rock is keeping it.'},
+  {id:'exp', grp:'Export &amp; integrity', kind:'Export pipeline', name:'Ridgeline 16', sub:'plant &rarr; custody station · 14.2 km',
+    line:'exp', tags: () => [
+      {k:'Linepack', v: fmt(6180 + wig(92,12)), u:'kPa'},
+      {k:'Flow', v: f1d(462 + wig(93,4)), u:'e3m3/d'},
+      {k:'MOP', v:'9,930', u:'kPa'},
+      {k:'ILI tool', v: window.PIG ? window.PIG.text() : 'in line'},
+      {k:'Delivery', v:'custody station · on-spec', good:1},
+    ],
+    geo:[['Length','14.2 km'],['OD','406.4 mm · 16&Prime;'],['Product','sales gas'],['MOP','9,930 kPa'],['Class','Class 1 &rarr; 2 at KP 12'],['Built','2019 · steel']],
+    note:'An inspection tool is in the line right now, reading wall thickness as it goes. Watch it move on the map: that dot is real time.'},
+  {id:'bv7', grp:'Export &amp; integrity', kind:'Block valve site', name:'BV-7', sub:'Ridgeline 16 · KP 8.1',
+    at: PT.bv7, tags: () => [
+      {k:'Position', v:'open', good:1},
+      {k:'Upstream', v: fmt(6205 + wig(95,10)), u:'kPa'},
+      {k:'Downstream', v: fmt(6198 + wig(96,10)), u:'kPa'},
+      {k:'Comms', v:'ok · LTE', good:1},
+      {k:'Battery', v: f1d(13.1 + wig(97,0.05)), u:'V'},
+      {k:'Actuator', v:'charged', good:1},
+    ],
+    geo:[['KP','8.1'],['LSD','13-33-061-06 W6'],['Type','remote block · gas over oil'],['Function','sectionalizing'],['Installed','2019'],['Last stroke test','June · passed']],
+    note:'Sixty seconds of attention per walk: position, pressures, comms, battery. Boring on purpose. The day it is interesting, you will know first.'},
+  {id:'rect', grp:'Export &amp; integrity', kind:'CP rectifier', name:'R-4', sub:'cathodic protection · KP 11.6',
+    at: PT.rect, tags: () => [
+      {k:'Output', v: f1d(14.2 + wig(99,0.1)), u:'V'},
+      {k:'Current', v: f1d(8.6 + wig(100,0.1)), u:'A'},
+      {k:'Pipe-to-soil', v:'&minus;1.12', u:'V'},
+      {k:'Status', v:'on', good:1},
+      {k:'Last survey', v:'May · annual'},
+    ],
+    geo:[['KP','11.6'],['LSD','01-04-061-05 W6'],['Protects','Ridgeline 16 · south leg'],['Criterion','&minus;0.85 V minimum'],['Installed','2019'],['Power','grid drop']],
+    note:'Corrosion is the slowest fault on the field, which makes it the easiest to forget. I do not forget.'},
+  {id:'pig', grp:'Export &amp; integrity', kind:'Inline inspection', name:'ILI tool', sub:'Ridgeline 16 · geometry + MFL', mover:1,
+    tags: () => [
+      {k:'Run', v:'2 of 2 · geometry + MFL'},
+      {k:'Position', v: window.PIG ? window.PIG.text() : 'in line'},
+      {k:'Speed', v: window.PIG && window.PIG.run ? '1.1' : '0.0', u:'m/s'},
+      {k:'Battery', v:'71', u:'%'},
+      {k:'Data', v:'onboard · offload at receiver'},
+    ],
+    geo:[['Tool','combo · geometry + MFL'],['Line','Ridgeline 16 · 16&Prime;'],['Launched','05:20 · plant launcher'],['Receive','custody station trap'],['Vendor crew','on site at receiver'],['Last full run','26 months ago']],
+    note:'While it swims, I hold its position against the linepack profile so the receive crew is never guessing when to close the trap.'},
+  {id:'truck', grp:'Field', kind:'Operator rounds', name:'Unit 12', sub:'day operator · physical rounds', mover:1,
+    tags: () => [
+      {k:'Operator', v:'day shift · Unit 12'},
+      {k:'Route', v: window.TRK ? window.TRK.text() : 'plant &rarr; pads'},
+      {k:'Speed', v: window.TRK && window.TRK.moving ? fmt(52 + wig(103,3)) : '0', u:'km/h'},
+      {k:'Last stop', v:'plant · 06:02'},
+      {k:'FLHA', v:'filed 05:48', good:1},
+    ],
+    geo:[['Vehicle','Unit 12 · 3/4 ton'],['Coverage','plant, pads, comp'],['Cadence','daily physical rounds'],['Journey mgmt','on · check-ins 2 h'],['Radio','LADD 1'],['Note','the human half of the walk']],
+    note:'The Roundsman reads tags; people read smells, sounds, and drips. The field needs both, and the pins tell Unit 12 where to look first.'},
+];
+const DEF = {}; DEFS.forEach(d => DEF[d.id] = d);
+
+/* ============================ 3D SCENE ============================ */
+const view = $('#view');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({antialias:true});
+} catch(e) {
+  view.appendChild(el('div','fail','<div class="in"><b>The 3D view could not start.</b><br/>This demo needs WebGL. Try a current Chrome, Edge or Firefox window without forced software rendering.</div>'));
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.35;
+view.insertBefore(renderer.domElement, view.firstChild);
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(42, 1, 1, 2400);
+cam.position.set(24, 238, 322);
+const controls = new OrbitControls(cam, renderer.domElement);
+controls.target.set(8, -8, -10);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 36; controls.maxDistance = 560;
+controls.maxPolarAngle = 2.5;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.45;
+
+const hemi = new THREE.HemisphereLight(0x9a8468, 0x141009, 1.3);
+const key  = new THREE.DirectionalLight(0xffd9b0, 1.75);  key.position.set(180, 260, 120);
+const rim  = new THREE.DirectionalLight(0x8a7a68, 0.5);  rim.position.set(-200, 140, -160);
+scene.add(hemi, key, rim);
+
+/* material registry for theme swaps */
+const MATS = [];
+function M(dark, light, opts){ const m = new THREE.MeshStandardMaterial(Object.assign({color:dark, roughness:.9, metalness:.05, flatShading:true}, opts||{})); MATS.push({m, dark, light}); return m; }
+function MB(dark, light, opts){ const m = new THREE.MeshBasicMaterial(Object.assign({color:dark}, opts||{})); MATS.push({m, dark, light}); return m; }
+
+/* shared palette */
+const mGround = M(0x241c14, 0xd8ceb6, {transparent:true, opacity:.38, side:THREE.DoubleSide, depthWrite:false});
+const mRoad   = M(0x282017, 0xc8bda1, {transparent:true, opacity:.9});
+const mCreek  = M(0x120e0a, 0xb3a88f, {transparent:true, opacity:.95});
+const mPad    = M(0x2b231a, 0xcfc4a9);
+const mSteel  = M(0x7d7264, 0x8a7e6b);
+const mSteelD = M(0x574e42, 0x6f6552);
+const mWall   = M(0x2a2219, 0xc9bc9f);
+const mRoof   = M(0x352b1f, 0xbfb295);
+const mBore   = M(0x8a7f6f, 0x9a8f78, {transparent:true, opacity:.85});
+const mShale  = M(0x6b5230, 0x8a6f4d, {transparent:true, opacity:.13, depthWrite:false});
+const mSalt   = M(0x7d6a45, 0x97815a, {transparent:true, opacity:.12, depthWrite:false});
+const mSand   = M(0x5d4d33, 0x8a774f, {transparent:true, opacity:.12, depthWrite:false});
+const mCavern = M(0xc9a24b, 0xa8823a, {transparent:true, opacity:.34, depthWrite:false});
+const mPipe   = M(0x7d7060, 0x7d7259, {transparent:true, opacity:.95});
+const mAccent = MB(0xD27A3F, 0xB45F26);
+const mPulse  = MB(0xE89968, 0xB45F26, {transparent:true, opacity:.9});
+const mFlame  = MB(0xE89968, 0xD27A3F, {transparent:true, opacity:.85});
+const mPond   = M(0x151b1a, 0xaab3a4, {transparent:true, opacity:.95});
+const mHitm   = new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false});
+
+/* terrain */
+const hxz = (x,z) => 2.0*Math.sin(x*0.011+1.7)*Math.cos(z*0.016+0.4) + 1.2*Math.sin((x+z)*0.019+0.8) + 0.7*Math.cos(x*0.029 - z*0.022);
+{
+  const g = new THREE.PlaneGeometry(560, 400, 64, 46);
+  g.rotateX(-Math.PI/2);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setY(i, hxz(p.getX(i), p.getZ(i)));
+  g.computeVertexNormals();
+  const gm = new THREE.Mesh(g, mGround);
+  gm.renderOrder = 3;
+  scene.add(gm);
+}
+/* faint property grid on the ground plane */
+{
+  const pts = [];
+  for (let x = -240; x <= 240; x += 80) { pts.push(new THREE.Vector3(x, 0, -180), new THREE.Vector3(x, 0, 180)); }
+  for (let z = -160; z <= 160; z += 80) { pts.push(new THREE.Vector3(-260, 0, z), new THREE.Vector3(260, 0, z)); }
+  const g = new THREE.BufferGeometry().setFromPoints(pts.map(v => new THREE.Vector3(v.x, hxz(v.x, v.z) + 0.15, v.z)));
+  const m = new THREE.LineBasicMaterial({color:0x463E34, transparent:true, opacity:.4});
+  MATS.push({m, dark:0x463E34, light:0xB3A78F});
+  const ls = new THREE.LineSegments(g, m);
+  ls.renderOrder = 4;
+  scene.add(ls);
+}
+
+/* ribbons: roads + creek */
+function ribbon(pts2, w, mat, yoff){
+  const pts = pts2.map(p => new THREE.Vector3(p[0], hxz(p[0], p[1]) + yoff, p[1]));
+  const cur = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.2);
+  const N = 110, pos = [], idx = [];
+  for (let i = 0; i <= N; i++){
+    const t = i/N, c = cur.getPointAt(t), tg = cur.getTangentAt(t);
+    const side = new THREE.Vector3(-tg.z, 0, tg.x).normalize().multiplyScalar(w/2);
+    const a = c.clone().add(side), b = c.clone().sub(side);
+    a.y = hxz(a.x, a.z) + yoff; b.y = hxz(b.x, b.z) + yoff;
+    pos.push(a.x,a.y,a.z, b.x,b.y,b.z);
+    if (i < N){ const k = i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  const mesh = new THREE.Mesh(g, mat);
+  mesh.renderOrder = 4;
+  scene.add(mesh);
+  return cur;
+}
+ribbon(LINES.creek, 5.5, mCreek, 0.1);
+ribbon(LINES.roadS, 3.2, mRoad, 0.22);
+ribbon([PT.plant, [12,10], PT.comp], 3.2, mRoad, 0.22);
+ribbon([PT.comp, [-108,-42], [-160,-74], PT.padA], 2.8, mRoad, 0.22);
+ribbon([PT.comp, [-72,20], [-102,44], PT.padB], 2.8, mRoad, 0.22);
+ribbon([PT.plant, [96,-40], PT.padC], 2.8, mRoad, 0.22);
+ribbon([PT.plant, [150,-10], PT.stor], 2.8, mRoad, 0.22);
+ribbon([PT.plant, [104,52], PT.batt], 2.6, mRoad, 0.22);
+
+/* strata slabs (x-ray only) */
+const UNDER = [];
+function slab(x1,x2,z1,z2,ytop,ybot,mat){
+  const g = new THREE.BoxGeometry(x2-x1, ytop-ybot, z2-z1);
+  const m = new THREE.Mesh(g, mat);
+  m.position.set((x1+x2)/2, (ytop+ybot)/2, (z1+z2)/2);
+  scene.add(m); UNDER.push(m); return m;
+}
+slab(-262, 42, -172, 172, -58, -72, mShale);
+slab(118, 272, -142, 44, -44, -80, mSalt);
+slab(58, 134, -162, -92, -33, -43, mSand);
+
+/* ============================ BUILDERS ============================ */
+const PICK = [], ANIM = [], PULSES = [], LBL = [];
+const box = (w,h,d,m,x,y,z,ry) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), m); b.position.set(x,y,z); if(ry) b.rotation.y = ry; return b; };
+const cyl = (r,h,m,x,y,z,seg) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg||10), m); c.position.set(x,y,z); return c; };
+function reg(obj, aid){ obj.traverse(o => { if (o.isMesh) { o.userData.aid = aid; PICK.push(o); } }); }
+function hit(grp, r, aid){ const s = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mHitm); s.userData.aid = aid; grp.add(s); PICK.push(s); }
+
+function tree(){ /* wellhead christmas tree */
+  const g = new THREE.Group();
+  g.add(cyl(.9,.35,mSteelD,0,.18,0));
+  g.add(cyl(.42,2.7,mSteel,0,1.5,0));
+  g.add(cyl(.62,.22,mSteelD,0,1.1,0)); g.add(cyl(.62,.22,mSteelD,0,2.0,0));
+  g.add(box(1.7,.3,.3,mSteel,.6,1.55,0));
+  g.add(box(.3,.3,1.7,mSteel,0,2.35,.4));
+  g.add(cyl(.3,.5,mSteelD,0,3.05,0));
+  return g;
+}
+function pumpjack(phase){
+  const g = new THREE.Group();
+  g.add(box(4.4,.35,1.7,mSteelD,0,.18,0));
+  const l1 = box(.28,3.9,.28,mSteel,-.55,1.9,0); l1.rotation.z = .3;
+  const l2 = box(.28,3.9,.28,mSteel,.55,1.9,0);  l2.rotation.z = -.3;
+  const l3 = box(.28,3.9,.28,mSteel,0,1.9,.5);   l3.rotation.x = -.26;
+  g.add(l1,l2,l3);
+  const beam = box(5.4,.34,.5,mSteel,0,0,0); beam.position.set(0,3.75,0);
+  const head = box(.7,1.5,.62,mSteelD,-2.9,-.2,0); head.rotation.z = .08; beam.add(head);
+  g.add(beam);
+  const disc = cyl(1.05,.3,mSteelD,1.9,1.15,0); disc.rotation.x = Math.PI/2;
+  const wt = box(.9,.6,.34,mSteel,0,.55,0); disc.add(wt);
+  g.add(disc);
+  ANIM.push(t => { beam.rotation.z = Math.sin(t*1.15 + phase) * .22; disc.rotation.z = t*1.15 + phase; });
+  return g;
+}
+function padSlab(x,z,w,d,ry){
+  const y = hxz(x,z);
+  const s = box(w,1.1,d,mPad,x,y+.4,z,ry||0);
+  scene.add(s); return y + .95;
+}
+function flare(x,y,z,h){
+  const g = new THREE.Group();
+  g.add(cyl(.5,h,mSteel,0,h/2,0));
+  g.add(cyl(.65,.8,mSteelD,0,h+.3,0));
+  const fl = new THREE.Mesh(new THREE.ConeGeometry(.8,2.6,7), mFlame); fl.position.y = h+2; g.add(fl);
+  const lt = new THREE.PointLight(0xE89968, 14, 60); lt.position.y = h+2.6; g.add(lt);
+  ANIM.push(t => { const s = .75 + Math.sin(t*9.1)*.2 + Math.sin(t*23.7)*.12; fl.scale.set(s,.8+s*.45,s); lt.intensity = 9 + s*7; });
+  g.position.set(x,y,z); return g;
+}
+
+/* wells */
+function gasWell(defId, endDx, endDz){
+  const d = DEF[defId], [x,z] = d.at, y = hxz(x,z) + .95;
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  g.add(tree()); hit(g, 5, defId);
+  scene.add(g); reg(g, defId);
+  const pts = [new THREE.Vector3(x,y,z), new THREE.Vector3(x,y-28,z), new THREE.Vector3(x,-48,z),
+    new THREE.Vector3(x+endDx*.22,-61,z+endDz*.22), new THREE.Vector3(x+endDx,-64.5,z+endDz)];
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .12), 40, .3, 6), mBore);
+  scene.add(tube); UNDER.push(tube);
+  LBL.push({aid:defId, kind:'asset', pos:new THREE.Vector3(x, y+7.5, z)});
+}
+function oilWell(defId, phase){
+  const d = DEF[defId], [x,z] = d.at, y = hxz(x,z) + .95;
+  const g = pumpjack(phase); g.position.set(x,y,z); g.rotation.y = .6;
+  hit(g, 5.5, defId); scene.add(g); reg(g, defId);
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+    new THREE.Vector3(x,y,z), new THREE.Vector3(x,-38,z)]), 8, .28, 6), mBore);
+  scene.add(tube); UNDER.push(tube);
+  LBL.push({aid:defId, kind:'asset', pos:new THREE.Vector3(x, y+8.5, z)});
+}
+padSlab(-198,-96, 30, 20, .25);
+padSlab(-133,64, 26, 18, -.3);
+padSlab(95,-124, 30, 20, .2);
+gasWell('w1', -52, 36); gasWell('w2', -46, -42); gasWell('w3', -46, 44); gasWell('w4', 52, 48);
+oilWell('w5', 0); oilWell('w6', 2.1);
+
+/* pipelines */
+const CURVES = {};
+function pipeline(defId, lineKey, r, depth, dur, n){
+  const pts = LINES[lineKey].map(p => new THREE.Vector3(p[0], hxz(p[0], p[1]) - depth, p[1]));
+  const cur = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .18); CURVES[defId] = cur;
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(cur, 90, r, 8), mPipe);
+  tube.userData.aid = defId; PICK.push(tube); scene.add(tube); UNDER.push(tube);
+  const meshes = [];
+  for (let i = 0; i < n; i++){ const s = new THREE.Mesh(new THREE.SphereGeometry(r*.85, 8, 6), mPulse); scene.add(s); meshes.push(s); UNDER.push(s); }
+  PULSES.push({cur, meshes, dur});
+  const mid = cur.getPointAt(.5);
+  LBL.push({aid:defId, kind:'asset', pos:new THREE.Vector3(mid.x, hxz(mid.x, mid.z) + 4, mid.z)});
+  return cur;
+}
+pipeline('gl1','gl1', .9, 3.4, 26, 3);
+pipeline('gl2','gl2', .9, 3.4, 26, 3);
+pipeline('gl3','gl3', .75, 3.2, 36, 2);
+pipeline('trunk','trunk', 1.25, 3.6, 20, 3);
+pipeline('stln','stln', 1.1, 3.6, 24, 2);
+pipeline('exp','exp', 1.45, 3.8, 30, 4);
+DEF['stln'] = null; /* stln is scenery: route its clicks to the storage site */
+{ /* GL-2 trouble span highlight */
+  const src = CURVES.gl2, pts = [];
+  for (let i = 0; i <= 24; i++) pts.push(src.getPointAt(.55 + .37*i/24));
+  const m = new THREE.MeshBasicMaterial({color:0xD27A3F, transparent:true, opacity:.4, depthWrite:false});
+  MATS.push({m, dark:0xD27A3F, light:0xB45F26});
+  const t = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 1.35, 8), m);
+  t.renderOrder = 2;
+  scene.add(t); UNDER.push(t);
+  ANIM.push(tt => m.opacity = FIND.f2.status === 'settled' ? .16 : .28 + .2*Math.sin(tt*2.6));
+}
+/* stln clicks belong to the storage header */
+CURVES.stln && (function(){ })();
+
+/* KP + crossing posts */
+function post(x,z,h){ const y = hxz(x,z); const p = cyl(.16,h,mSteel,x,y+h/2,z,6); scene.add(p); return p; }
+[[.02,'KP 0'],[.3,'KP 4'],[.57,'KP 8'],[.86,'KP 12']].forEach(([t,txt]) => {
+  const c = CURVES.exp.getPointAt(t); post(c.x, c.z, 2.2);
+  LBL.push({kind:'kp', text:txt, pos:new THREE.Vector3(c.x, hxz(c.x,c.z)+3.4, c.z)});
+});
+{ const c = CURVES.gl2.getPointAt(.8); post(c.x, c.z, 2.2); LBL.push({kind:'kp', text:'KP 11 · creek crossing', pos:new THREE.Vector3(c.x, hxz(c.x,c.z)+3.6, c.z)}); }
+
+/* compressor station */
+{
+  const [x,z] = PT.comp, y = padSlab(x,z, 30, 22);
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  g.add(box(9,4.2,5.5,mWall,-6,2.1,-3)); g.add(box(9.6,.8,6.1,mRoof,-6,4.6,-3));
+  g.add(box(9,4.2,5.5,mWall,5.5,2.1,3.2)); g.add(box(9.6,.8,6.1,mRoof,5.5,4.6,3.2));
+  g.add(cyl(.42,7.5,mSteel,-8.5,5.6,-3)); g.add(cyl(.42,7.5,mSteel,3,5.6,3.2));
+  g.add(box(7,2.6,3.4,mSteelD,6,1.3,-4.6));
+  ANIM.push(t => {}); hit(g, 15, 'comp');
+  scene.add(g); reg(g,'comp');
+  LBL.push({aid:'comp', kind:'asset', pos:new THREE.Vector3(x, y+11, z)});
+}
+/* gas plant */
+{
+  const [x,z] = PT.plant, y = padSlab(x,z, 46, 30);
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  const sep1 = cyl(1.9,8.5,mSteel,-15,2.4,-8); sep1.rotation.z = Math.PI/2; g.add(sep1);
+  const sep2 = cyl(1.9,8.5,mSteel,-15,2.4,-3.4); sep2.rotation.z = Math.PI/2; g.add(sep2);
+  g.add(cyl(1.6,13,mSteel,-4,6.5,-7));
+  g.add(cyl(1.35,10,mSteel,.5,5,-7));
+  g.add(box(11,4.5,7,mWall,6,2.25,5)); g.add(box(11.7,.9,7.6,mRoof,6,4.95,5));
+  g.add(box(7,3.6,5,mWall,-8,1.8,7)); g.add(box(7.6,.8,5.6,mRoof,-8,4.1,7));
+  g.add(cyl(3,5,mSteelD,15,2.5,-8));
+  g.add(box(16,.5,.9,mSteelD,0,3.2,.5)); g.add(box(16,.5,.9,mSteelD,0,2.2,1.6));
+  g.add(flare(19,0,10, 19));
+  hit(g, 24, 'plant'); scene.add(g); reg(g,'plant');
+  LBL.push({aid:'plant', kind:'asset', pos:new THREE.Vector3(x, y+23, z)});
+}
+/* battery */
+{
+  const [x,z] = PT.batt, y = padSlab(x,z, 26, 17, .1);
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  g.add(cyl(3.9,6.5,mSteel,-7.5,3.25,0,14)); g.add(cyl(3.9,6.5,mSteel,1.5,3.25,0,14)); g.add(cyl(3.9,6.5,mSteel,9.5,3.25,-1,14));
+  g.add(box(4.5,2.6,3.2,mWall,7,1.3,6)); g.add(box(5,.7,3.7,mRoof,7,2.9,6));
+  hit(g, 15, 'batt'); scene.add(g); reg(g,'batt');
+  LBL.push({aid:'batt', kind:'asset', pos:new THREE.Vector3(x, y+10, z)});
+}
+/* storage site + caverns */
+function cavern(defId, x, z){
+  const prof = [[0,0],[3.2,1.5],[6,5],[7.8,10],[8.2,16],[7,21],[4.4,25],[1.6,28],[.9,30]].map(p => new THREE.Vector2(p[0], p[1]));
+  const body = new THREE.Mesh(new THREE.LatheGeometry(prof, 20), mCavern);
+  body.position.set(x, -78, z);
+  body.renderOrder = 1;
+  body.userData.aid = defId; PICK.push(body); scene.add(body); UNDER.push(body);
+  const y = hxz(x,z) + .95;
+  const g = new THREE.Group(); g.position.set(x,y,z); g.add(tree());
+  hit(g, 4.5, defId); scene.add(g); reg(g, defId);
+  const str = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+    new THREE.Vector3(x,y,z), new THREE.Vector3(x,-48,z)]), 6, .3, 6), mBore);
+  scene.add(str); UNDER.push(str);
+  LBL.push({aid:defId, kind:'asset', pos:new THREE.Vector3(x, -60, z), under:1});
+}
+{
+  const [x,z] = PT.stor, y = padSlab(x,z, 32, 22, -.15);
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  g.add(box(7,3.4,4.5,mWall,4,1.7,4)); g.add(box(7.6,.8,5,mRoof,4,3.9,4));
+  g.add(box(9,.5,.9,mSteelD,-2,1.7,-2));
+  const pond = new THREE.Mesh(new THREE.CircleGeometry(6.5, 18), mPond);
+  pond.rotation.x = -Math.PI/2; pond.position.set(-9,.62,6); pond.renderOrder = 4; g.add(pond);
+  hit(g, 16, 'stor'); scene.add(g); reg(g,'stor');
+  LBL.push({aid:'stor', kind:'asset', pos:new THREE.Vector3(x, y+9, z)});
+}
+cavern('cv1', PT.cv1[0], PT.cv1[1]);
+cavern('cv2', PT.cv2[0], PT.cv2[1]);
+/* route stln tube clicks to the storage site */
+PICK.forEach(o => { if (o.userData.aid === 'stln') o.userData.aid = 'stor'; });
+LBL.forEach(l => { if (l.aid === 'stln') l.dead = 1; });
+
+/* block valve + rectifier */
+{
+  const [x,z] = PT.bv7, y = padSlab(x,z, 10, 8, .2);
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  g.add(box(2.6,2.2,1.8,mWall,2.4,1.1,1.4));
+  g.add(cyl(.9,1.6,mSteelD,-1.5,.9,-1)); g.add(cyl(.24,2.3,mSteel,-1.5,2.2,-1));
+  hit(g, 7, 'bv7'); scene.add(g); reg(g,'bv7');
+  LBL.push({aid:'bv7', kind:'asset', pos:new THREE.Vector3(x, y+6, z)});
+}
+{
+  const [x,z] = PT.rect, y = hxz(x,z);
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  g.add(cyl(.14,3.2,mSteel,0,1.6,0,6)); g.add(box(1.3,1.6,.7,mWall,0,2.4,0));
+  hit(g, 5, 'rect'); scene.add(g); reg(g,'rect');
+  LBL.push({aid:'rect', kind:'asset', pos:new THREE.Vector3(x, y+5.4, z)});
+}
+
+/* movers: ILI pig + operator truck */
+const pigMesh = new THREE.Group();
+{
+  const b = cyl(1.0,4.4,mAccent); b.rotation.z = Math.PI/2; pigMesh.add(b);
+  hit(pigMesh, 6, 'pig'); scene.add(pigMesh); reg(pigMesh, 'pig');
+}
+window.PIG = { t:.12, run:true, kp(){ return .05 + this.t * 14.2; }, text(){ return this.run ? 'KP ' + f1d(this.kp()) + ' · moving' : 'in receiver · offloading'; } };
+LBL.push({aid:'pig', kind:'mover', getPos:() => pigMesh.position.clone().add(new THREE.Vector3(0,5,0))});
+ANIM.push((t, dt) => {
+  if (window.PIG.run){
+    window.PIG.t += dt/300;
+    if (window.PIG.t >= .965){ window.PIG.run = false; window.PIG.t = .965; }
+    const p = CURVES.exp.getPointAt(window.PIG.t), tg = CURVES.exp.getTangentAt(window.PIG.t);
+    pigMesh.position.copy(p);
+    pigMesh.rotation.y = Math.atan2(tg.x, tg.z) + Math.PI/2;
+  }
+});
+const trkMesh = new THREE.Group();
+{
+  trkMesh.add(box(2.6,1.0,1.3,mAccent,0,.75,0));
+  trkMesh.add(box(1.1,.85,1.2,mSteelD,-.6,1.55,0));
+  hit(trkMesh, 5, 'truck'); scene.add(trkMesh); reg(trkMesh,'truck');
+}
+const trkCurve = new THREE.CatmullRomCurve3([PT.plant, [12,10], PT.comp, [-72,20], [-102,44], PT.padB].map(p => new THREE.Vector3(p[0], hxz(p[0], p[1]) + .9, p[1])), false, 'catmullrom', .2);
+window.TRK = { t:.05, dir:1, pause:0, moving:true, text(){ return this.moving ? (this.dir > 0 ? 'plant &rarr; Pad B' : 'Pad B &rarr; plant') : 'stopped · doing the human part'; } };
+LBL.push({aid:'truck', kind:'mover', getPos:() => trkMesh.position.clone().add(new THREE.Vector3(0,4.2,0))});
+ANIM.push((t, dt) => {
+  const T = window.TRK;
+  if (T.pause > 0){ T.pause -= dt; T.moving = false; return; }
+  T.moving = true;
+  T.t += T.dir * dt/170;
+  if (T.t >= .985){ T.t = .985; T.dir = -1; T.pause = 22; }
+  if (T.t <= .015){ T.t = .015; T.dir = 1; T.pause = 16; }
+  const p = trkCurve.getPointAt(T.t), tg = trkCurve.getTangentAt(T.t);
+  trkMesh.position.set(p.x, hxz(p.x, p.z) + .35, p.z);
+  trkMesh.rotation.y = Math.atan2(tg.x, tg.z) + (T.dir > 0 ? Math.PI/2 : -Math.PI/2);
+});
+
+/* zone labels (x-ray only) */
+LBL.push({kind:'zone', text:'Bluestone shale · 2,240 m', pos:new THREE.Vector3(-118,-62,42), under:1});
+LBL.push({kind:'zone', text:'Carden salt · 1,780 m', pos:new THREE.Vector3(152,-58,-72), under:1});
+LBL.push({kind:'zone', text:'Teal sand · 1,180 m', pos:new THREE.Vector3(96,-36,-152), under:1});
+
+/* finding markers */
+const MRK = {};
+function marker(fid, pos, big){
+  const g = new THREE.Group(); g.position.copy(pos);
+  const pin = new THREE.Mesh(new THREE.OctahedronGeometry(big ? 2.6 : 2.1), mAccent); g.add(pin);
+  const rg = new THREE.Mesh(new THREE.RingGeometry(3.6, 4.5, 28), new THREE.MeshBasicMaterial({color:0xD27A3F, transparent:true, opacity:.5, side:THREE.DoubleSide, depthWrite:false}));
+  MATS.push({m:rg.material, dark:0xD27A3F, light:0xB45F26});
+  rg.rotation.x = -Math.PI/2; rg.position.y = -(pos.y - (hxz(pos.x, pos.z) + .4));
+  rg.renderOrder = 6;
+  g.add(rg);
+  const aid = FIND[fid].aid;
+  g.traverse(o => { if (o.isMesh && o.material !== rg.material){ o.userData.aid = aid; PICK.push(o); } });
+  scene.add(g);
+  MRK[fid] = {g, pin, rg, base: pos.y, big: !!big, on: true};
+  return MRK[fid];
+}
+marker('f1', new THREE.Vector3(-128, hxz(-128,67) + 13, 67));
+{ const c = CURVES.gl2.getPointAt(.8); marker('f2', new THREE.Vector3(c.x, hxz(c.x, c.z) + 12, c.z)); }
+marker('f3', new THREE.Vector3(PT.comp[0], hxz(PT.comp[0], PT.comp[1]) + 17, PT.comp[1]));
+ANIM.push(t => {
+  for (const fid in MRK){ const k = MRK[fid], f = FIND[fid];
+    if (!k.on){ k.g.visible = false; continue; }
+    k.g.visible = true;
+    const settled = f.status === 'settled';
+    const sp = (f.sev === 'now' && !settled) ? 2.6 : 1.6;
+    k.g.position.y = k.base + Math.sin(t*sp) * .9;
+    k.pin.rotation.y = t * .8;
+    k.rg.material.opacity = settled ? .16 : .3 + .25*Math.sin(t*sp);
+    const s = 1 + (settled ? 0 : .1*Math.sin(t*sp));
+    k.rg.scale.set(s,s,s);
+    k.pin.scale.setScalar(settled ? .55 : 1);
+  }
+});
+
+/* selection ring */
+const selRing = new THREE.Mesh(new THREE.RingGeometry(4.8, 5.35, 36), new THREE.MeshBasicMaterial({color:0xE8E1D4, transparent:true, opacity:.55, side:THREE.DoubleSide, depthWrite:false}));
+MATS.push({m:selRing.material, dark:0xE8E1D4, light:0x2A241C});
+selRing.rotation.x = -Math.PI/2; selRing.visible = false; selRing.renderOrder = 6; scene.add(selRing);
+ANIM.push(t => { if (selRing.visible){ const s = 1 + .06*Math.sin(t*2.2); selRing.scale.set(s,s,s); } });
+
+/* ============================ LABEL DOM ============================ */
+const labelsHost = $('#labels');
+LBL.forEach(L => {
+  if (L.dead) return;
+  let e;
+  if (L.kind === 'zone'){ e = el('div','lbl zone', L.text); }
+  else if (L.kind === 'kp'){ e = el('div','lbl kp', L.text); }
+  else {
+    const d = DEF[L.aid];
+    e = el('div','lbl' + (L.kind === 'mover' ? ' mover' : ''), '<span class="d"></span>' + d.name);
+    e.addEventListener('click', ev => { ev.stopPropagation(); select(L.aid); });
+  }
+  labelsHost.appendChild(e); L.el = e;
+});
+function refreshLabelFlags(){
+  LBL.forEach(L => {
+    if (!L.el || !L.aid) return;
+    const f = findByAsset(L.aid);
+    L.el.classList.toggle('flag', !!(f && f.status !== 'settled'));
+    L.el.classList.toggle('sel', S.sel === L.aid);
+  });
+}
+
+/* ============================ RENDER LOOP ============================ */
+const V2 = new THREE.Vector2(), RAY = new THREE.Raycaster();
+let tPrev = performance.now();
+const FLY = {on:false, t:0, dur:1.05, p0:new THREE.Vector3(), p1:new THREE.Vector3(), q0:new THREE.Vector3(), q1:new THREE.Vector3()};
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt = Math.min(.1, (now - tPrev)/1000); tPrev = now;
+  const t = now/1000;
+  ANIM.forEach(fn => fn(t, dt));
+  PULSES.forEach(P => {
+    P.meshes.forEach((m, i) => {
+      const tt = ((t / P.dur) + i / P.meshes.length) % 1;
+      m.position.copy(P.cur.getPointAt(tt));
+      m.visible = S.xray;
+    });
+  });
+  if (FLY.on){
+    FLY.t += dt / FLY.dur;
+    const k = FLY.t >= 1 ? 1 : (FLY.t*FLY.t*(3 - 2*FLY.t));
+    cam.position.lerpVectors(FLY.p0, FLY.p1, k);
+    controls.target.lerpVectors(FLY.q0, FLY.q1, k);
+    if (FLY.t >= 1) FLY.on = false;
+  }
+  controls.update();
+  /* labels */
+  const w = view.clientWidth, h = view.clientHeight;
+  LBL.forEach(L => {
+    if (!L.el) return;
+    if (L.under && !S.xray){ L.el.style.display = 'none'; return; }
+    const p = (L.getPos ? L.getPos() : L.pos).clone();
+    const d = cam.position.distanceTo(p);
+    const maxd = L.kind === 'kp' ? 270 : L.kind === 'zone' ? 430 : 470;
+    p.project(cam);
+    if (p.z > 1 || p.z < -1 || d > maxd){ L.el.style.display = 'none'; return; }
+    L.el.style.display = '';
+    L.el.style.opacity = Math.max(.25, Math.min(1, 1.7 - d/(maxd*.72))).toFixed(2);
+    const x = (p.x*.5 + .5) * w, y = (-p.y*.5 + .5) * h;
+    L.el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) translate(-50%,' + (L.kind === 'zone' ? '-50%' : '-130%') + ')';
+    L.el.style.left = '0'; L.el.style.top = '0';
+  });
+  renderer.render(scene, cam);
+}
+requestAnimationFrame(tick);
+
+new ResizeObserver(() => {
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w, h, false);
+  cam.aspect = w/h; cam.updateProjectionMatrix();
+}).observe(view);
+
+/* ============================ PICKING ============================ */
+function castAt(ev){
+  const r = renderer.domElement.getBoundingClientRect();
+  V2.set(((ev.clientX - r.left)/r.width)*2 - 1, -((ev.clientY - r.top)/r.height)*2 + 1);
+  RAY.setFromCamera(V2, cam);
+  const hits = RAY.intersectObjects(PICK, false);
+  for (const hi of hits){
+    if (!hi.object.visible) continue;
+    const aid = hi.object.userData.aid;
+    if (aid){ if (!S.xray && (aid === 'cv1' || aid === 'cv2') && hi.object.material === mCavern) continue; return aid; }
+  }
+  return null;
+}
+let downXY = null;
+renderer.domElement.addEventListener('pointerdown', ev => { downXY = [ev.clientX, ev.clientY]; FLY.on = false; controls.autoRotate = false; });
+renderer.domElement.addEventListener('pointerup', ev => {
+  if (!downXY) return;
+  const moved = Math.hypot(ev.clientX - downXY[0], ev.clientY - downXY[1]);
+  downXY = null;
+  if (moved > 7) return;
+  const aid = castAt(ev);
+  if (aid) select(aid); else deselect();
+});
+const tip = $('#tip');
+let hoverPending = false;
+renderer.domElement.addEventListener('pointermove', ev => {
+  if (hoverPending) return; hoverPending = true;
+  requestAnimationFrame(() => {
+    hoverPending = false;
+    const aid = castAt(ev);
+    renderer.domElement.style.cursor = aid ? 'pointer' : 'grab';
+    if (aid && aid !== S.sel){
+      const d = DEF[aid], r = view.getBoundingClientRect();
+      tip.innerHTML = '<b>' + d.name + '</b> · ' + d.kind.replace(/ ·.*/, '');
+      tip.style.opacity = 1;
+      tip.style.left = Math.min(ev.clientX - r.left + 14, r.width - 150) + 'px';
+      tip.style.top = (ev.clientY - r.top - 8) + 'px';
+    } else tip.style.opacity = 0;
+  });
+});
+
+/* ============================ CAMERA FLIGHTS ============================ */
+function focusOf(aid){
+  const d = DEF[aid];
+  if (d.mover){
+    const p = aid === 'pig' ? pigMesh.position.clone() : trkMesh.position.clone();
+    return {tgt: p.clone(), pos: p.clone().add(new THREE.Vector3(30, 36, 52))};
+  }
+  if (d.line){
+    const cur = CURVES[aid], mid = cur.getPointAt(.5);
+    const big = aid === 'exp';
+    const tgt = new THREE.Vector3(mid.x, hxz(mid.x, mid.z), mid.z);
+    return {tgt, pos: tgt.clone().add(new THREE.Vector3(big ? 40 : 24, big ? 128 : 96, big ? 150 : 118))};
+  }
+  if (d.under != null){
+    const [x,z] = d.at, tgt = new THREE.Vector3(x, -56, z);
+    const az = Math.atan2(x - 40, z + 20);
+    return {tgt, pos: new THREE.Vector3(x + Math.sin(az)*84, 8, z + Math.cos(az)*84)};
+  }
+  const [x,z] = d.at, y = hxz(x,z);
+  const P = {w:[56,26], comp:[74,34], plant:[104,48], batt:[64,28], stor:[88,40], bv7:[50,22], rect:[46,20]};
+  const key2 = aid.startsWith('w') ? 'w' : (P[aid] ? aid : 'w');
+  const [dist, elev] = P[key2] || [60, 28];
+  const az = Math.atan2(x - 8, z + 10) + .45;
+  return {tgt: new THREE.Vector3(x, y + 3, z), pos: new THREE.Vector3(x + Math.sin(az)*dist, y + elev, z + Math.cos(az)*dist)};
+}
+function fly(aid){
+  const f = focusOf(aid);
+  FLY.p0.copy(cam.position); FLY.q0.copy(controls.target);
+  FLY.p1.copy(f.pos); FLY.q1.copy(f.tgt);
+  FLY.t = 0; FLY.on = true;
+}
+function flyHome(){
+  FLY.p0.copy(cam.position); FLY.q0.copy(controls.target);
+  FLY.p1.set(24, 238, 322); FLY.q1.set(8, -8, -10);
+  FLY.t = 0; FLY.on = true; FLY.dur = 1.2;
+}
+
+/* ============================ VIEW MODE + THEME ============================ */
+function setXray(on){
+  S.xray = on;
+  $('#tgXray').classList.toggle('on', on);
+  $('#tgSurf').classList.toggle('on', !on);
+  mGround.opacity = on ? .32 : .96;
+  UNDER.forEach(o => {
+    if (o.material === mPipe){ o.visible = true; o.material.opacity = on ? .95 : .07; }
+    else o.visible = on;
+  });
+}
+$('#tgXray').addEventListener('click', () => setXray(true));
+$('#tgSurf').addEventListener('click', () => setXray(false));
+
+const THEMES = {
+  dark:  {bg:0x14100c, fogN:280, fogF:820, hemiSky:0x9a8468, hemiGnd:0x141009, hemiI:1.3, keyC:0xffd9b0, keyI:1.75, rimI:.5, exp:1.35},
+  light: {bg:0xe7dfcc, fogN:320, fogF:900, hemiSky:0xfff2dc, hemiGnd:0xcabc9e, hemiI:1.3, keyC:0xfff1d6, keyI:1.65, rimI:.55, exp:1.1},
+};
+function applyTheme(mode){
+  const T = THEMES[mode];
+  scene.background = new THREE.Color(T.bg);
+  scene.fog = new THREE.Fog(T.bg, T.fogN, T.fogF);
+  hemi.color.set(T.hemiSky); hemi.groundColor.set(T.hemiGnd); hemi.intensity = T.hemiI;
+  key.color.set(T.keyC); key.intensity = T.keyI; rim.intensity = T.rimI;
+  renderer.toneMappingExposure = T.exp;
+  MATS.forEach(e => e.m.color.set(mode === 'dark' ? e.dark : e.light));
+}
+applyTheme('dark'); /* the site has no light mode, so the scene is dark only */
+
+/* ============================ SPARK DRAWING ============================ */
+function drawSpark(cv, arr, warm, lw){
+  const ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  ctx.clearRect(0,0,W,H);
+  if (!arr || arr.length < 2) return;
+  let mn = Infinity, mx = -Infinity;
+  arr.forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; });
+  const pad = (mx - mn) * .18 + .0001; mn -= pad; mx += pad;
+  const css = getComputedStyle($('#rmApp'));
+  ctx.strokeStyle = warm ? css.getPropertyValue('--accent').trim() : css.getPropertyValue('--muted').trim();
+  ctx.lineWidth = lw || 1.4; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  arr.forEach((v, i) => {
+    const x = i/(arr.length - 1) * (W - 4) + 2, y = H - 3 - (v - mn)/(mx - mn) * (H - 6);
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  });
+  ctx.stroke();
+  const last = arr[arr.length - 1];
+  ctx.fillStyle = css.getPropertyValue('--accent').trim();
+  ctx.beginPath();
+  ctx.arc(W - 2.5, H - 3 - (last - mn)/(mx - mn) * (H - 6), 2, 0, 7);
+  ctx.fill();
+}
+
+/* ============================ LOG + TICKER ============================ */
+let trailN = 0;
+function log(cls, txt, tOverride){
+  trailN++;
+  const t = tOverride || fmtClock(S.m);
+  const row = el('div','lrow ' + cls, '<span class="t">' + t + '</span><span class="x">' + txt + '</span>');
+  $('#trailRows').appendChild(row);
+  const tr = $('#trail'); if (tr.classList.contains('open')) tr.scrollTop = tr.scrollHeight;
+  $('#tick').innerHTML = '<span class="t">' + t + '</span>' + txt;
+  $('#trailCount').textContent = trailN;
+  $('#trailCount2').textContent = trailN + ' entries';
+}
+$('#logTog').addEventListener('click', () => {
+  const b = $('#logTog'), open = b.getAttribute('aria-expanded') === 'true';
+  b.setAttribute('aria-expanded', String(!open));
+  $('#trail').classList.toggle('open', !open);
+});
+
+/* ============================ STATS ============================ */
+function updStats(){
+  $('#stWalks').textContent = fmt(S.walks);
+  $('#stTags').textContent = (S.tags/1000).toFixed(1) + 'k';
+  $('#stPins').textContent = S.pins;
+  $('#stCalls').textContent = S.calls;
+  $('#spendChip').textContent = money(S.spend);
+  $('#spendNum').textContent = money(S.spend);
+  $('#spendBar').style.width = Math.min(100, S.spend/5*100).toFixed(1) + '%';
+}
+function setChip(mode, txt){
+  const c = $('#stateChip');
+  c.className = 'statechip ' + mode; c.textContent = txt;
+}
+
+/* ============================ BOARD + INDEX ============================ */
+function renderBoard(){
+  const host = $('#board'); host.innerHTML = '';
+  let n = 0;
+  FORDER.forEach(fid => {
+    const f = FIND[fid];
+    if (f.status === 'hidden') return;
+    n++;
+    const settled = f.status === 'settled';
+    const sev = settled ? '<span class="sev done">handled</span>' : '<span class="sev ' + f.sev + '">' + (f.sev === 'now' ? 'act now' : f.sev) + '</span>';
+    const c = el('button','bcard' + (settled ? ' settled' : ''),
+      '<span class="r1">' + sev + '<span class="aname">' + DEF[f.aid].name + ' · ' + DEF[f.aid].kind.split(' ·')[0] + '</span></span>' +
+      '<span class="line">' + (settled ? 'Settled: ' + f.optLabel(f.chosen) : f.line) + '</span>');
+    c.addEventListener('click', () => select(f.aid));
+    host.appendChild(c);
+  });
+  $('#findCount').textContent = n;
+  if (!n) host.appendChild(el('div','empty','Nothing pinned. That is the normal state, and it costs a third of a cent a walk.'));
+}
+Object.values(FIND).forEach(f => f.optLabel = id => (f.opts.find(o => o.id === id) || {label:''}).label.toLowerCase());
+function renderIndex(){
+  const host = $('#idx'); host.innerHTML = '';
+  const groups = [];
+  DEFS.forEach(d => { if (!groups.includes(d.grp)) groups.push(d.grp); });
+  groups.forEach(g => {
+    host.appendChild(el('div','grp', g));
+    DEFS.filter(d => d.grp === g).forEach(d => {
+      const f = findByAsset(d.id);
+      const dot = f && f.status !== 'settled' ? 'flag' : d.mover ? 'mov' : 'ok';
+      const r = el('button','irow' + (S.sel === d.id ? ' sel' : ''),
+        '<span class="dot ' + dot + '"></span>' + d.name + (d.mover ? '<span class="sub">live</span>' : ''));
+      r.addEventListener('click', () => select(d.id));
+      host.appendChild(r);
+    });
+  });
+}
+
+/* ============================ DETAIL PANEL ============================ */
+const panel = $('#panel');
+function select(aid){
+  if (!DEF[aid]) return;
+  S.sel = aid;
+  const d = DEF[aid];
+  const y = d.at ? hxz(d.at[0], d.at[1]) : 0;
+  if (d.under != null){ selRing.position.set(d.at[0], -46.5, d.at[1]); }
+  else if (d.at){ selRing.position.set(d.at[0], y + .7, d.at[1]); }
+  else if (d.line){ const m = CURVES[aid].getPointAt(.5); selRing.position.set(m.x, hxz(m.x, m.z) + .7, m.z); }
+  else if (d.mover){ const p = aid === 'pig' ? pigMesh.position : trkMesh.position; selRing.position.set(p.x, hxz(p.x, p.z) + .7, p.z); }
+  selRing.visible = true;
+  fly(aid); openPanel(aid); renderIndex(); refreshLabelFlags();
+  $('#rail').classList.remove('open');
+}
+function deselect(){
+  S.sel = null; selRing.visible = false;
+  panel.classList.remove('open');
+  renderIndex(); refreshLabelFlags();
+}
+$('#pClose').addEventListener('click', deselect);
+
+function openPanel(aid){
+  const d = DEF[aid];
+  $('#pKind').textContent = d.kind.replace(/&amp;/g,'&');
+  $('#pName').textContent = d.name;
+  $('#pSub').innerHTML = d.sub;
+  const b = $('#pBody'); b.innerHTML = '';
+  const f = findByAsset(aid);
+  if (f) { const slot = el('div'); slot.id = 'fslot'; b.appendChild(slot); renderFinding(f); }
+  const tcap = el('div','panelcap','Live from SCADA · 5 s scan');
+  b.appendChild(tcap);
+  const tt = el('div','tagtbl'); tt.id = 'tslot'; b.appendChild(tt);
+  const gcap = el('div','panelcap','From the land + well files');
+  b.appendChild(gcap);
+  const geo = el('div','geo', d.geo.map(g => '<div class="gk">' + g[0] + '</div><div class="gv">' + g[1] + '</div>').join(''));
+  b.appendChild(geo);
+  if (d.note){
+    b.appendChild(el('div','panelcap','The Roundsman’s note'));
+    b.appendChild(el('div','pnote','<span class="who">the-roundsman:</span> ' + d.note));
+  }
+  panel.classList.add('open');
+  renderTags();
+}
+function renderTags(){
+  if (!S.sel || !panel.classList.contains('open')) return;
+  const d = DEF[S.sel], tt = $('#tslot');
+  if (!tt) return;
+  tt.innerHTML = '';
+  d.tags().forEach(r => {
+    const row = el('div','trow');
+    row.appendChild(el('span','tk', r.k));
+    if (r.spark && SP[r.spark]){
+      const cv = document.createElement('canvas'); cv.width = 88; cv.height = 20;
+      row.appendChild(cv); drawSpark(cv, SP[r.spark].arr, r.warm, 1.2);
+    }
+    row.appendChild(el('span','tv' + (r.warm ? ' warm' : ''), r.v + (r.u ? '<span class="u">' + r.u + '</span>' : '')));
+    tt.appendChild(row);
+  });
+}
+function renderFinding(f){
+  const slot = $('#fslot');
+  if (!slot || !S.sel || FIND[f.id].aid !== S.sel) return;
+  const sev = f.status === 'settled' ? '<span class="sev done">handled</span>' : '<span class="sev ' + f.sev + '">' + (f.sev === 'now' ? 'act now' : f.sev) + '</span>';
+  let inner =
+    '<div class="fr1">' + sev + '<span style="font-size:10px;color:var(--muted)">the Roundsman’s pin</span><span class="ftime">' + (f.t || '') + '</span></div>' +
+    '<div class="ftitle">' + f.title + '</div>' +
+    '<div class="fsec"><div class="fk">What it saw</div><ul>' + f.saw.map(s => '<li>' + s + '</li>').join('') + '</ul>' +
+      '<div class="bigspark"><div class="cap"><span>' + f.sparkCap + '</span><b id="bsv"></b></div><canvas id="bspark" width="300" height="52"></canvas></div></div>' +
+    '<div class="fsec"><div class="fk">Why it matters</div><div class="ft">' + f.why + '</div></div>' +
+    '<div class="fsec"><div class="fk">The ask</div><div class="ft">' + f.ask + '</div></div>';
+  if (f.status === 'open'){
+    inner += '<div class="fork">' + f.opts.map(o =>
+      '<button class="fbtn ' + (o.pri ? 'pri' : 'sec') + '" data-f="' + f.id + '" data-o="' + o.id + '">' + o.label + '<span class="s2">' + o.sub + '</span></button>').join('') + '</div>';
+  } else if (f.status === 'watch2'){
+    inner += '<div class="fwait">Your call: reduce and watch. It is watching with you. If the curve keeps climbing, this comes back as an ask.</div>';
+  } else if (f.status === 'reraise'){
+    inner += '<div class="fwait">30 minutes later: the curve kept climbing. This is now an ask, not a watch.</div>' +
+      '<div class="fork"><button class="fbtn pri" data-f="f4" data-o="swap">' + f.opts[0].label + '<span class="s2">' + f.opts[0].sub + '</span></button></div>';
+  } else {
+    inner += '<div class="fdone"><b>Handled.</b> ' + f.outcome[f.chosen] + '<span class="lg">logged ' + fmtClock(f.settledAt) + ' · in the paper trail below the map · your name on the decision, its evidence attached</span></div>';
+  }
+  slot.innerHTML = '<div class="find">' + inner + '</div>';
+  const cv = $('#bspark');
+  if (cv && SP[f.sparkId]){
+    drawSpark(cv, SP[f.sparkId].arr, true, 1.6);
+    const arr = SP[f.sparkId].arr;
+    $('#bsv').textContent = f1d(arr[arr.length - 1]) + ' ' + f.sparkUnit;
+  }
+  slot.querySelectorAll('.fbtn').forEach(btn => btn.addEventListener('click', () => choose(btn.dataset.f, btn.dataset.o)));
+}
+
+/* ============================ DECISIONS ============================ */
+function choose(fid, optId){
+  const f = FIND[fid];
+  S.calls++;
+  if (fid === 'f4' && optId === 'watch'){
+    f.status = 'watch2'; F4T.reduceAt = S.m;
+    log('you', 'your call on CV-2: reduce rate and watch 30 minutes · on the record');
+    setChip('busy','Watching close');
+    after(25, () => {
+      if (f.status !== 'watch2') return;
+      f.status = 'reraise';
+      log('find', 'CV-2: the curve kept climbing through the watch. Re-raising. <b>This is now an ask.</b>');
+      showToast('<b>CV-2 again.</b> The wait cost 140 kPa of headroom. The swap order is still drafted.', 'Back to CV-2', () => select('cv2'));
+      setChip('wait','Waiting on you');
+      renderBoard(); renderFinding(f);
+    });
+  } else {
+    f.status = 'settled'; f.chosen = optId; f.settledAt = S.m;
+    S.spend += 0.05;
+    if (['book','both','move','meoh','swap'].includes(optId)) S.drafts++;
+    log('you', 'your call on ' + DEF[f.aid].name + ': ' + f.optLabel(optId));
+    (f.logs[optId] || []).forEach(([dm, cls, txt]) => after(dm, () => log(cls, txt)));
+    if (fid === 'f4'){
+      F4T.holdAt = S.m;
+      after(3, () => { F4T.swapped = true; });
+      after(31, () => { F4T.fixed = true; });
+      after(36, () => unlockDigest());
+    }
+    const openLeft = Object.values(FIND).some(x => x.status === 'open' || x.status === 'reraise' || x.status === 'watch2');
+    setChip(openLeft ? 'busy' : 'on', openLeft ? 'Pinned finds up' : 'Walking');
+  }
+  renderBoard(); renderIndex(); refreshLabelFlags(); updStats();
+  if (S.sel === f.aid) renderFinding(f);
+}
+
+/* ============================ TOAST ============================ */
+let toastTimer = null;
+function showToast(html, goLabel, goFn){
+  const t = $('#toast');
+  t.innerHTML = '<span class="tx">' + html + '</span>' +
+    (goLabel ? '<button class="go">' + goLabel + '</button>' : '') +
+    '<button class="no">later</button>';
+  t.classList.add('on');
+  const hide = () => t.classList.remove('on');
+  t.querySelector('.no').onclick = hide;
+  if (goLabel) t.querySelector('.go').onclick = () => { hide(); goFn && goFn(); };
+  clearTimeout(toastTimer); toastTimer = setTimeout(hide, 26000);
+}
+
+/* ============================ THE LIVE EVENT ============================ */
+function fireF4(){
+  const f = FIND.f4;
+  f.status = 'open'; f.t = 'pinned ' + fmtClock(S.m);
+  S.pins++; S.spend += 0.06;
+  const [x,z] = PT.cv2;
+  marker('f4', new THREE.Vector3(x, hxz(x,z) + 14, z), true);
+  log('find', 'walk #' + fmt(S.walks) + ' broke pattern at Carden Lake: CV-2 taking 39% less than nominated, valve reporting open, pressure climbing');
+  log('find', '<b>pin dropped on CV-2</b> · two readings that cannot both be true · switch order drafted, waiting on a human');
+  setChip('wait','Waiting on you');
+  showToast('<b>New pin · Cavern CV-2.</b> Injection fell 39% while its valve reports wide open. Pressure is climbing against the fill curve.', 'Fly to CV-2', () => select('cv2'));
+  renderBoard(); renderIndex(); refreshLabelFlags(); updStats();
+  if (S.sel === 'cv2') openPanel('cv2');
+}
+at(379, fireF4);
+
+/* ============================ DIGEST ============================ */
+function unlockDigest(){
+  if (S.ended) return;
+  S.ended = true;
+  $('#digestBtn').hidden = false;
+  log('field', 'CV-2 back on plan through CV-1 · the field never noticed · that was the point');
+  showToast('<b>The walk is written up.</b> Numbers, decisions, and the two alarms that never had to fire.', 'Open the digest', openDigest);
+  setChip('on','Walking');
+}
+function openDigest(){
+  $('#dgrid').innerHTML = [
+    [fmt(S.walks), 'walks today', ''],
+    [(S.tags/1000).toFixed(1) + 'k', 'tags read', ''],
+    [S.pins, 'pins on the map', 'acc'],
+    [S.calls, 'human decisions', ''],
+    [S.drafts, 'orders drafted · zero signed by software', ''],
+    [money(S.spend) + ' / $5.00', 'spend against the cap', 'gd'],
+  ].map(d => '<div class="dstat"><div class="n ' + d[2] + '">' + d[0] + '</div><div class="l">' + d[1] + '</div></div>').join('');
+  $('#dline').innerHTML = 'Every pin carried its evidence. Every decision was a named human. The Roundsman read <b>' + fmt(S.tags) + ' tags</b> today and spent <b>' + money(S.spend) + '</b> doing it, most of that on the four finds. The quiet walks cost about a third of a cent each.';
+  setOvl('digest', true);
+}
+$('#digestBtn').addEventListener('click', openDigest);
+$('#againBtn').addEventListener('click', () => rerun());
+
+/* ============================ OVERLAY WIRING ============================ */
+/* The overlays are viewport-fixed on a page that scrolls, so the page behind
+   them is frozen while one is open. */
+function setOvl(id, on){
+  $('#' + id).classList.toggle('on', on);
+  const anyOpen = ['hood','digest'].some(x => $('#' + x).classList.contains('on'));
+  document.body.style.overflow = anyOpen ? 'hidden' : '';
+}
+$('#hoodBtn').addEventListener('click', () => setOvl('hood', true));
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => setOvl(b.dataset.close, false)));
+['hood','digest'].forEach(id => $('#' + id).addEventListener('click', ev => { if (ev.target.id === id) setOvl(id, false); }));
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'Escape') return;
+  ['hood','digest'].forEach(id => { if ($('#' + id).classList.contains('on')) setOvl(id, false); });
+});
+/* reload lands back on the console, not the top of the page */
+const rerun = () => { location.hash = 'run'; location.reload(); };
+$('#resetBtn').addEventListener('click', rerun);
+$('#railTog').addEventListener('click', () => $('#rail').classList.toggle('open'));
+
+/* ============================ WALK ENGINE ============================ */
+const WALKLINES = [
+  'walk #N · 1,434 tags read · everything inside its tolerance · $0.003',
+  'walk #N · 1,431 tags · frost line checked on the GL-2 crossing · all quiet elsewhere',
+  'walk #N · 1,434 tags · CMMS backlog read · nothing new for the field',
+  'walk #N · 1,428 tags · weather feed pulled · cold holds through Friday',
+  'walk #N · 1,434 tags · plant, comp, caverns, lines: inside plan · $0.003',
+  'walk #N · 1,437 tags · linepack profile matched against the ILI position',
+  'walk #N · 1,434 tags · nothing worth your attention · that is the job',
+];
+let lastWalk = 350, wi = 0, spTick = 0, lastReal = performance.now();
+function simTick(dm){
+  if (!S.started) return;
+  S.m += dm;
+  $('#clock').textContent = fmtClock(S.m);
+  const due = EVQ.filter(e => e.m <= S.m).sort((a,b) => a.m - b.m);
+  due.forEach(e => { EVQ.splice(EVQ.indexOf(e), 1); e.fn(); });
+  if (S.m - lastWalk >= 5){
+    let logged = false;
+    while (S.m - lastWalk >= 5){
+      lastWalk += 5;
+      S.walks++; S.tags += 1420 + Math.floor(Math.random()*24); S.spend += .003;
+      if (!logged){
+        const anyOpen = Object.values(FIND).some(x => x.status === 'open' || x.status === 'reraise');
+        if (!anyOpen || Math.random() < .5) log('walk', WALKLINES[wi++ % WALKLINES.length].replace('N', fmt(S.walks)));
+        logged = true;
+      }
+    }
+    updStats();
+  }
+  if (++spTick >= 4){ spTick = 0; pushSparks(); renderTags();
+    const f = S.sel && findByAsset(S.sel);
+    if (f && $('#bspark')){ drawSpark($('#bspark'), SP[f.sparkId].arr, true, 1.6); const a = SP[f.sparkId].arr; const b = $('#bsv'); if (b) b.textContent = f1d(a[a.length-1]) + ' ' + f.sparkUnit; }
+  }
+}
+setInterval(() => {
+  const now = performance.now();
+  const dm = Math.min(1.25, (now - lastReal) / 2000);
+  lastReal = now;
+  simTick(dm);
+}, 500);
+
+/* ============================ BOOT ============================ */
+seedSparks();
+renderBoard(); renderIndex(); refreshLabelFlags(); updStats();
+setChip('busy','3 pins up');
+log('walk', 'night walks #2,112 to #2,180 · quiet · 69 walks, nothing posted', 'overnight');
+log('find', 'pin · 103/07-22 annulus creeping · watch', '03:12');
+log('find', 'pin · GL-2 differential climbing at the creek crossing · ask', '04:41');
+log('find', 'pin · K-200B vibration off its habit, inside its alarm · watch', '05:05');
+function begin(){
+  if (S.started) return;
+  S.started = true;
+  controls.autoRotate = false;
+  log('walk', 'walk #' + fmt(S.walks + 1) + ' begins · you are on the field with it');
+  setTimeout(() => {
+    if (FIND.f4.status !== 'hidden' || S.ended || S.calls > 0) return;
+    showToast('<b>Three pins are up</b> from the night walks, orange on the map. Click one, or click anything else first: every asset opens.', 'Take me to the first pin', () => select('w4'));
+  }, 11000);
+}
+/* The clock does not start until the console is actually on screen, so the
+   field is still quiet when the reader arrives at it. Polled rather than
+   observed: a rect check is cheap, and it cannot be defeated by a browser
+   that throttles observers on a backgrounded or uncomposited tab. */
+(function watchForArrival(){
+  const app = $('#rmApp');
+  const check = () => {
+    if (S.started) return true;
+    const r = app.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.top < vh * 0.8 && r.bottom > vh * 0.2){ begin(); return true; }
+    return false;
+  };
+  if (check()) return;
+  const poll = setInterval(() => { if (check()) clearInterval(poll); }, 400);
+  /* touching it counts as arriving, whatever the geometry says */
+  app.addEventListener('pointerdown', () => { begin(); clearInterval(poll); }, {once:true});
+})();
+</script>
+<script>
+setTimeout(function () {
+  if (window.__threeOK) return;
+  var v = document.querySelector('#view');
+  if (!v || v.querySelector('.fail')) return;
+  var d = document.createElement('div');
+  d.className = 'fail';
+  d.innerHTML = '<div class="in"><b>The 3D view did not load.</b><br/>It needs WebGL and one fetch of the 3D engine. Try a current Chrome, Edge or Firefox window, or check the connection and refresh.</div>';
+  v.appendChild(d);
+}, 6000);
+</script>
+</body>
+</html>

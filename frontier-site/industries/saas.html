@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SaaS &amp; Software — Agentic Standard</title>
-<meta name="description" content="PQLs surfaced, renewals briefed, friction mapped. Three agents for SaaS &amp; Software.">
+<meta name="description" content="PQLs surfaced, renewals briefed, the whole company held as one graph. Three agents for SaaS &amp; Software, one of them live.">
 <meta property="og:title" content="SaaS &amp; Software — Agentic Standard">
-<meta property="og:description" content="PQLs surfaced, renewals briefed, friction mapped. Three agents for SaaS &amp; Software.">
+<meta property="og:description" content="PQLs surfaced, renewals briefed, the whole company held as one graph. Three agents for SaaS &amp; Software, one of them live.">
 <meta property="og:site_name" content="Agentic Standard">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SaaS &amp; Software — Agentic Standard">
-<meta name="twitter:description" content="PQLs surfaced, renewals briefed, friction mapped. Three agents for SaaS &amp; Software.">
+<meta name="twitter:description" content="PQLs surfaced, renewals briefed, the whole company held as one graph. Three agents for SaaS &amp; Software, one of them live.">
 <meta name="theme-color" content="#100D0A">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,6 +310,113 @@ button.ind-card:focus-visible {
 .ind-panel-head { margin-block-start: clamp(1.4rem, 3.5vw, 2rem); }
 .ind-panel-head h1 { font-size: var(--text-h2); margin-block-end: 0; max-width: 24ch; }
 a.ind-back { text-decoration: none; }
+
+/* -- agent card rows ---------------------------------------------------------
+   The multiplier, How it works and the demo link should sit on shared lines
+   across all three cards. They only do that when the three descriptions
+   wrap to the same number of lines, and these three sit close enough to a
+   wrap boundary that they fall out of step at some widths.
+
+   Subgrid would be the obvious fix, but .card-slot carries container-type
+   for the type scale, and containment disables subgrid. So the description
+   simply reserves the tallest line count its band needs. Shorter copy
+   leaves a little space instead of pulling the row beneath it up.
+
+   Bands come from measuring the real wrap points; revisit them if this copy
+   changes materially. */
+@supports (height: 1lh) {
+  @container card (max-width: 279px)                          { .ind-agents .card > h3 + p { min-height: 5lh; } }
+  @container card (min-width: 280px) and (max-width: 355px)   { .ind-agents .card > h3 + p { min-height: 4lh; } }
+  @container card (min-width: 356px)                          { .ind-agents .card > h3 + p { min-height: 3lh; } }
+  /* the multiplier gloss flips between one and two lines inside the same
+     range; reserving two keeps How it works on one row across the three */
+  .ind-agents .agent-stat-gloss { min-height: 2lh; }
+}
+
+/* ==== live demo teaser (#knot-demo) =====================================
+   One card that should read as a door, not a paragraph: a warm spotlight
+   tracks the pointer, and a slow accent arc marks the way in. */
+@property --demo-spin { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+#knot-demo .lead { max-width: 62ch; }
+.demo-grid {
+  margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem);
+  display: grid; gap: clamp(1rem, 2.5vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.demo-grid.solo { grid-template-columns: minmax(min(100%, 20rem), 38rem); }
+
+.demo-card {
+  position: relative;
+  display: grid; align-content: start; gap: 0.55rem;
+  padding: clamp(1.35rem, 3vw, 1.9rem);
+  background: var(--panel);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 2px;
+  text-decoration: none;
+  isolation: isolate;
+  transition: border-color 0.2s ease, translate 0.2s ease, opacity 0.25s ease;
+}
+.demo-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s ease;
+  background: radial-gradient(
+    22rem circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in oklch, var(--accent) 16%, transparent), transparent 68%);
+}
+.demo-card:hover, .demo-card:focus-visible { border-color: var(--accent); translate: 0 -2px; }
+.demo-card:hover::before, .demo-card:focus-visible::before { opacity: 1; }
+.demo-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.demo-card.is-featured::after {
+  content: ""; position: absolute; inset: 0; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--demo-spin),
+    transparent 0 58%, var(--accent) 76%, transparent 88% 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: demo-spin 9s linear infinite;
+}
+@keyframes demo-spin { to { --demo-spin: 360deg; } }
+
+.demo-eyebrow {
+  display: flex; align-items: center; gap: 0.5em;
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+}
+.demo-eyebrow .dot {
+  width: 6px; height: 6px; background: var(--accent); flex: none;
+  animation: demo-blink 2.4s ease-in-out infinite;
+}
+@keyframes demo-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.demo-card h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem); line-height: 1.15;
+  letter-spacing: -0.01em; color: var(--fg); margin: 0; text-wrap: balance;
+}
+.demo-card p { margin: 0; color: var(--fg-body); font-size: var(--text-small); line-height: 1.6; }
+
+.demo-meta {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; margin: 0.35rem 0 0; padding: 0;
+}
+.demo-meta li {
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--hairline); padding: 0.35em 0.6em;
+}
+.demo-go {
+  margin-block-start: 0.75rem; display: inline-flex; align-items: center; gap: 0.5em;
+  font-weight: 600; font-size: var(--text-small); color: var(--accent-soft);
+}
+.demo-go .arrow { transition: translate 0.2s ease; }
+.demo-card:hover .demo-go .arrow { translate: 4px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-card.is-featured::after, .demo-eyebrow .dot { animation: none; }
+  .demo-card:hover { translate: none; }
+  .demo-go .arrow, .demo-card:hover .demo-go .arrow { translate: none; }
+}
 </style>
 <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-G8dLSoHsvMzCZqnnk7Fmv.js"></script>
@@ -423,23 +530,24 @@ a.ind-back { text-decoration: none; }
           <div class="card-slot">
             <article class="card">
               <div class="card-tag">Agent 03</div>
-              <h3>The Friction Mapper</h3>
-              <p>Clusters the week's support tickets into themes and hands product a ranked friction report every Friday.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">4&#215;</span><span class="agent-stat-gloss">Reads all tickets weekly, start to finish.</span></p>
+              <h3>The Knot Finder</h3>
+              <p>Holds the whole company as one graph and raises the knots: a spouse in the reporting line, a partner in the pay path, a vendor on the payroll.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">10&#215;</span><span class="agent-stat-gloss">Tests every line, every night. Audit used to sample once a year.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs Fridays. Reads the week's support tickets. Clusters them into themes, ranks by volume. Posts the report to product. Humans set the roadmap.</p>
+                  <p><strong>The loop:</strong> Wakes on every people event, and once a night. Reads mirrors of the HRIS, payroll, benefits, expenses and the vendor master, bank details hashed at the source. Joins and rules first, the model only on the ambiguous records. Ties a knot with its evidence and a drafted memo. Your head of internal audit decides.</p>
                   <p><strong>What it needs:</strong></p>
                   <ul class="agent-needs">
-                    <li>Read: the support ticket export</li>
-                    <li>Post: #product-friction in Slack</li>
-                    <li>Owner: your product ops manager</li>
-                    <li>Per-run spend cap, enforced</li>
-                    <li>Every run logged</li>
+                    <li>Read: mirrors of the people systems, never the systems</li>
+                    <li>Write: the case file only</li>
+                    <li>Owner: your head of internal audit</li>
+                    <li>A surname alone never raises; every dismissal signed</li>
+                    <li>Daily spend cap, every read logged</li>
                   </ul>
                 </div>
               </details>
+              <p class="card-cta"><a class="text-link" href="/industries/knot-finder-graph">Walk the graph with it <span aria-hidden="true">&#8594;</span></a></p>
             </article>
           </div>
         </div>
@@ -447,6 +555,31 @@ a.ind-back { text-decoration: none; }
         <p class="honest-note">An example scenario. The multipliers are estimates. Your real numbers come from the Readiness Map.</p>
         <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
       </section>
+    </div>
+  </section>
+
+  <!-- 2b. Live demo teaser -->
+  <section class="section section-rule" id="knot-demo" aria-labelledby="knot-demo-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">Live Demo &middot; Agent 03</div>
+        <h2 id="knot-demo-title">Two thousand people. <em>One</em> graph.</h2>
+        <p class="lead">Not a video of the Knot Finder. The Knot Finder. A whole software company drawn as one graph, the org chart on top and the households underneath it, from the HR, payroll, benefits and vendor data you already hold. Zoom in on anyone, open the three knots it tied overnight, and catch the fourth before it lands on Monday.</p>
+      </div>
+      <div class="demo-grid solo reveal reveal-late" id="demoGrid">
+        <a class="demo-card is-featured" href="/industries/knot-finder-graph">
+          <span class="demo-eyebrow"><span class="dot" aria-hidden="true"></span> Start here &middot; the agent holds the whole company</span>
+          <h3>Walk the graph with the Knot Finder</h3>
+          <p>2,380 people, four payroll entities, six acquisitions, one graph. Click anyone for the records the agent holds on them. Three knots are tied from the night walk, a spouse in the reporting line, a partner in the commissions queue, a vendor paid to an employee's own account, each with every record attached. A fourth arrives while you are there, before the transfer that would tie it goes live. It drafts the memo. You make the call.</p>
+          <ul class="demo-meta">
+            <li>3 minutes</li>
+            <li>you play internal audit</li>
+            <li>4 knots, 1 live</li>
+          </ul>
+          <span class="demo-go">Open the graph <span class="arrow" aria-hidden="true">&#8594;</span></span>
+        </a>
+      </div>
+      <p class="ind-note">It reads a mirror of the people systems and writes paperwork. It cannot change a reporting line, hold a payment, or contact an employee: that permission does not exist, so it cannot be misused. Bank details arrive hashed, a surname alone never raises anything, and every dismissal carries a name and a reason.</p>
     </div>
   </section>
 

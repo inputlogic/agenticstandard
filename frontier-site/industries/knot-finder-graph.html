@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Walk With The Knot Finder &middot; SaaS &amp; Software — Agentic Standard</title>
+<meta name="description" content="A whole software company drawn as one graph: the org chart on top, and underneath it the shared roofs, joint accounts and emergency contacts that four systems each know a quarter of. An agent walks it every night and on every change, ties a knot where a line and a rule cross, and hands the call to you.">
+<meta property="og:title" content="A Walk With The Knot Finder — Agentic Standard">
+<meta property="og:description" content="2,380 people as one graph. An agent finds where the org chart and real life cross a rule, brings the evidence, and hands the decision back to you.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A Walk With The Knot Finder — Agentic Standard">
+<meta name="twitter:description" content="2,380 people as one graph. An agent finds where the org chart and real life cross a rule, brings the evidence, and hands the decision back to you.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-G8dLSoHsvMzCZqnnk7Fmv.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+<style>
+/* ==== A Walk With The Knot Finder ========================================
+   The operator's cut for SaaS & Software, and the seventh perspective in
+   the set: logistics put you beside an agent, manufacturing handed you its
+   finished work, e-commerce made you the customer, oil and gas put the
+   agent on the map, finance ops made you the adjudicator. Here THE AGENT
+   HOLDS THE WHOLE COMPANY IN ONE HEAD: 2,380 people drawn as one graph, the
+   org chart on top and the lines nobody drew underneath it.
+
+   Everything below is scoped under .kf-app so none of it reaches the rest
+   of the page, and the page's own tokens do not reach in. Dark only: the
+   site has no light mode. No libraries: the graph, its layout and its
+   walker are a few hundred lines of plain JavaScript on a canvas. */
+.kf-app{
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:'Instrument Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:ui-monospace,'Cascadia Mono','Segoe UI Mono',Consolas,monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --r:14px;
+  --bg:#100D0A; --fg:#E8E1D4; --body:#CEC6B8; --muted:#968C7C; --muted-2:#6d6355;
+  --accent:#D27A3F; --accent-soft:#b9794d; --hair:#463E34; --hair-soft:#2c2620;
+  --panel:#1B1611; --panel-2:#221b15; --panel-3:#191410; --good:#8FAC77; --warn:#C9A24B;
+  --accent-ink:#1a120b; --veil:rgba(16,13,10,.74);
+  position:relative;
+  color:var(--body); font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.kf-app *{box-sizing:border-box}
+.kf-app ::selection{background:var(--accent); color:var(--bg)}
+.kf-app button,.kf-app input{font-family:var(--sans)}
+.kf-app p{margin:0}
+
+/* ============================ SHELL ============================ */
+.shell{position:relative; z-index:1; width:100%; height:min(880px, 84vh); min-height:620px; display:flex; flex-direction:column}
+.bracket{position:absolute; width:clamp(24px,2.6vw,38px); height:clamp(24px,2.6vw,38px); color:var(--fg); opacity:.9; pointer-events:none; z-index:5}
+.bracket.tl{top:-7px;left:-7px} .bracket.br{bottom:-7px;right:-7px}
+
+/* ============================ TOPBAR ============================ */
+.topbar{display:flex; align-items:center; gap:12px; padding:2px 4px 11px}
+.topbar .role{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.topbar .spacer{flex:1}
+.envchip{flex:none; display:flex; align-items:center; gap:7px; border:1px solid var(--hair); border-radius:99px; padding:5px 11px; font-size:11px; color:var(--muted); white-space:nowrap}
+.envchip b{color:var(--body); font-weight:600; font-variant-numeric:tabular-nums}
+.envchip .cl{font-family:var(--mono); font-size:11.5px; color:var(--fg)}
+.iconbtn{
+  appearance:none; background:transparent; border:1px solid var(--hair); color:var(--body);
+  width:33px;height:33px;border-radius:9px; cursor:pointer; display:grid;place-items:center; flex:none;
+  transition:.18s var(--ease);
+}
+.iconbtn:hover{border-color:var(--accent); color:var(--fg)}
+.iconbtn svg{width:15px;height:15px}
+.wordbtn{
+  appearance:none; background:transparent; border:1px solid var(--hair); color:var(--body); flex:none;
+  height:33px; border-radius:9px; padding:0 13px; cursor:pointer; font-size:11px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; transition:.18s var(--ease); white-space:nowrap;
+}
+.wordbtn:hover{border-color:var(--accent); color:var(--fg)}
+.wordbtn.glow{color:var(--accent); border-color:var(--accent); animation:breathe 1.5s var(--ease) infinite}
+.wordbtn[hidden]{display:none}
+@keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ============================ STAGE ============================ */
+.stage{flex:1; min-height:0; position:relative; display:flex; border:1px solid var(--hair); border-radius:var(--r); overflow:hidden; background:var(--panel)}
+
+/* ---------------- LEFT · RAIL ---------------- */
+.rail{width:296px; flex:none; background:var(--panel-3); border-right:1px solid var(--hair); display:flex; flex-direction:column; min-height:0}
+.rail-head{padding:12px 15px; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hair-soft); display:flex; align-items:center; gap:8px; flex:none; white-space:nowrap}
+.rail-head b{color:var(--body); font-weight:600}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--good); flex:none}
+.kf-app.live .pulse{animation:breathe 1.8s var(--ease) infinite}
+.rail-scroll{overflow-y:auto; overflow-x:hidden; padding:13px 12px 18px; display:flex; flex-direction:column; gap:13px; min-height:0}
+
+.agent-id{border:1px solid var(--hair); border-radius:11px; padding:11px; background:var(--panel); display:flex; gap:10px; align-items:center; flex:none}
+.agent-id .avatar{width:34px;height:34px; flex:none; border-radius:9px; background:var(--panel-2); display:grid; place-items:center; border:1px solid var(--hair)}
+.agent-id .avatar svg{width:19px;height:19px}
+.agent-id .nm{font-weight:600; color:var(--fg); font-size:12.5px; line-height:1.2}
+.agent-id .tg{font-size:10px; color:var(--muted); letter-spacing:.06em; margin-top:2px}
+.statechip{margin-left:auto; flex:none; font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--hair); color:var(--muted); border-radius:99px; padding:4px 8px; white-space:nowrap; transition:.2s var(--ease)}
+.statechip.on{color:var(--good); border-color:color-mix(in srgb, var(--good) 45%, transparent)}
+.statechip.busy{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 55%, transparent)}
+.statechip.wait{color:var(--accent); border-color:var(--accent); animation:breathe 1.4s var(--ease) infinite}
+
+.statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; flex:none}
+.sstat{border:1px solid var(--hair-soft); border-radius:9px; padding:8px 9px; background:var(--panel); min-width:0}
+.sstat .n{font-family:var(--mono); font-size:14.5px; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap}
+.sstat .n.acc{color:var(--accent)}
+.sstat .l{font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:3px; line-height:1.3}
+
+.panelcap{font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; flex:none}
+.panelcap::after{content:""; flex:1; height:1px; background:var(--hair-soft)}
+.panelcap .cnt{color:var(--accent); font-weight:600}
+
+/* knots board */
+.board{display:flex; flex-direction:column; gap:7px; flex:none}
+.bcard{
+  text-align:left; appearance:none; width:100%; border:1px solid var(--hair); border-radius:10px;
+  background:var(--panel); padding:9px 11px; cursor:pointer; color:var(--body);
+  display:flex; flex-direction:column; gap:5px; transition:.16s var(--ease); flex:none;
+}
+.bcard:hover{border-color:var(--accent)}
+.bcard.sel{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 6%, var(--panel))}
+.bcard .r1{display:flex; align-items:center; gap:7px}
+.bcard .kid{font-family:var(--mono); font-size:9.5px; color:var(--accent); flex:none; font-weight:600}
+.bcard .aname{font-size:11.5px; font-weight:600; color:var(--fg); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bcard .line{font-size:11px; color:var(--muted); line-height:1.45}
+.bcard.settled{opacity:.62}
+.bcard.settled:hover{opacity:.9}
+.bcard.fresh{animation:flashin .9s var(--ease)}
+@keyframes flashin{0%{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 18%, var(--panel))}100%{border-color:var(--hair)}}
+.sev{flex:none; font-size:8.5px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; border-radius:99px; padding:2.5px 7px; border:1px solid}
+.sev.watch{color:var(--warn); border-color:color-mix(in srgb, var(--warn) 50%, transparent)}
+.sev.ask{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 60%, transparent)}
+.sev.now{color:var(--accent); border-color:var(--accent); animation:breathe 1.1s var(--ease) infinite}
+.sev.done{color:var(--good); border-color:color-mix(in srgb, var(--good) 45%, transparent)}
+.board .empty{font-size:11px; color:var(--muted-2); padding:2px 2px}
+
+/* held back: the restraint list */
+.held{display:flex; flex-direction:column; gap:6px; flex:none}
+.hrow{
+  appearance:none; text-align:left; width:100%; border:1px solid var(--hair-soft); border-radius:9px; background:transparent;
+  padding:8px 10px; cursor:pointer; color:var(--body); display:grid; grid-template-columns:auto 1fr; gap:3px 10px; align-items:baseline; transition:.16s var(--ease);
+}
+.hrow:hover{border-color:var(--hair); background:var(--panel)}
+.hrow.on{border-color:var(--accent-soft); background:var(--panel)}
+.hrow .n{font-family:var(--mono); font-size:14px; color:var(--fg); font-variant-numeric:tabular-nums; grid-row:1 / span 2; align-self:start; padding-top:1px}
+.hrow .h{font-size:11px; color:var(--fg); font-weight:600; line-height:1.35}
+.hrow .g{font-size:10.5px; color:var(--muted); line-height:1.45}
+
+/* find anyone */
+.search{appearance:none; width:100%; border:1px solid var(--hair); background:var(--panel); color:var(--fg); border-radius:9px; padding:8px 11px; font-size:12px; outline:none; transition:.16s var(--ease); flex:none}
+.search::placeholder{color:var(--muted-2)}
+.search:focus{border-color:var(--accent)}
+.sres{display:flex; flex-direction:column; gap:2px; flex:none}
+.srow{appearance:none; width:100%; text-align:left; background:transparent; border:0; border-radius:8px; padding:6px 9px; cursor:pointer; color:var(--body); font-size:12px; display:flex; align-items:baseline; gap:8px; transition:background .14s var(--ease)}
+.srow:hover{background:var(--panel-2)}
+.srow .nm{color:var(--fg); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.srow .tt{font-size:10.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+.srow .kk{margin-left:auto; font-family:var(--mono); font-size:9px; color:var(--accent); flex:none}
+
+/* ---------------- CENTER · GRAPH VIEW ---------------- */
+.view{flex:1; min-width:0; position:relative; overflow:hidden; background:var(--panel)}
+.view canvas{display:block; width:100%; height:100%; outline:none; touch-action:none; cursor:grab}
+.view canvas.hov{cursor:pointer}
+.view canvas.drag{cursor:grabbing}
+
+.viewtogs{position:absolute; top:12px; left:12px; z-index:6; display:flex; flex-wrap:wrap; border:1px solid var(--hair); border-radius:9px; overflow:hidden; background:color-mix(in srgb, var(--panel) 82%, transparent); backdrop-filter:blur(6px)}
+.vtog{appearance:none; border:0; background:transparent; color:var(--muted); font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:7px 11px; cursor:pointer; transition:.16s var(--ease); display:flex; align-items:center; gap:6px}
+.vtog + .vtog{border-left:1px solid var(--hair-soft)}
+.vtog .sw{width:8px;height:8px;border-radius:50%; border:1px solid var(--muted-2); flex:none}
+.vtog.on{color:var(--fg); background:var(--panel-2)}
+.vtog.on .sw{background:var(--fg); border-color:var(--fg)}
+.vtog.on .sw.home{background:var(--warn); border-color:var(--warn)}
+.vtog.on .sw.money{background:var(--accent-soft); border-color:var(--accent-soft)}
+.vtog.on .sw.vendor{background:var(--body); border-color:var(--body); border-radius:1px}
+.vtog:hover{color:var(--fg)}
+
+.wx{position:absolute; top:12px; right:12px; z-index:6; font-size:10.5px; color:var(--muted); background:color-mix(in srgb, var(--panel) 78%, transparent); border:1px solid var(--hair-soft); border-radius:9px; padding:6px 11px; pointer-events:none; backdrop-filter:blur(6px)}
+.wx b{color:var(--body); font-variant-numeric:tabular-nums}
+
+.hint{position:absolute; left:12px; bottom:12px; z-index:6; font-size:10.5px; color:var(--muted); background:color-mix(in srgb, var(--panel) 78%, transparent); border:1px solid var(--hair-soft); border-radius:9px; padding:6px 11px; pointer-events:none; backdrop-filter:blur(6px); display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+.hint b{color:var(--body); font-weight:600}
+.hint .lg{display:inline-flex; align-items:center; gap:5px}
+.hint .lg i{display:inline-block; width:14px; height:0; border-top:2px solid; border-radius:2px}
+.hint .lg i.rep{border-color:var(--muted)}
+.hint .lg i.dec{border-color:var(--good)}
+.hint .lg i.inf{border-color:var(--warn)}
+.hint .lg i.kn{border-color:var(--accent)}
+.hint .lg s{display:inline-block; width:7px; height:7px; background:var(--body); text-decoration:none}
+
+.fitbtn{position:absolute; right:12px; bottom:12px; z-index:6; background:color-mix(in srgb, var(--panel) 82%, transparent); backdrop-filter:blur(6px)}
+#tip{position:absolute; z-index:7; pointer-events:none; font-size:10.5px; color:var(--fg); background:color-mix(in srgb, var(--bg) 86%, transparent); border:1px solid var(--hair); border-radius:8px; padding:5px 9px; opacity:0; transition:opacity .12s linear; white-space:nowrap; line-height:1.4; max-width:260px}
+#tip .t2{color:var(--muted); font-size:10px; display:block}
+#tip .t3{color:var(--accent); font-size:9.5px; display:block; letter-spacing:.08em; text-transform:uppercase; margin-top:2px}
+
+/* toast */
+.toast{
+  position:absolute; left:50%; bottom:18px; translate:-50% 0; z-index:8;
+  background:var(--panel-2); border:1px solid var(--accent); border-radius:12px; padding:11px 13px;
+  display:flex; align-items:center; gap:12px; max-width:min(92%, 540px);
+  box-shadow:0 12px 40px rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:.3s var(--ease); transform:translateY(8px);
+}
+.toast.on{opacity:1; pointer-events:auto; transform:translateY(0)}
+.toast .tx{font-size:12px; color:var(--body); line-height:1.45}
+.toast .tx b{color:var(--fg)}
+.toast .go{appearance:none; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:11px; letter-spacing:.06em; border-radius:8px; padding:7px 12px; cursor:pointer; white-space:nowrap}
+.toast .no{appearance:none; border:1px solid var(--hair); background:transparent; color:var(--muted); font-size:11px; border-radius:8px; padding:7px 10px; cursor:pointer; white-space:nowrap}
+
+/* ---------------- RIGHT · DETAIL PANEL ---------------- */
+.panel{
+  position:absolute; top:0; right:0; bottom:0; width:min(404px, 94%); z-index:9;
+  background:var(--panel-3); border-left:1px solid var(--hair);
+  transform:translateX(103%); transition:transform .34s var(--ease);
+  display:flex; flex-direction:column; min-height:0;
+}
+.panel.open{transform:translateX(0)}
+.phead{padding:13px 16px 12px; border-bottom:1px solid var(--hair-soft); display:flex; align-items:flex-start; gap:10px; flex:none}
+.phead .k{font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+.phead .nm{font-family:var(--serif); font-size:21px; font-weight:600; color:var(--fg); line-height:1.1; margin-top:3px}
+.phead .sub{font-size:10.5px; color:var(--muted); margin-top:4px; font-family:var(--mono); line-height:1.45}
+.phead .x{margin-left:auto; flex:none}
+.pscroll{overflow-y:auto; padding:14px 16px 22px; display:flex; flex-direction:column; gap:15px; min-height:0}
+.pscroll > *{flex:none}
+
+.kv{display:grid; grid-template-columns:auto 1fr; gap:5px 14px; border:1px solid var(--hair-soft); border-radius:10px; padding:10px 12px; background:var(--panel)}
+.kv .k{font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-2); padding-top:2px; white-space:nowrap}
+.kv .v{font-size:11.5px; color:var(--body); line-height:1.45; min-width:0}
+.kv .v b{color:var(--fg); font-weight:600}
+.kv .v .mono{font-family:var(--mono); font-size:10.5px; color:var(--fg)}
+.chainrow{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+.pchip{appearance:none; border:1px solid var(--hair); background:transparent; color:var(--body); border-radius:99px; padding:3px 9px; font-size:10.5px; cursor:pointer; transition:.16s var(--ease); max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.pchip:hover{border-color:var(--accent); color:var(--fg)}
+.pchip.me{border-color:var(--accent-soft); color:var(--fg)}
+.pchip.kn{border-color:var(--accent); color:var(--accent)}
+.chainrow .ar{color:var(--muted-2); font-size:10px}
+
+.srcs{display:flex; flex-direction:column; border:1px solid var(--hair-soft); border-radius:10px; overflow:hidden}
+.srow2{display:flex; align-items:center; gap:9px; padding:7px 11px; background:var(--panel)}
+.srow2:nth-child(even){background:var(--panel-3)}
+.srow2 .sk{flex:1; min-width:0; font-size:11px; color:var(--muted)}
+.srow2 .sk b{color:var(--body); font-weight:600}
+.srow2 .sv{font-family:var(--mono); font-size:10.5px; color:var(--fg); white-space:nowrap}
+.srow2 .sv.dim{color:var(--muted-2)}
+.srow2 .sv.warm{color:var(--accent)}
+.srow2 .ok{width:6px;height:6px;border-radius:50%;background:var(--good); flex:none; opacity:.8}
+.srow2 .no{width:6px;height:6px;border-radius:50%;background:var(--hair); flex:none}
+
+.pnote{font-size:12px; line-height:1.55; color:var(--muted)}
+.pnote b{color:var(--body); font-weight:600}
+.pnote .who{color:var(--accent)}
+.pcap{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:6px}
+
+/* knot card */
+.find{border:1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius:12px; background:color-mix(in srgb, var(--accent) 5%, var(--panel)); padding:12px 13px; display:flex; flex-direction:column; gap:11px}
+.find .fr1{display:flex; align-items:center; gap:8px}
+.find .ftime{margin-left:auto; font-size:9.5px; color:var(--muted-2); font-family:var(--mono)}
+.find .ftitle{font-family:var(--serif); font-style:italic; font-size:18.5px; color:var(--fg); line-height:1.2}
+.find .ftitle b{font-style:normal; font-weight:600; color:var(--accent)}
+.fsec .fk{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; gap:8px}
+.fsec .fk .cnt{color:var(--accent); font-weight:600; letter-spacing:0}
+.fsec .ft{font-size:12px; line-height:1.55; color:var(--body)}
+.fsec .ft b{color:var(--fg); font-weight:600}
+.fsec ul{margin:0; padding:0 0 0 1px; list-style:none; display:flex; flex-direction:column; gap:4px}
+.fsec li{font-size:11.5px; line-height:1.5; color:var(--body); position:relative; padding-left:13px}
+.fsec li::before{content:""; position:absolute; left:0; top:.5em; width:5px; height:5px; background:var(--accent); opacity:.7}
+.fsec li b{color:var(--fg); font-weight:600}
+
+/* evidence rows: each record the agent read, with the raw row behind it */
+.ev{display:flex; flex-direction:column; gap:5px}
+.evrow{
+  appearance:none; text-align:left; width:100%; border:1px solid var(--hair-soft); border-radius:9px; background:var(--panel);
+  padding:8px 10px; cursor:pointer; color:var(--body); display:grid; grid-template-columns:1fr auto; gap:3px 10px; transition:.16s var(--ease);
+}
+.evrow:hover{border-color:var(--accent-soft)}
+.evrow.open{border-color:var(--accent-soft); border-bottom-left-radius:0; border-bottom-right-radius:0}
+.evrow .src{font-family:var(--mono); font-size:9.5px; color:var(--accent); letter-spacing:.04em}
+.evrow .opn{font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); grid-column:2; grid-row:1; align-self:start}
+.evrow .clm{grid-column:1 / span 2; font-size:11.5px; line-height:1.5; color:var(--body)}
+.evrow .clm b{color:var(--fg); font-weight:600}
+.evraw{border:1px solid var(--accent-soft); border-top:0; border-radius:0 0 9px 9px; background:var(--panel-3); padding:8px 10px; margin-top:-5px}
+.evraw pre{margin:0; font-family:var(--mono); font-size:10px; line-height:1.55; color:var(--muted); white-space:pre-wrap; word-break:break-word}
+.evraw pre b{color:var(--fg); font-weight:600}
+.evraw .fn{font-size:9.5px; color:var(--muted-2); margin-top:6px; line-height:1.45}
+
+.fork{display:flex; flex-direction:column; gap:7px; margin-top:2px}
+.fbtn{appearance:none; text-align:left; border-radius:9px; padding:9px 12px; cursor:pointer; font-size:12px; font-weight:600; line-height:1.4; transition:.16s var(--ease)}
+.fbtn.pri{border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink)}
+.fbtn.pri:hover{filter:brightness(1.08)}
+.fbtn.sec{border:1px solid var(--hair); background:transparent; color:var(--body)}
+.fbtn.sec:hover{border-color:var(--accent); color:var(--fg)}
+.fbtn .s2{display:block; font-weight:400; font-size:10.5px; color:inherit; opacity:.75; margin-top:2px}
+.reasons{display:flex; flex-direction:column; gap:6px; border:1px solid var(--hair-soft); border-radius:9px; padding:9px 10px; background:var(--panel)}
+.reasons .rc{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:2px}
+.rbtn{appearance:none; text-align:left; border:1px solid var(--hair); background:transparent; color:var(--body); border-radius:8px; padding:7px 10px; font-size:11.5px; cursor:pointer; transition:.16s var(--ease)}
+.rbtn:hover{border-color:var(--accent); color:var(--fg)}
+.fdone{border-top:1px solid var(--hair-soft); padding-top:9px; font-size:11.5px; line-height:1.55; color:var(--body)}
+.fdone b{color:var(--good)}
+.fdone .lg{display:block; margin-top:5px; font-size:10px; color:var(--muted-2); font-family:var(--mono)}
+.fwait{font-size:11px; color:var(--warn); border-top:1px solid var(--hair-soft); padding-top:9px; line-height:1.5}
+
+/* people in a knot */
+.ppl{display:flex; flex-direction:column; gap:6px}
+.prow2{appearance:none; text-align:left; width:100%; border:1px solid var(--hair-soft); border-radius:9px; background:var(--panel); padding:8px 10px; cursor:pointer; color:var(--body); display:flex; align-items:center; gap:9px; transition:.16s var(--ease)}
+.prow2:hover{border-color:var(--accent-soft)}
+.prow2 .d{width:7px;height:7px;border-radius:50%;background:var(--fg); flex:none}
+.prow2 .d.v{border-radius:1px}
+.prow2 .nm{font-size:11.5px; font-weight:600; color:var(--fg)}
+.prow2 .tt{font-size:10.5px; color:var(--muted); line-height:1.35}
+.prow2 .go{margin-left:auto; color:var(--muted-2); font-size:12px; flex:none}
+
+/* ---------------- DOCK · ticker + trail ---------------- */
+.dock{flex:none; margin-top:11px; border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); overflow:hidden}
+.dockbar{display:flex; align-items:center; gap:11px; padding:8px 13px}
+.logtog{appearance:none; background:transparent; border:0; color:var(--muted); display:flex; align-items:center; gap:7px; font-size:10px; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; padding:2px; flex:none}
+.logtog:hover{color:var(--fg)}
+.logtog .ch{transition:transform .25s var(--ease)}
+.logtog[aria-expanded="true"] .ch{transform:rotate(90deg)}
+.logtog .n{color:var(--accent); font-weight:600}
+.tickline{flex:1; min-width:0; font-size:11.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums}
+.tickline b{color:var(--body); font-weight:600}
+.tickline .t{font-family:var(--mono); color:var(--muted-2); font-size:10.5px; margin-right:7px}
+.trail{max-height:0; overflow:hidden; transition:max-height .3s var(--ease)}
+.trail.open{max-height:170px; overflow-y:auto; border-top:1px solid var(--hair-soft)}
+.trail .rows{padding:9px 13px; display:flex; flex-direction:column; gap:5px}
+.lrow{font-size:11px; line-height:1.5; color:var(--muted); display:flex; gap:9px}
+.lrow .t{font-family:var(--mono); color:var(--muted-2); font-size:10px; flex:none; padding-top:1px}
+.lrow.find .x{color:var(--accent)}
+.lrow.you .x{color:var(--fg); font-weight:600}
+.lrow.walk .x{color:var(--good)}
+
+/* ---------------- OVERLAYS ---------------- */
+.ovl{position:fixed; inset:0; z-index:80; background:var(--veil); backdrop-filter:blur(7px); display:grid; place-items:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .3s var(--ease)}
+.ovl.on{opacity:1; pointer-events:auto}
+/* .ocard, not .card: site.css owns .card and would leak height:100% + grid into it */
+.ovl .ocard{
+  position:relative; width:min(660px, 100%); max-height:min(88vh, 820px); overflow-y:auto;
+  background:var(--panel); border:1px solid var(--hair); border-radius:16px; padding:clamp(22px,4vw,38px);
+  box-shadow:0 30px 90px rgba(0,0,0,.4);
+}
+.ovl .ocard.wide{width:min(780px,100%)}
+.okick{font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent); margin-bottom:14px}
+.ohead{font-family:var(--serif); font-weight:600; font-size:clamp(27px,4.4vw,38px); line-height:1.06; color:var(--fg); letter-spacing:-.01em; margin:0 0 14px}
+.ohead em{font-style:italic; color:var(--accent)}
+.olead{font-size:13.5px; line-height:1.65; color:var(--body); margin:0 0 16px}
+.olead b{color:var(--fg); font-weight:600}
+.fine{font-size:10.5px; line-height:1.6; color:var(--muted-2); margin-top:16px}
+.btn-go{appearance:none; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; border-radius:10px; padding:12px 22px; cursor:pointer; transition:.16s var(--ease)}
+.btn-go:hover{filter:brightness(1.07)}
+.btn-quiet{appearance:none; border:0; background:transparent; color:var(--muted); font-family:var(--serif); font-style:italic; font-size:15px; cursor:pointer}
+.btn-quiet:hover{color:var(--accent)}
+.ovl .x{position:absolute; top:14px; right:14px}
+
+/* under the hood: loop + pnl + fence */
+.hood-grid{display:flex; flex-direction:column; gap:20px}
+.loop{display:flex; flex-direction:column}
+.lnode{display:grid; grid-template-columns:26px 1fr; gap:10px; padding:6px 2px; position:relative}
+.lnode::before{content:""; position:absolute; left:12.5px; top:30px; bottom:-4px; width:2px; background:var(--hair-soft)}
+.lnode:last-child::before{display:none}
+.ldot{width:26px;height:26px;border-radius:8px; border:1px solid var(--hair); background:var(--panel-2); display:grid; place-items:center; color:var(--muted)}
+.ldot svg{width:13px;height:13px}
+.lname{font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--fg); padding-top:1px}
+.lgloss{font-size:11.5px; color:var(--muted); line-height:1.5; margin-top:2px}
+.pnl{border:1px solid var(--hair); border-radius:12px; overflow:hidden}
+.pnl .ph{padding:10px 13px; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hair-soft); background:var(--panel-2)}
+.pnl .ph b{color:var(--accent)}
+.prow{display:grid; grid-template-columns:86px 1fr; gap:12px; padding:9px 13px; border-bottom:1px solid var(--hair-soft); font-size:11.5px; line-height:1.55}
+.prow:last-child{border-bottom:0}
+.prow .k{font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-2); padding-top:2px}
+.prow .v{color:var(--muted)}
+.prow .v b{color:var(--body); font-weight:600}
+.meter{display:block; height:4px; border-radius:99px; background:var(--hair-soft); margin:7px 0 4px; overflow:hidden}
+.meter i{display:block; height:100%; width:18%; background:var(--accent); border-radius:99px; transition:width .5s var(--ease)}
+.spendline{display:flex; justify-content:space-between; font-size:10px; color:var(--muted-2)}
+.spendline b{font-family:var(--mono); color:var(--body)}
+.fence{border:1px solid var(--hair); border-radius:12px; padding:13px 15px}
+.fence .fh{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:9px}
+.fence ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+.fence li{font-size:12px; line-height:1.55; color:var(--body); position:relative; padding-left:15px}
+.fence li::before{content:""; position:absolute; left:0; top:.52em; width:6px; height:6px; background:var(--accent)}
+.fence li b{color:var(--fg); font-weight:600}
+
+/* digest */
+.dgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:6px 0 18px}
+.dstat{border:1px solid var(--hair-soft); border-radius:10px; padding:11px 12px; background:var(--panel-3)}
+.dstat .n{font-family:var(--mono); font-size:19px; color:var(--fg); font-variant-numeric:tabular-nums}
+.dstat .n.acc{color:var(--accent)} .dstat .n.gd{color:var(--good)}
+.dstat .l{font-size:9px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); margin-top:4px; line-height:1.45}
+.dquote{border-left:2px solid var(--accent); padding:2px 0 2px 14px; margin:16px 0; font-family:var(--serif); font-style:italic; font-size:17px; line-height:1.45; color:var(--body)}
+.chips{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px}
+.chip{border:1px solid var(--hair-soft); border-radius:10px; padding:10px 12px; background:var(--panel-3)}
+.chip .cn{font-size:11px; font-weight:600; color:var(--fg); margin-bottom:3px}
+.chip .cl2{font-size:10.5px; line-height:1.5; color:var(--muted)}
+.cta-row{display:flex; align-items:center; gap:15px; margin-top:22px; flex-wrap:wrap}
+a.btn-go{text-decoration:none; display:inline-block}
+.calls{display:flex; flex-direction:column; gap:5px; margin:4px 0 14px}
+.callrow{display:grid; grid-template-columns:auto 1fr; gap:10px; font-size:11.5px; line-height:1.5; color:var(--muted); border:1px solid var(--hair-soft); border-radius:9px; padding:7px 10px; background:var(--panel-3)}
+.callrow .kid{font-family:var(--mono); color:var(--accent); font-size:10px; padding-top:2px}
+.callrow b{color:var(--fg); font-weight:600}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 1060px){ .rail{width:254px} .statgrid{grid-template-columns:1fr 1fr} }
+@media (max-width: 900px){
+  .shell{height:min(680px, 80vh); min-height:540px}
+  .topbar .role{display:none}
+  .rail{position:absolute; z-index:12; top:0; bottom:0; left:0; transform:translateX(-103%); transition:transform .3s var(--ease); width:min(300px,86%)}
+  .rail.open{transform:translateX(0)}
+  .hint{display:none}
+  .wx{display:none}
+  .chips{grid-template-columns:1fr}
+  .dgrid{grid-template-columns:1fr 1fr}
+}
+#railTog{display:none; position:absolute; top:12px; left:12px; z-index:11}
+/* after the base rule, or equal ID specificity would leave the rail
+   permanently unreachable on narrow screens */
+@media (max-width:900px){
+  #railTog{display:grid}
+  .viewtogs{left:56px; right:12px}
+}
+@media (prefers-reduced-motion: reduce){
+  .kf-app *{animation:none !important; transition:none !important}
+}
+
+/* ==== page furniture around the console (site tokens, not the app's) ==== */
+.hero { padding-block: clamp(4.5rem, 12vw, 7.5rem) clamp(2.5rem, 6vw, 4rem); }
+.hero h1 { max-width: 16ch; }
+.hero .lead { margin-block-start: clamp(1.2rem, 3vw, 1.7rem); max-width: 62ch; }
+.rise { animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.21, 1) both; }
+@keyframes rise { from { opacity: 0; translate: 0 1.4rem; } to { opacity: 1; translate: 0 0; } }
+.hero .kicker.rise { animation-delay: 0.06s; }
+.hero h1.rise { animation-delay: 0.18s; }
+.hero .lead.rise { animation-delay: 0.34s; }
+.hero .kf-controls.rise { animation-delay: 0.5s; }
+.hero .kf-honest.rise { animation-delay: 0.62s; }
+
+.kf-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-block-start: clamp(1.3rem, 3vw, 1.8rem); }
+.kf-control {
+  display: inline-flex; align-items: baseline; gap: 0.55em;
+  border: 1px solid var(--hairline-strong); padding: 0.55em 0.9em;
+  font-size: var(--text-small); color: var(--muted);
+}
+.kf-control b {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft);
+}
+.kf-honest {
+  display: flex; align-items: flex-start; gap: 0.7rem;
+  max-width: 70ch; color: var(--muted); font-size: var(--text-small);
+  margin-block-start: clamp(1.2rem, 3vw, 1.7rem); line-height: 1.6;
+}
+.kf-honest::before {
+  content: ""; flex: none; width: 8px; height: 8px;
+  margin-block-start: 0.5em; background: var(--accent);
+}
+.kf-next { text-align: center; margin-block-start: clamp(2rem, 5vw, 3rem); }
+.kf-next .lead { max-width: 56ch; margin-inline: auto; }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none !important; } }
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="/" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/standard">Standard</a>
+      <a href="/foundation">Foundation</a>
+      <a href="/continuum">Continuum</a>
+      <a href="/about">About</a>
+      <a href="/industries" aria-current="page">Industries</a>
+      <a class="nav-cta" href="/book">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="container">
+      <p><a class="text-link" href="/industries/saas"><span aria-hidden="true">&#8592;</span> Back to SaaS &amp; Software</a></p>
+      <div class="kicker accent rise" style="margin-block-start: 1.4rem;">Live Demo &middot; Agent 03 &middot; SaaS &amp; Software</div>
+      <h1 class="rise">The org chart, and the lines <em>nobody drew</em>.</h1>
+      <p class="lead rise">You are the head of internal audit at Greywell Software: 2,380 people, four payroll entities, six acquisitions, three HR systems that never quite merged. The external auditors arrive in nine days with a question your team used to answer with three weeks of spreadsheets. Does anyone approve pay for someone they live with?</p>
+      <p class="lead rise">The agent that answers it is the Knot Finder. It holds the whole company as one graph: the org chart on top, and underneath it the lines nobody drew, the shared roofs and joint accounts and emergency contacts that four systems each know a quarter of. Where a line and a rule cross, it ties a knot and brings you the evidence. It drafts the paper. It cannot move a person, hold a payment, or send a word. Every call is yours.</p>
+      <div class="kf-controls rise" aria-label="How this demo works">
+        <span class="kf-control"><b>Drag</b> to pan</span>
+        <span class="kf-control"><b>Scroll</b> to zoom</span>
+        <span class="kf-control"><b>Click</b> anyone for their records</span>
+        <span class="kf-control"><b>Orange</b> is a knot</span>
+        <span class="kf-control"><b>Layers</b> top left</span>
+      </div>
+      <p class="kf-honest rise">A fictional company. Every person, address and account on this page was invented for it, and any resemblance to a real person is an accident of common names. The pattern reads a mirror of your people systems with bank details hashed at the source. It never sees a salary, a government ID, a photo, or the open web.</p>
+    </div>
+  </section>
+
+  <!-- the console -->
+  <section class="section" id="run" style="padding-block-start: 0;">
+    <div class="container">
+
+<div class="kf-app live" id="kfApp">
+<div class="shell">
+  <svg class="bracket tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+  <svg class="bracket br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <span class="role">Greywell Software &middot; you are internal audit &middot; the Knot Finder answers to you</span>
+    <span class="spacer"></span>
+    <span class="envchip" title="Office time"><span class="cl" id="clock">08:40</span><span>Thursday</span></span>
+    <span class="envchip" title="Agent spend against its daily cap">spend <b id="spendChip">$1.12</b><span>/ $6.00</span></span>
+    <button class="wordbtn" id="digestBtn" hidden>The walk, written up</button>
+    <button class="wordbtn" id="hoodBtn">Under the hood</button>
+    <button class="iconbtn" id="resetBtn" title="Run it again" aria-label="Restart the demo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ STAGE ============ -->
+  <section class="stage" aria-label="The company graph">
+
+    <!-- LEFT · RAIL -->
+    <div class="rail" id="rail">
+      <div class="rail-head"><span class="pulse" aria-hidden="true"></span> Agent 03 &middot; <b>the-knot-finder</b></div>
+      <div class="rail-scroll">
+        <div class="agent-id">
+          <div class="avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/>
+              <path d="M12 7.2V11M12 11l-5.2 5M12 11l5.2 5"/><path d="M7.2 18h9.6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="nm">The Knot Finder</div>
+            <div class="tg">holds the company as one graph</div>
+          </div>
+          <span class="statechip on" id="stateChip">Walking</span>
+        </div>
+
+        <div class="statgrid" aria-label="Tonight's walk">
+          <div class="sstat"><div class="n" id="stPeople">2,380</div><div class="l">people</div></div>
+          <div class="sstat"><div class="n" id="stSources">9</div><div class="l">sources fused</div></div>
+          <div class="sstat"><div class="n" id="stPairs">0</div><div class="l">pairs checked</div></div>
+          <div class="sstat"><div class="n" id="stRoofs">0</div><div class="l">under one roof</div></div>
+          <div class="sstat"><div class="n acc" id="stKnots">3</div><div class="l">knots tied</div></div>
+          <div class="sstat"><div class="n" id="stCalls">0</div><div class="l">your calls</div></div>
+        </div>
+
+        <div>
+          <div class="panelcap">Knots tied <span class="cnt" id="knotCount">3</span></div>
+          <div class="board" id="board" style="margin-top:9px"></div>
+        </div>
+
+        <div>
+          <div class="panelcap">Held back</div>
+          <div class="held" id="held" style="margin-top:9px"></div>
+        </div>
+
+        <div>
+          <div class="panelcap">Find anyone</div>
+          <input class="search" id="search" type="search" placeholder="a name, a title, a team" autocomplete="off" style="margin-top:9px" aria-label="Find anyone in the company">
+          <div class="sres" id="sres" style="margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER · GRAPH -->
+    <div class="view" id="view">
+      <canvas id="gfx" aria-label="The company drawn as a graph. The list on the left holds the same findings as text." role="img"></canvas>
+      <button class="iconbtn" id="railTog" aria-label="Open the agent rail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="viewtogs" role="group" aria-label="Layers">
+        <button class="vtog on" data-layer="org"><span class="sw" aria-hidden="true"></span>Org chart</button>
+        <button class="vtog on" data-layer="home"><span class="sw home" aria-hidden="true"></span>Under one roof</button>
+        <button class="vtog" data-layer="money"><span class="sw money" aria-hidden="true"></span>Who approves pay</button>
+        <button class="vtog on" data-layer="vendor"><span class="sw vendor" aria-hidden="true"></span>Vendors</button>
+      </div>
+      <div class="wx" id="wx">Thursday &middot; nightly walk done <b>02:14</b> &middot; <b id="wxEvents">14</b> events since, nothing tied</div>
+      <div class="hint" id="hint">
+        <span class="lg"><i class="rep"></i>reports to</span>
+        <span class="lg"><i class="dec"></i>declared household</span>
+        <span class="lg"><i class="inf"></i>under one roof, nothing declared</span>
+        <span class="lg"><i class="kn"></i>a knot</span>
+        <span class="lg"><s></s>a vendor</span>
+      </div>
+      <button class="iconbtn fitbtn" id="fitBtn" title="See the whole company" aria-label="See the whole company">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+      <div id="tip"></div>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+
+    <!-- RIGHT · DETAIL PANEL -->
+    <aside class="panel" id="panel" aria-label="Detail">
+      <div class="phead">
+        <div style="min-width:0">
+          <div class="k" id="pKind">Person</div>
+          <div class="nm" id="pName">&nbsp;</div>
+          <div class="sub" id="pSub"></div>
+        </div>
+        <button class="iconbtn x" id="pClose" aria-label="Close panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="pscroll" id="pBody"></div>
+    </aside>
+  </section>
+
+  <!-- ============ DOCK ============ -->
+  <section class="dock" aria-label="The paper trail">
+    <div class="dockbar">
+      <button class="logtog" id="logTog" aria-expanded="false">
+        <svg class="ch" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        Paper trail &middot; <span class="n" id="trailCount">0</span>
+      </button>
+      <div class="tickline" id="tick"><span class="t">08:40</span>nightly walk done at 02:14 &middot; 14 events since, 14 neighbourhoods re-walked, nothing tied &middot; the change feed is quiet, which is the normal state</div>
+    </div>
+    <div class="trail" id="trail"><div class="rows" id="trailRows"></div></div>
+  </section>
+</div><!-- /.shell -->
+
+<!-- ============ UNDER THE HOOD ============ -->
+<div class="ovl" id="hood">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="hood" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">Under the hood</div>
+    <h2 class="ohead" style="font-size:clamp(24px,3.6vw,32px)">One loop. The same one on <em>every</em> desk we deploy.</h2>
+    <div class="hood-grid">
+      <div>
+        <div class="panelcap" style="margin-bottom:8px">The loop it walks</div>
+        <div class="loop">
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+            <div><div class="lname">Trigger</div><div class="lgloss">the change feed from the people systems, plus a clock at 02:00. A hire, a transfer, a new bank detail, a new vendor: each one re-walks a neighbourhood. No human needed.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></span>
+            <div><div class="lname">Read</div><div class="lgloss">mirrors of the HRIS, three payrolls, benefits, expenses, equity and the vendor master. Read-only, every one. Bank details arrive as hashes; it never sees a number.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 7a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5 5 5 0 0 1-5-5v0a5 5 0 0 1 5-5z"/><path d="M12 17v4M7.5 9.5 4 7.5M16.5 9.5 20 7.5M7.5 14.5 4 16.5M16.5 14.5 20 16.5"/></svg></span>
+            <div><div class="lname">Think</div><div class="lgloss">joins and rules first, which cost nearly nothing: same roof, same account, same line. The model only wakes for the ambiguous records, a free-text address, an attestation form, a vendor name.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-3.5-7.5L3 10z"/></svg></span>
+            <div><div class="lname">Act</div><div class="lgloss">a knot on the graph with every record attached, and a drafted memo. Or nothing. Most re-walks end in nothing.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20.5c.8-4 3.5-6 7-6s6.2 2 7 6"/></svg></span>
+            <div><div class="lname">Your call</div><div class="lgloss">re-route, hold, accept with a reason. A named human. Nobody's line, pay or paperwork moves because software wanted it to.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9.5 13h6M9.5 16.5h6M9.5 9.5H12"/></svg></span>
+            <div><div class="lname">Log</div><div class="lgloss">every record read, every match, every knot, every call, every dollar. On the record from day one, which is what an auditor wants to see.</div></div></div>
+        </div>
+      </div>
+
+      <div class="pnl" aria-label="The agent's P&amp;L">
+        <div class="ph">The agent's <b>P&amp;L</b> · five lines before it touched real work</div>
+        <div class="prow"><span class="k">Scope</span><span class="v">Hold the people graph. Raise where a line and a rule disagree, with the records attached. Draft the paper. <b>Nothing else.</b></span></div>
+        <div class="prow"><span class="k">Owner</span><span class="v"><b>You.</b> Head of internal audit. One named human, not a committee and not a channel.</span></div>
+        <div class="prow"><span class="k">Budget</span><span class="v"><b>$6.00 a day</b>, enforced in the request path itself. The nightly walk costs about ninety cents. A re-walk after one event costs about two.
+          <span class="meter"><i id="spendBar"></i></span>
+          <span class="spendline"><span>spent today</span><b id="spendNum">$1.12</b></span>
+        </span></div>
+        <div class="prow"><span class="k">Review</span><span class="v">First Friday, monthly. Judged on <b>knots that held up</b>, and on anything the auditors find that it did not.</span></div>
+        <div class="prow"><span class="k">Paper trail</span><span class="v">On since day one. <b id="trailCount2">0 entries</b> this morning, in the dock below the graph.</span></div>
+      </div>
+
+      <div class="fence">
+        <div class="fh">The fence around it · why this is safe to own</div>
+        <ul>
+          <li>It reads <b>mirrors</b> of the people systems. Workday, the payrolls and the vendor master do not know it exists.</li>
+          <li>Bank details are <b>hashed at the connector</b>. It can tell two records share an account; it cannot tell you the account. Salaries, government IDs and photos never arrive at all.</li>
+          <li>It reads <b>your records, not the internet</b>. No social graph, no profiles, nothing inferred from a name or a face.</li>
+          <li>It cannot change a line, re-route an approval, hold a payment, or contact an employee. <b>The permission does not exist</b>, so it cannot be misused.</li>
+          <li>A surname alone <b>never raises anything</b>. Every knot ships with its records. Every dismissal carries a name and a reason.</li>
+          <li>Findings go to <b>one named owner</b>, not to a channel. Spend is capped in the request path. Every read is on the record.</li>
+        </ul>
+      </div>
+      <p class="fine" style="margin-top:2px">A fictional company, invented people. The loop is the product; swap the graph and the feed, and the same six boxes run a vendor master, a sales territory map, or a law firm's conflict check.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DIGEST ============ -->
+<div class="ovl" id="digest">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="digest" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">The walk, written up</div>
+    <h2 class="ohead" style="font-size:clamp(24px,3.6vw,32px)">Nobody ran the spreadsheets. The <em>whole company</em> got walked.</h2>
+    <div class="dgrid" id="dgrid"></div>
+    <div class="panelcap" style="margin:0 0 8px">Your calls, as logged</div>
+    <div class="calls" id="dcalls"></div>
+    <p class="olead" id="dline"></p>
+    <div class="dquote">"The expensive version of today was the auditors pulling Priya's line in their sample, and a whistleblower telling us about Northlake a year from now. Neither of those days will happen, and the paper trail shows exactly why."</div>
+    <div class="panelcap" style="margin:18px 0 8px">Same walker · other graphs</div>
+    <div class="chips">
+      <div class="chip"><div class="cn">Procurement</div><div class="cl2">Every vendor against every employee: addresses, accounts, approvers. The Northlake check, run on the whole master.</div></div>
+      <div class="chip"><div class="cn">Sales territories</div><div class="cl2">A rep selling to their partner's company, or approving their own referral. Same graph, different edges.</div></div>
+      <div class="chip"><div class="cn">Law and advisory firms</div><div class="cl2">The conflict check before a new matter opens, run against every client, every lawyer, every family tie on file.</div></div>
+      <div class="chip"><div class="cn">Banking and lending</div><div class="cl2">Loan officers and borrowers, approvers and applicants. The related-party rule, checked continuously.</div></div>
+      <div class="chip"><div class="cn">Public sector</div><div class="cl2">Procurement officers against bidders, grant reviewers against grantees. The declaration form, tested every night.</div></div>
+      <div class="chip"><div class="cn">Clinical research</div><div class="cl2">Investigators against sponsors and payments. Disclosure is a form; this is the check behind it.</div></div>
+    </div>
+    <div class="cta-row">
+      <a class="btn-go" href="/book">Book the call</a>
+      <button class="btn-quiet" id="againBtn">run the walk again</button>
+    </div>
+    <p class="fine">The graph was the demo. The loop is the product: a trigger, a read-only look, cheap rules before expensive thinking, one bounded action, a named human, a log. The Readiness Map prices it against your real company.</p>
+  </div>
+</div>
+</div><!-- /.kf-app -->
+
+    </div>
+  </section>
+
+  <!-- what this was -->
+  <section class="section section-rule kf-next">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Same Loop</div>
+        <h2>The graph was the demo. The <em>loop</em> is the product.</h2>
+        <p class="lead">A trigger the agent waits on, a read-only look at systems you already run, cheap rules before expensive thinking, one bounded action, a named human holding the judgment, and a log of all of it. Swap the graph and the feed, and the same six boxes run a vendor master, a sales territory map, or a freight desk.</p>
+        <p class="ind-cta" style="margin-block-start: 1.4rem;"><a class="text-link" href="/industries/saas">See the other two agents on this desk <span aria-hidden="true">&#8594;</span></a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- final CTA -->
+  <section class="section inverted cta-final" style="text-align:center;">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Real Numbers</div>
+        <h2 style="max-width:24ch; margin-inline:auto;">Enough demos. Get <em>your</em> number.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead" style="max-width:56ch; margin:0 auto clamp(1.75rem, 4vw, 2.5rem);">Greywell is invented. Your company is not. The Readiness Map makes it exact: your systems, your rules, your first agents, with names and owners.</p>
+        <a class="btn" href="/book">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="/">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We put AI agents to work inside your company, and prove it in six weeks.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="/foundation">The Foundation</a>
+        <a href="/continuum">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="/standard">The Standard</a>
+        <a href="/about">About</a>
+        <a href="/industries">Industries</a>
+        <a href="/book">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+<script>
+(function(){
+'use strict';
+/* ====================================================================
+   A Walk With The Knot Finder
+   ------------------------------------------------------------------
+   1. A fictional company, generated from a seed so it is the same
+      every visit: 2,380 people, their reporting lines, addresses,
+      hashed bank details, emergency contacts, benefits records,
+      attestations, a vendor master.
+   2. The agent's walk: the joins and rules that turn those records
+      into households, approval paths, knots and held-back pairs.
+   3. A radial layout and a canvas renderer for the whole graph.
+   4. The console around it: rail, panel, dock, clock, event, digest.
+   No libraries. Everything is plain JavaScript in this one block.
+   ==================================================================== */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const money = n => '$' + n.toFixed(2);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------- seeded randomness: the company is the same every visit ---------- */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+let rnd = mulberry32(20260819);
+const R = () => rnd();
+const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
+const pick = arr => arr[Math.floor(R() * arr.length)];
+const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; };
+
+/* ---------- name pools ---------- */
+const FIRST = ['James','Emily','Michael','Sarah','David','Hannah','Daniel','Laura','Matthew','Rachel','Andrew','Grace','Thomas','Olivia','Ryan','Megan','Joshua','Sophie','Jack','Lucy','Liam','Chloe','Nathan','Zoe','Ethan','Holly','Callum','Amelia','Connor','Erin','Patrick','Fiona','Sean','Niamh','Declan','Aoife','Graham','Heather','Neil','Kirsty','Stuart','Rohan','Ananya','Vikram','Meera','Karan','Neha','Aditya','Kavya','Rahul','Pooja','Sanjay','Divya','Nikhil','Shreya','Amit','Isha','Rajiv','Deepa','Harpreet','Simran','Jaspreet','Sana','Imran','Zara','Faisal','Ayesha','Wei','Mei','Jun','Yuki','Haruto','Sakura','Minjun','Jiwoo','Seoyeon','Hiro','Kenji','Aiko','Xin','Hao','Ying','Jin','Sooah','Lan','Thanh','Linh','Minh','Huong','Bao','Carlos','Sofia','Diego','Valentina','Mateo','Camila','Santiago','Lucia','Alejandro','Isabela','Javier','Mariana','Andres','Gabriela','Luis','Daniela','Renata','Elena','Omar','Layla','Yusuf','Karim','Amira','Hassan','Dalia','Samir','Rania','Leila','Farah','Bilal','Ziad','Kwame','Ama','Kofi','Adaeze','Chidi','Ngozi','Emeka','Zainab','Tunde','Folake','Sipho','Thandiwe','Abebe','Amara','Sekou','Seun','Lukas','Anna','Jonas','Mathis','Lea','Luca','Giulia','Matteo','Chiara','Piotr','Agnieszka','Tomasz','Katarzyna','Sven','Lars','Freya','Niko','Elina','Mikko','Aino','Dmitri','Irina','Andrei','Ioana','Bogdan','Yelena','Marcus','Jenna','Nicole','Brandon','Kevin','Stephanie','Jason','Amanda','Justin','Melissa','Tyler','Jessica','Aaron','Brittany','Kyle','Ashley','Derek','Lauren','Cody','Kayla','Taylor','Morgan','Casey','Avery','Riley','Rowan','Beatriz','Ines','Joao','Pedro','Tiago','Mariam','Youssef','Selin','Emre','Defne','Arda','Zeynep'];
+const LASTW = [['Nguyen',6],['Patel',6],['Singh',5],['Chen',5],['Kim',5],['Smith',5],['Garcia',4],['Li',4],['Wang',4],['Khan',4],['Lee',4],['Martin',3],['Brown',3],['Williams',3],['Jones',3],['Taylor',3],['Wilson',3],['Rodriguez',3],['Martinez',3],['Johnson',3],['Hernandez',2],['Lopez',2],['Gonzalez',2],['Ali',2],['Ahmed',2],['Shah',2],['Sharma',2],['Kaur',2],['Gupta',2],['Park',2],['Liu',2],['Zhang',2],['Tran',2],['Pham',2],['Le',2],['Murphy',2],['Kelly',2],['Anderson',2],['Thompson',2],['White',2],['Harris',2],['Clark',2],['Lewis',2],['Robinson',2],['Walker',2],['Young',2],['Allen',2],['King',2],['Wright',2],['Scott',2],['Green',2],['Baker',2],['Adams',2],['Nelson',2],['Hill',2],['Campbell',2],['Stewart',2],['Roy',2],['Tremblay',2],['Gagnon',2],['Silva',2],['Santos',2],['Rahman',2],['Reddy',2],['Rao',2],['Choi',2],['Wong',2],['Chan',2],['Huang',2],['Wu',2],['Cote',1],['Bouchard',1],['Lavoie',1],['Fortin',1],['Gauthier',1],['Morin',1],['Bernard',1],['Moreau',1],['Lefebvre',1],['Muller',1],['Schmidt',1],['Schneider',1],['Fischer',1],['Weber',1],['Meyer',1],['Wagner',1],['Becker',1],['Hoffmann',1],['Rossi',1],['Russo',1],['Ferrari',1],['Esposito',1],['Bianchi',1],['Romano',1],['Ricci',1],['Kowalski',1],['Nowak',1],['Zielinski',1],['Oliveira',1],['Souza',1],['Pereira',1],['Costa',1],['Carvalho',1],['Almeida',1],['Mensah',1],['Owusu',1],['Nwosu',1],['Dlamini',1],['Ndlovu',1],['Nasser',1],['Hussein',1],['Chowdhury',1],['Islam',1],['Das',1],['Banerjee',1],['Mukherjee',1],['Iyer',1],['Nair',1],['Pillai',1],['Yamamoto',1],['Tanaka',1],['Suzuki',1],['Takahashi',1],['Watanabe',1],['Ito',1],['Kobayashi',1],['Sato',1],['Jung',1],['Kang',1],['Cho',1],['Yoon',1],['Jang',1],['Lim',1],['Han',1],['Lam',1],['Cheung',1],['Ho',1],['Ng',1],['Yeung',1],['Lau',1],['Leung',1],['Zhao',1],['Zhou',1],['Xu',1],['Sun',1],['Ma',1],['Zhu',1],['Hu',1],['Guo',1],['Lin',1],['Gao',1],['Luo',1],['Zheng',1],['Liang',1],['Song',1],['Tang',1],['Xie',1],['Brennan',1],['Doyle',1],['Byrne',1],['Quinn',1],['Lynch',1],['Moran',1],['Kennedy',1],['Burke',1],['Ryan',1],['McCarthy',1],['Sullivan',1],['Fitzgerald',1],['Hughes',1],['Evans',1],['Roberts',1],['Davies',1],['Thomas',1],['Ramirez',1],['Torres',1],['Flores',1],['Rivera',1],['Gomez',1],['Diaz',1],['Cruz',1],['Morales',1],['Reyes',1],['Gutierrez',1],['Chavez',1],['Ramos',1],['Mendoza',1],['Ruiz',1],['Alvarez',1],['Castillo',1],['Jimenez',1],['Vasquez',1],['Romero',1],['Herrera',1],['Medina',1],['Aguilar',1],['Vargas',1],['Castro',1],['Fernandez',1],['Moreno',1],['Salazar',1],['Vega',1],['Delgado',1],['Navarro',1],['Eriksson',1],['Johansson',1],['Nilsson',1],['Larsson',1],['Olsen',1],['Hansen',1],['Pedersen',1],['Virtanen',1],['Korhonen',1],['Ivanov',1],['Petrov',1],['Smirnov',1],['Popov',1],['Novak',1],['Horvat',1],['Popescu',1],['Ionescu',1],['Okonkwo',1],['Abubakar',1],['Adeleke',1],['Bello',1],['Ibrahim',1],['Mahmoud',1],['Saleh',1],['Aziz',1],['Hamid',1],['Rashid',1],['Karimi',1],['Hosseini',1],['Ahmadi',1],['Rezaei',1],['Moradi',1],['Nazari',1],['Sadeghi',1],['Yilmaz',1],['Kaya',1],['Demir',1],['Celik',1],['Sahin',1]];
+const LAST = []; LASTW.forEach(([n, w]) => { for (let i = 0; i < w; i++) LAST.push(n); });
+
+/* ---------- titles ---------- */
+const T = {
+  eng: ['Software Engineer II','Senior Software Engineer','Software Engineer I','Staff Engineer','Senior Software Engineer','Software Engineer II','Senior Software Engineer'],
+  pm: ['Product Manager','Senior Product Manager','Associate Product Manager','Product Manager'],
+  design: ['Product Designer','Senior Product Designer','UX Researcher','Product Designer'],
+  data: ['Data Engineer','Analytics Engineer','Data Scientist','Data Analyst','Senior Data Engineer'],
+  docs: ['Technical Writer','Senior Technical Writer','Technical Writer II'],
+  ops: ['Product Operations Specialist','Release Manager','Program Manager'],
+  sales: ['Account Executive','Senior Account Executive','Sales Development Representative','Enterprise Account Executive','Account Executive'],
+  se: ['Sales Engineer','Senior Sales Engineer','Sales Engineer'],
+  mkt: ['Marketing Manager','Content Marketing Manager','Demand Generation Manager','Product Marketing Manager','Marketing Specialist'],
+  revops: ['Revenue Operations Analyst','Sales Operations Manager','Deal Desk Analyst'],
+  support: ['Support Engineer I','Support Engineer II','Senior Support Engineer','Support Engineer II'],
+  cs: ['Customer Success Manager','Senior Customer Success Manager','Customer Success Manager'],
+  ps: ['Implementation Consultant','Senior Consultant','Solutions Architect','Implementation Consultant'],
+  fin: ['Financial Analyst','Senior Accountant','Accountant','Senior Financial Analyst'],
+  ap: ['Accounts Payable Specialist','Senior AP Specialist'],
+  payroll: ['Payroll Specialist','Senior Payroll Specialist'],
+  legal: ['Corporate Counsel','Paralegal','Contracts Manager'],
+  proc: ['Procurement Specialist','Sourcing Manager'],
+  audit: ['Internal Auditor','Senior Internal Auditor'],
+  it: ['IT Support Specialist','Systems Administrator','Security Analyst'],
+  people: ['HR Business Partner','Recruiter','People Operations Specialist','Total Rewards Analyst','Senior Recruiter'],
+  fops: ['Operations Analyst','Customer Support Specialist','Onboarding Specialist']
+};
+const MIX = {
+  eng:     [['Toronto',52],['Austin',18],['London',10],['Remote (CA)',10],['Remote (US)',10]],
+  prod:    [['Toronto',60],['Austin',20],['London',8],['Remote (CA)',6],['Remote (US)',6]],
+  salesNA: [['Austin',52],['Toronto',28],['Remote (US)',14],['Remote (CA)',6]],
+  salesEU: [['London',90],['Remote (UK)',10]],
+  cust:    [['Austin',55],['Toronto',28],['London',12],['Remote (US)',5]],
+  fin:     [['Toronto',72],['Austin',22],['London',6]],
+  people:  [['Toronto',58],['Austin',30],['London',12]],
+  fennel:  [['Denver',82],['Remote (US)',18]]
+};
+const ENTITY = {
+  'Toronto': 'Greywell Canada Ltd.', 'Remote (CA)': 'Greywell Canada Ltd.',
+  'Austin': 'Greywell Software Inc.', 'Remote (US)': 'Greywell Software Inc.',
+  'London': 'Greywell UK Ltd.', 'Remote (UK)': 'Greywell UK Ltd.',
+  'Denver': 'Fennel Analytics Inc.'
+};
+const PAYROLL = { 'Greywell Canada Ltd.': 'ADP Canada', 'Greywell Software Inc.': 'ADP US', 'Greywell UK Ltd.': 'UK payroll bureau', 'Fennel Analytics Inc.': 'Fennel payroll export' };
+const BENEFITS = { 'Greywell Canada Ltd.': 'Sun Life', 'Greywell Software Inc.': 'Aetna', 'Greywell UK Ltd.': 'Bupa', 'Fennel Analytics Inc.': 'Fennel plan' };
+
+/* ---------- spec helpers ---------- */
+const ics = (n, pool) => Array.from({ length: n }, () => ({ t: pick(pool) }));
+const team = (t, n, pool, extra) => ({ t, kids: ics(n, pool).concat(extra || []) });
+function area(t, prefix, teams, pool, lo, hi, extra) {
+  const node = { t, kids: teams.map(tn => team(prefix + tn, ri(lo, hi), pool)) };
+  if (extra) node.kids = node.kids.concat(extra);
+  return node;
+}
+const ENG_TEAMS = ['Workflows','Reporting','Billing','Mobile','Admin Console','Connectors','Public API','Marketplace','Search','Notifications','Permissions','Import','Export','Scheduling','Audit Log','Webhooks','Templates','Forms','Dashboards','Alerts','Compute','Networking','Build','Deploy','Observability','Incident Tooling','Edge','Caching','Queues','Identity','Streaming','Storage','AppSec','Detection','Threat Intel','Access'];
+let engTeamIx = 0;
+const nextTeams = n => { const out = []; for (let i = 0; i < n; i++) out.push(ENG_TEAMS[(engTeamIx++) % ENG_TEAMS.length]); return out; };
+
+/* ---------- the company ---------- */
+const SPEC = {
+  n: 'Helena Marchetti', t: 'Chief Executive Officer', loc: 'Toronto', kids: [
+    { n: 'Desmond Okafor', t: 'Chief Technology Officer', dept: 'Engineering', sector: 'Engineering', mix: MIX.eng, kids: [
+      { n: 'Tobias Lindqvist', id: 'tobias', t: 'VP Engineering, Platform', kids: [
+        { n: 'Priya Venkataraman', id: 'priya', t: 'Director of Engineering, Platform Services', loc: 'Toronto', kids: [
+          { n: 'Lena Forsberg', id: 'lena', t: 'Engineering Manager, Data Platform', loc: 'Toronto', kids: [
+            { n: 'Arjun Venkataraman', id: 'arjun', t: 'Staff Engineer', loc: 'Toronto' }
+          ].concat(ics(6, T.eng)) },
+          team('Engineering Manager, Streaming', 8, T.eng),
+          team('Engineering Manager, Storage', 9, T.eng),
+          team('Engineering Manager, Identity', 7, T.eng)
+        ] },
+        { n: 'Samuel Adeyemi', id: 'samuel', t: 'Director of Engineering, Platform Infrastructure', loc: 'Toronto', kids: [
+          team('Engineering Manager, Compute', 8, T.eng), team('Engineering Manager, Networking', 7, T.eng), team('Engineering Manager, Build', 7, T.eng)
+        ] },
+        area('Director of Engineering, Developer Experience', 'Engineering Manager, ', ['Deploy','Observability','Incident Tooling'], T.eng, 7, 10),
+        area('Director of Engineering, Reliability', 'Engineering Manager, ', ['Edge','Caching','Queues'], T.eng, 7, 10),
+        area('Director of Engineering, Data Infrastructure', 'Engineering Manager, ', ['Lakehouse','Pipelines','Metrics Store'], T.eng, 7, 10)
+      ] },
+      { t: 'VP Engineering, Applications', kids: [
+        area('Director of Engineering, Workflows', 'Engineering Manager, ', nextTeams(4), T.eng, 8, 11),
+        area('Director of Engineering, Reporting', 'Engineering Manager, ', nextTeams(4), T.eng, 8, 11),
+        area('Director of Engineering, Billing', 'Engineering Manager, ', nextTeams(4), T.eng, 8, 11),
+        area('Director of Engineering, Mobile', 'Engineering Manager, ', nextTeams(3), T.eng, 8, 11),
+        area('Director of Engineering, Admin', 'Engineering Manager, ', nextTeams(3), T.eng, 8, 11)
+      ] },
+      { t: 'VP Engineering, Integrations', kids: [
+        area('Director of Engineering, Connectors', 'Engineering Manager, ', nextTeams(4), T.eng, 8, 11),
+        area('Director of Engineering, Public API', 'Engineering Manager, ', nextTeams(4), T.eng, 8, 11),
+        area('Director of Engineering, Marketplace', 'Engineering Manager, ', nextTeams(3), T.eng, 8, 11)
+      ] },
+      { t: 'VP Engineering, Enterprise and Compliance', kids: [
+        area('Director of Engineering, Enterprise Admin', 'Engineering Manager, ', ['SSO and SCIM','Audit and Retention','Data Residency'], T.eng, 8, 11),
+        area('Director of Engineering, Governance', 'Engineering Manager, ', ['Policies','Approvals','Legal Hold'], T.eng, 8, 11),
+        area('Director of Engineering, Localization', 'Engineering Manager, ', ['Localization','Accessibility','Payments'], T.eng, 8, 11)
+      ] },
+      { t: 'VP Engineering, Data and AI', kids: [
+        area('Director of Engineering, Machine Learning', 'Engineering Manager, ', ['Ranking','Recommendations','Assistants'], T.eng, 8, 11),
+        area('Director of Engineering, ML Platform', 'Engineering Manager, ', ['Training','Serving','Evaluation'], T.eng, 8, 11),
+        area('Director of Engineering, Search', 'Engineering Manager, ', ['Search','Indexing','Relevance'], T.eng, 8, 11)
+      ] },
+      { t: 'VP Engineering, Quality and Release', kids: [
+        area('Director, Quality Engineering', 'Engineering Manager, ', ['Test Platform','Automation','Performance'], T.eng, 7, 9),
+        area('Director, Release Engineering', 'Engineering Manager, ', ['Release','Environments','Tooling'], T.eng, 7, 9)
+      ] },
+      { t: 'VP Security Engineering', kids: [
+        area('Director, Application Security', 'Engineering Manager, ', ['AppSec','Access'], T.eng, 6, 8),
+        area('Director, Detection and Response', 'Engineering Manager, ', ['Detection','Threat Intel'], T.eng, 6, 8)
+      ] },
+      { t: 'VP Corporate IT', mix: MIX.fin, kids: [
+        area('Director, IT Operations', 'Manager, ', ['Service Desk','Endpoints','Identity and Access'], T.it, 6, 9)
+      ] }
+    ] },
+    { n: 'Naomi Feld', t: 'Chief Product Officer', dept: 'Product and Design', sector: 'Product & Design', mix: MIX.prod, kids: [
+      { t: 'VP Product, Core', kids: [
+        area('Director of Product, Workflows', 'Group Product Manager, ', ['Workflows','Forms','Templates'], T.pm, 4, 6),
+        area('Director of Product, Platform', 'Group Product Manager, ', ['Platform','Integrations','Developer'], T.pm, 4, 6),
+        area('Director of Product, Mobile and Admin', 'Group Product Manager, ', ['Mobile','Admin','Billing'], T.pm, 4, 6)
+      ] },
+      { t: 'VP Product, Growth', kids: [
+        area('Director of Product, Growth', 'Group Product Manager, ', ['Onboarding','Monetization','Lifecycle'], T.pm, 4, 6),
+        { n: 'Gregor Ilic', t: 'Director, Product Operations', loc: 'Toronto', kids: [
+          { n: 'Dana Whitfield', id: 'dana', t: 'Manager, Documentation', loc: 'Toronto', kids: [
+            { n: 'Owen Castellanos', id: 'owen', t: 'Technical Writer II', loc: 'Toronto' }
+          ].concat(ics(5, T.docs)) },
+          team('Manager, Product Operations', 5, T.ops),
+          team('Manager, Release Management', 4, T.ops)
+        ] }
+      ] },
+      { t: 'VP Product, Enterprise', kids: [
+        area('Director of Product, Enterprise', 'Group Product Manager, ', ['Security','Compliance','Identity'], T.pm, 4, 6),
+        area('Director of Product, Data and AI', 'Group Product Manager, ', ['Analytics','Assistants'], T.pm, 4, 6)
+      ] },
+      { t: 'VP Design', kids: [
+        area('Director of Design, Product', 'Design Manager, ', ['Core','Growth','Mobile'], T.design, 5, 7),
+        area('Director, Research and Design Systems', 'Design Manager, ', ['Research','Design Systems','Brand'], T.design, 5, 7)
+      ] },
+      { t: 'VP Data and Analytics', dept: 'Data', kids: [
+        area('Director, Data Platform', 'Manager, ', ['Data Engineering','Analytics Engineering'], T.data, 7, 9),
+        area('Director, Analytics', 'Manager, ', ['Product Analytics','Business Intelligence','Data Science'], T.data, 6, 8)
+      ] }
+    ] },
+    { n: 'Caroline Whitcombe', t: 'Chief Revenue Officer', dept: 'Sales', sector: 'Sales & Marketing', mix: MIX.salesNA, kids: [
+      { t: 'VP Sales, North America', kids: [
+        { t: 'Regional Director, Enterprise East', region: 'Enterprise East', loc: 'Toronto', kids: [
+          team('Sales Manager, Enterprise East 1', 8, T.sales), team('Sales Manager, Enterprise East 2', 8, T.sales), team('Sales Manager, Enterprise East 3', 7, T.sales)
+        ] },
+        { t: 'Regional Director, Enterprise West', region: 'Enterprise West', loc: 'Austin', kids: [
+          team('Sales Manager, Enterprise West 1', 8, T.sales), team('Sales Manager, Enterprise West 2', 8, T.sales), team('Sales Manager, Enterprise West 3', 7, T.sales)
+        ] },
+        area('Regional Director, Enterprise Central', 'Sales Manager, Enterprise Central ', ['1','2','3'], T.sales, 7, 9),
+        area('Regional Director, Strategic Accounts', 'Sales Manager, Strategic ', ['1','2'], T.sales, 6, 8),
+        area('Regional Director, Mid-Market', 'Sales Manager, Mid-Market ', ['1','2','3','4','5','6','7'], T.sales, 8, 10),
+        area('Director, Sales Development', 'SDR Manager, ', ['Inbound','Outbound East','Outbound West','Outbound Central'], T.sales, 10, 13)
+      ] },
+      { t: 'VP Sales, EMEA', mix: MIX.salesEU, region: 'EMEA', kids: [
+        area('Regional Director, UK and Ireland', 'Sales Manager, ', ['UKI 1','UKI 2','UKI 3'], T.sales, 7, 9),
+        area('Regional Director, DACH and Nordics', 'Sales Manager, ', ['DACH','Nordics','Benelux'], T.sales, 7, 9),
+        area('Regional Director, Southern Europe', 'Sales Manager, ', ['France','Iberia','Italy'], T.sales, 6, 8),
+        area('Director, Sales Development, EMEA', 'SDR Manager, EMEA ', ['1','2'], T.sales, 9, 11)
+      ] },
+      { t: 'VP Sales Engineering', kids: [
+        { t: 'Director, Sales Engineering, East', region: 'Enterprise East', loc: 'Toronto', kids: [
+          { n: 'Hannah Kowalczyk', id: 'hannah', t: 'Manager, Sales Engineering, Enterprise East', loc: 'Toronto', kids: [
+            { n: 'Tomas Ferreira', id: 'tomas', t: 'Senior Sales Engineer', loc: 'Toronto' }
+          ].concat(ics(6, T.se)) },
+          team('Manager, Sales Engineering, Mid-Market East', 7, T.se),
+          team('Manager, Sales Engineering, Enterprise East 2', 6, T.se)
+        ] },
+        { t: 'Director, Sales Engineering, West', region: 'Enterprise West', loc: 'Austin', kids: [
+          team('Manager, Sales Engineering, Enterprise West', 7, T.se), team('Manager, Sales Engineering, Mid-Market West', 7, T.se), team('Manager, Sales Engineering, Central', 6, T.se)
+        ] },
+        { t: 'Director, Sales Engineering, EMEA', region: 'EMEA', mix: MIX.salesEU, kids: [ team('Manager, Sales Engineering, EMEA 1', 8, T.se), team('Manager, Sales Engineering, EMEA 2', 7, T.se) ] }
+      ] },
+      { t: 'VP Partnerships', kids: [
+        area('Director, Channel and Alliances', 'Manager, ', ['Channel','Alliances'], T.sales, 6, 8)
+      ] },
+      { t: 'VP Marketing', dept: 'Marketing', mix: MIX.prod, kids: [
+        area('Director, Demand Generation', 'Manager, ', ['Paid','Lifecycle','Events'], T.mkt, 6, 8),
+        area('Director, Product Marketing', 'Manager, ', ['Core','Enterprise','Competitive'], T.mkt, 5, 7),
+        area('Director, Brand and Content', 'Manager, ', ['Content','Brand','Web'], T.mkt, 6, 8),
+        area('Director, Marketing Operations', 'Manager, ', ['Marketing Ops','Analytics'], T.mkt, 5, 7)
+      ] },
+      { t: 'VP Revenue Operations', kids: [
+        area('Director, Sales Operations', 'Manager, ', ['Planning','Deal Desk','Systems','Enablement'], T.revops, 5, 7)
+      ] }
+    ] },
+    { n: 'Bernard Osei', t: 'Chief Customer Officer', dept: 'Customer', sector: 'Customer', mix: MIX.cust, kids: [
+      { t: 'VP Support', kids: [
+        { t: 'Director, Technical Support, Americas', loc: 'Austin', kids: [
+          { t: 'Manager, Tier 2 Support', id: 'noorMgr', loc: 'Austin', kids: [
+            { n: 'Noor Haddad', id: 'noor', t: 'Support Engineer II', loc: 'Austin' }
+          ].concat(ics(9, T.support)) },
+          team('Manager, Tier 1 Support, Americas 1', 12, T.support), team('Manager, Tier 1 Support, Americas 2', 12, T.support), team('Manager, Tier 1 Support, Americas 3', 11, T.support), team('Manager, Tier 1 Support, Americas 4', 12, T.support), team('Manager, Tier 1 Support, Americas 5', 11, T.support), team('Manager, Escalations', 7, T.support)
+        ] },
+        area('Director, Technical Support, EMEA', 'Manager, ', ['Tier 1 Support, EMEA 1','Tier 1 Support, EMEA 2','Tier 1 Support, EMEA 3','Tier 2 Support, EMEA'], T.support, 9, 12),
+        area('Director, Technical Support, Enterprise', 'Manager, ', ['Enterprise Support 1','Enterprise Support 2','Enterprise Support 3'], T.support, 8, 10),
+        area('Director, Support Operations', 'Manager, ', ['Knowledge','Tooling','Quality'], T.support, 5, 7)
+      ] },
+      { t: 'VP Customer Success', kids: [
+        { t: 'Director, Customer Success, Mid-Market', loc: 'Austin', kids: [
+          { n: 'Elias Brandt', id: 'elias', t: 'Manager, Customer Success, Mid-Market 1', loc: 'Austin', kids: ics(7, T.cs) },
+          { n: 'Rafael Ortiz', id: 'rafael', t: 'Manager, Customer Success, Mid-Market 2', loc: 'Austin', kids: ics(7, T.cs) },
+          team('Manager, Customer Success, Mid-Market 3', 8, T.cs), team('Manager, Customer Success, Mid-Market 4', 8, T.cs), team('Manager, Customer Success, Mid-Market 5', 8, T.cs), team('Manager, Customer Success, Mid-Market 6', 7, T.cs)
+        ] },
+        area('Director, Customer Success, Enterprise', 'Manager, Customer Success, Enterprise ', ['1','2','3','4','5'], T.cs, 8, 10),
+        area('Director, Customer Success, EMEA', 'Manager, Customer Success, EMEA ', ['1','2','3','4'], T.cs, 7, 9)
+      ] },
+      { t: 'VP Professional Services', kids: [
+        area('Director, Implementation', 'Manager, Implementation ', ['1','2','3','4','5'], T.ps, 8, 10),
+        area('Director, Solutions Architecture', 'Manager, ', ['Architecture','Enablement','Migrations'], T.ps, 6, 8)
+      ] },
+      { t: 'VP Customer Education', kids: [
+        area('Director, Education and Community', 'Manager, ', ['Academy','Community'], T.ps, 5, 7)
+      ] }
+    ] },
+    { n: 'Raymond Tsai', t: 'Chief Financial Officer', dept: 'Finance and Legal', sector: 'Finance & Legal', mix: MIX.fin, kids: [
+      { n: 'Ingrid Halvorsen', id: 'ingrid', t: 'Controller', loc: 'Toronto', kids: [
+        { n: 'Victor Nakamura', id: 'victor', t: 'Manager, Sales Commissions', loc: 'Toronto', kids: [
+          { n: 'Claire Dubois', id: 'claire', t: 'Senior Analyst, Sales Commissions', loc: 'Toronto' },
+          { n: 'Devika Menon', id: 'devika', t: 'Analyst, Sales Commissions', loc: 'Toronto' },
+          { n: 'Piotr Wisniewski', id: 'piotr', t: 'Analyst, Sales Commissions', loc: 'London' }
+        ].concat(ics(1, T.fin)) },
+        { t: 'Manager, Accounts Payable', id: 'apMgr', loc: 'Toronto', kids: ics(8, T.ap) },
+        { t: 'Manager, Payroll', loc: 'Toronto', kids: ics(5, T.payroll) },
+        team('Manager, Revenue Accounting', 8, T.fin),
+        team('Manager, General Ledger', 7, T.fin),
+        team('Manager, Tax', 4, T.fin),
+        team('Manager, Treasury', 3, T.fin)
+      ] },
+      { t: 'VP Finance, FP&A', kids: [ team('Manager, FP&A, Go-to-Market', 5, T.fin), team('Manager, FP&A, R&D', 5, T.fin), team('Manager, Corporate FP&A', 4, T.fin) ] },
+      { t: 'General Counsel', kids: [ team('Associate General Counsel, Commercial', 5, T.legal), team('Associate General Counsel, Corporate', 4, T.legal) ] },
+      { t: 'Director, Procurement', id: 'procDir', kids: [ { t: 'Manager, Procurement', id: 'procMgr', kids: ics(5, T.proc) }, team('Manager, Vendor Management', 4, T.proc) ] },
+      { t: 'VP Corporate Development', kids: [ team('Director, Investor Relations', 4, T.fin) ] },
+      { n: 'Maren Holloway', t: 'Head of Internal Audit', id: 'you', loc: 'Toronto', kids: ics(4, T.audit) }
+    ] },
+    { n: 'Anika Raman', t: 'Chief People Officer', dept: 'People', sector: 'People', mix: MIX.people, kids: [
+      area('Director, HR Business Partners', 'HRBP Lead, ', ['R&D','Go-to-Market','Customer and G&A'], T.people, 5, 7),
+      area('Director, Talent Acquisition', 'Recruiting Manager, ', ['Engineering','Go-to-Market','Corporate'], T.people, 6, 8),
+      area('Director, Learning and Development', 'Manager, ', ['Programs','Enablement'], T.people, 4, 6),
+      team('Director, Total Rewards', 6, T.people),
+      team('Director, Workplace and People Operations', 8, T.people)
+    ] },
+    { n: 'Rosalind Achebe', t: 'General Manager, Fennel Analytics', dept: 'Fennel Analytics', sector: 'Fennel Analytics', mix: MIX.fennel, fennel: true, kids: [
+      { t: 'VP Engineering, Fennel', kids: [
+        area('Director of Engineering, Fennel Platform', 'Engineering Manager, Fennel ', ['Ingest','Query','Visuals'], T.eng, 9, 11),
+        area('Director of Engineering, Fennel Apps', 'Engineering Manager, Fennel ', ['Apps 1','Apps 2','Apps 3'], T.eng, 9, 11),
+        area('Director, Fennel Data', 'Manager, Fennel ', ['Data Engineering','Data Science'], T.data, 8, 10)
+      ] },
+      { t: 'VP Sales, Fennel', kids: [
+        area('Director of Sales, Fennel', 'Sales Manager, Fennel ', ['East','West','Inside'], T.sales, 10, 12),
+        area('Director, Fennel Customer Success', 'Manager, Fennel Success ', ['1','2'], T.cs, 8, 10)
+      ] },
+      { t: 'VP Customer and Operations, Fennel', kids: [
+        area('Director, Fennel Customer', 'Manager, Fennel ', ['Support','Onboarding'], T.fops, 9, 11),
+        team('Director, Fennel Operations', 8, T.fops)
+      ] }
+    ] }
+  ]
+};
+
+/* ---------- build the people list ---------- */
+const people = [];
+const P = {};                 // planted people by short id
+const byId = new Map();
+let seq = 1000;
+const usedNames = new Set();
+function nameFor(surnameHint) {
+  for (let tries = 0; tries < 40; tries++) {
+    const f = pick(FIRST), l = surnameHint || pick(LAST), n = f + ' ' + l;
+    if (!usedNames.has(n)) { usedNames.add(n); return [f, l]; }
+  }
+  const f = pick(FIRST), l = pick(LAST);
+  return [f, l];
+}
+function weightedLoc(mix) { const tot = mix.reduce((s, m) => s + m[1], 0); let x = R() * tot; for (const [loc, w] of mix) { x -= w; if (x <= 0) return loc; } return mix[0][0]; }
+function build(spec, parent, depth, inherit) {
+  const ctx = Object.assign({}, inherit);
+  if (spec.dept) ctx.dept = spec.dept;
+  if (spec.sector) ctx.sector = spec.sector;
+  if (spec.mix) ctx.mix = spec.mix;
+  if (spec.region) ctx.region = spec.region;
+  if (spec.fennel) ctx.fennel = true;
+  if (depth === 1) ctx.exec = spec;
+  const loc = spec.loc || (ctx.mix ? weightedLoc(ctx.mix) : 'Toronto');
+  let first, last;
+  if (spec.n) { const parts = spec.n.split(' '); first = parts[0]; last = parts.slice(1).join(' '); usedNames.add(spec.n); }
+  else { const nm = nameFor(); first = nm[0]; last = nm[1]; }
+  const ent = ctx.fennel ? 'Fennel Analytics Inc.' : ENTITY[loc];
+  const p = {
+    id: (ctx.fennel ? 'FA-' : 'GW-') + (seq++),
+    key: spec.id || null,
+    first, last, name: first + ' ' + last,
+    title: spec.t, depth, parent: parent || null, kids: [],
+    dept: ctx.dept || 'Executive', sector: ctx.sector || 'Executive', region: ctx.region || null,
+    loc, ent, fennel: !!ctx.fennel,
+    planted: !!spec.id
+  };
+  if (spec.id) P[spec.id] = p;
+  people.push(p); byId.set(p.id, p);
+  if (parent) parent.kids.push(p);
+  (spec.kids || []).forEach(k => build(k, p, depth + 1, ctx));
+  return p;
+}
+const ROOT = build(SPEC, null, 0, {});
+ROOT.sector = 'Executive';
+
+/* trim or top up to exactly 2,380 so the copy on the page is honest */
+(function settleHeadcount() {
+  const TARGET = 2380;
+  let guard = 0;
+  const leafManagers = () => people.filter(p => p.kids.length && !p.kids.some(k => k.kids.length) && !p.planted && p.depth >= 3);
+  while (people.length > TARGET && guard++ < 50000) {
+    const mgr = pick(leafManagers());
+    const cands = mgr.kids.filter(k => !k.planted && !k.kids.length);
+    if (cands.length <= 3) continue;
+    const victim = pick(cands);
+    mgr.kids.splice(mgr.kids.indexOf(victim), 1);
+    people.splice(people.indexOf(victim), 1); byId.delete(victim.id);
+  }
+  guard = 0;
+  while (people.length < TARGET && guard++ < 50000) {
+    const mgr = pick(leafManagers());
+    if (!mgr || mgr.kids.length >= 12) continue;
+    const pool = T[{ Engineering: 'eng', Sales: 'sales', Customer: 'support', 'Finance and Legal': 'fin', People: 'people', 'Product and Design': 'pm', Data: 'data', Marketing: 'mkt', 'Fennel Analytics': 'eng' }[mgr.dept] || 'eng'];
+    const nm = nameFor();
+    const p = { id: (mgr.fennel ? 'FA-' : 'GW-') + (seq++), key: null, first: nm[0], last: nm[1], name: nm[0] + ' ' + nm[1], title: pick(pool), depth: mgr.depth + 1, parent: mgr, kids: [], dept: mgr.dept, sector: mgr.sector, region: mgr.region, loc: mgr.loc, ent: mgr.ent, fennel: mgr.fennel, planted: false };
+    mgr.kids.push(p); people.push(p); byId.set(p.id, p);
+  }
+})();
+/* ids: shuffle the numbering so it does not spell out the org chart */
+(function renumber() {
+  const nums = shuffle(Array.from({ length: people.length }, (_, i) => 1001 + i * 3 + ri(0, 2)));
+  people.forEach((p, i) => { p.id = (p.fennel ? 'FA-' : 'GW-') + String(nums[i]).padStart(5, '0'); });
+  byId.clear(); people.forEach(p => byId.set(p.id, p));
+  /* the planted ids the copy quotes; nobody else may hold one of them */
+  const QUOTED = { priya: 'GW-01188', arjun: 'GW-04471', lena: 'GW-02940', claire: 'GW-03377', tomas: 'GW-05102', owen: 'GW-05520', dana: 'GW-02216', noor: 'GW-06240', elias: 'GW-04018', devika: 'GW-05871', samuel: 'GW-01305', rafael: 'GW-04422', noorMgr: 'GW-03390' };
+  const quotedIds = new Set(Object.values(QUOTED));
+  let spare = 9001;
+  people.forEach(p => { if (!(p.key && QUOTED[p.key]) && quotedIds.has(p.id)) p.id = 'GW-' + String(spare++).padStart(5, '0'); });
+  Object.keys(QUOTED).forEach(k => { P[k].id = QUOTED[k]; });
+  byId.clear(); people.forEach(p => byId.set(p.id, p));
+})();
+
+/* ---------- hire dates, addresses, banks, contacts ---------- */
+const STREETS = {
+  'Toronto': ['Yonge St','Queen St W','King St W','Bloor St W','Dundas St E','Spadina Ave','Bathurst St','Danforth Ave','Gerrard St E','Eglinton Ave W','St Clair Ave W','Roncesvalles Ave','Ossington Ave','Adelaide St W','Richmond St W','College St','Harbord St','Davenport Rd','Lake Shore Blvd W','Logan Ave','Pape Ave','Dufferin St','Carlton St','Wellesley St E','Jarvis St'],
+  'Austin': ['Congress Ave','S Lamar Blvd','Guadalupe St','E 6th St','Barton Springs Rd','Burnet Rd','Manor Rd','E Cesar Chavez St','S 1st St','W 5th St','Red River St','Duval St','Airport Blvd','Oltorf St','Riverside Dr','Menchaca Rd','Anderson Ln','E 7th St','W 38th St','Bee Cave Rd'],
+  'London': ['Bermondsey St','Columbia Rd','Old St','Kingsland Rd','Clapham High St','Brixton Rd','Caledonian Rd','Holloway Rd','Camden High St','Wandsworth Rd','Upper St','Essex Rd','Hackney Rd','Mare St','Roman Rd','Lordship Ln','Chiswick High Rd','Balham High Rd','Tooting High St','Walworth Rd'],
+  'Denver': ['Larimer St','Blake St','Tennyson St','S Broadway','Colfax Ave','Federal Blvd','Pearl St','Downing St','Speer Blvd','Tejon St','Wazee St','Champa St','Race St','Gaylord St'],
+  'Remote (CA)': ['Main St','Commercial Dr','4th Ave W','Bank St','Rue Saint-Denis','Spring Garden Rd','17 Ave SW','Osborne St','Whyte Ave','Water St'],
+  'Remote (US)': ['Division St','Hawthorne Blvd','N Clark St','Hillsborough St','Camelback Rd','Pike St','Magazine St','Broadway','Walnut St','Grand Ave'],
+  'Remote (UK)': ['Deansgate','Park St','Byres Rd','Rose St','Cowley Rd','Gloucester Rd','Bold St','Mill Rd']
+};
+const REMOTE_CITY = { 'Remote (CA)': ['Vancouver','Calgary','Ottawa','Montreal','Halifax','Winnipeg','Edmonton'], 'Remote (US)': ['Portland','Chicago','Raleigh','Phoenix','Seattle','New Orleans','Minneapolis','Philadelphia'], 'Remote (UK)': ['Manchester','Bristol','Glasgow','Edinburgh','Oxford','Liverpool','Cambridge'] };
+const usedAddr = new Set();
+function mkAddr(loc, force) {
+  const city = REMOTE_CITY[loc] ? pick(REMOTE_CITY[loc]) : loc;
+  for (let tries = 0; tries < 50; tries++) {
+    const st = pick(STREETS[loc] || STREETS['Toronto']);
+    const num = ri(3, 1450);
+    const unit = R() < 0.42 ? String(ri(101, 2890)) : '';
+    const a = { num, st, unit, city };
+    const key = canon(a);
+    if (!usedAddr.has(key) || force) { usedAddr.add(key); return a; }
+  }
+  return { num: ri(3, 1450), st: pick(STREETS[loc] || STREETS['Toronto']), unit: '', city };
+}
+function canon(a) { return (a.num + ' ' + a.st + (a.unit ? ' | UNIT ' + a.unit : '') + ' | ' + a.city).toUpperCase(); }
+function addrText(a) { return (a.unit ? (R() < 0.5 ? a.unit + '-' + a.num + ' ' + a.st : a.num + ' ' + a.st + ' #' + a.unit) : a.num + ' ' + a.st) + ', ' + a.city; }
+function prettyAddr(a) { return a.num + ' ' + a.st + (a.unit ? ', unit ' + a.unit : '') + ', ' + a.city; }
+const HEX = '0123456789abcdef';
+function hash() { let s = ''; for (let i = 0; i < 8; i++) s += HEX[Math.floor(R() * 16)]; return s.slice(0, 4) + '…' + s.slice(4); }
+function dateBetween(y0, y1) { const y = ri(y0, y1), m = ri(1, 12), d = ri(1, 28); return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); }
+people.forEach(p => {
+  p.hired = p.depth <= 1 ? dateBetween(2015, 2019) : p.depth <= 3 ? dateBetween(2016, 2023) : dateBetween(2018, 2026);
+  p.addr = mkAddr(p.loc);
+  p.addrRaw = addrText(p.addr);
+  p.bank = hash();
+  p.emerg = null;      // another employee, or null (an outside contact)
+  p.dep = null;        // benefits dependant who is an employee
+  p.declared = null;   // attestation: a relative or partner at Greywell
+  p.equity = p.depth <= 4 || R() < 0.55;
+  p.expenses = ri(0, 14);
+});
+/* fixed facts the page copy quotes */
+P.priya.hired = '2019-02-11'; P.arjun.hired = '2021-06-07'; P.lena.hired = '2020-09-14';
+P.claire.hired = '2021-04-19'; P.tomas.hired = '2022-08-22'; P.owen.hired = '2025-10-27'; P.dana.hired = '2019-11-04';
+P.noor.hired = '2023-03-13'; P.elias.hired = '2021-01-18'; P.devika.hired = '2024-02-05';
+
+/* households: shared roofs, planted and generated */
+const buildings = [
+  { loc: 'Toronto', num: 18, st: 'Yorkville Ave', units: ['2204','1507','903'] },
+  { loc: 'Toronto', num: 77, st: 'Harbour Square', units: ['1208','2411','614'] },
+  { loc: 'Toronto', num: 300, st: 'Front St W', units: ['2108','1512','806'] },
+  { loc: 'Toronto', num: 8, st: 'Mercer St', units: ['1204','709'] },
+  { loc: 'Austin', num: 9, st: 'Rainey St', units: ['1711','2305','908'] },
+  { loc: 'Austin', num: 301, st: 'West Ave', units: ['1402','2210','1115'] },
+  { loc: 'London', num: 24, st: 'Wharf Rd', units: ['31','17','8'] },
+  { loc: 'Denver', num: 1745, st: 'Wazee St', units: ['402','615'] }
+];
+function setAddr(p, a, raw) { p.addr = a; p.addrRaw = raw || addrText(a); usedAddr.add(canon(a)); }
+const YORK = { num: 18, st: 'Yorkville Ave', unit: '2204', city: 'Toronto' };
+setAddr(P.priya, YORK, '2204-18 Yorkville Avenue'); setAddr(P.arjun, YORK, '18 Yorkville Ave #2204');
+const HARB = { num: 77, st: 'Harbour Square', unit: '1208', city: 'Toronto' };
+setAddr(P.tomas, HARB, '1208-77 Harbour Sq'); setAddr(P.claire, HARB, '77 Harbour Square, Apt 1208');
+const GLOU = { num: 30, st: 'Gloucester St', unit: '1402', city: 'Toronto' };
+setAddr(P.owen, GLOU, '1402-30 Gloucester St');
+const RAIN = { num: 9, st: 'Rainey St', unit: '1711', city: 'Austin' };
+setAddr(P.noor, RAIN, '9 Rainey St Apt 1711'); setAddr(P.elias, RAIN, '1711-9 Rainey Street');
+/* everyone else in those buildings: different units, so not a household */
+const freeIn = loc => people.filter(p => !p.planted && p.loc === loc && !p.roofTag);
+buildings.forEach(b => {
+  b.units.forEach(u => {
+    if ((b.st === 'Yorkville Ave' && u === '2204') || (b.st === 'Harbour Square' && u === '1208') || (b.st === 'Rainey St' && u === '1711')) return;
+    const p = pick(freeIn(b.loc)); if (!p) return;
+    p.roofTag = 'bldg';
+    setAddr(p, { num: b.num, st: b.st, unit: u, city: b.loc });
+  });
+});
+
+/* shared roofs: the planted ones are fixed; the rest are generated so
+   none of them sits inside an approval path (those would be knots, and
+   there are exactly the ones the story plants) */
+function branchOf(p) { let x = p; while (x.depth > 1) x = x.parent; return x; }
+function chainUp(p, n) { const out = []; let x = p.parent; while (x && out.length < n) { out.push(x); x = x.parent; } return out; }
+function lineWithin(a, b, n) { return chainUp(a, n).includes(b) || chainUp(b, n).includes(a); }
+const roofs = [];   // {a, b, tier:'declared'|'inferred'|'watch', sig:{addr,bank,emerg,dep,surname,declared}}
+function tie(a, b, tier, opts) {
+  opts = opts || {};
+  const sharedAddr = a.addr;
+  setAddr(b, sharedAddr, opts.raw || addrText(sharedAddr));
+  if (opts.surname) { b.last = a.last; b.name = b.first + ' ' + b.last; }
+  if (opts.bank) b.bank = a.bank;
+  if (opts.emerg) { a.emerg = b; b.emerg = a; }
+  if (opts.dep) a.dep = b;
+  if (tier === 'declared') { a.declared = b; b.declared = a; }
+  a.roofTag = b.roofTag = tier;
+  roofs.push({ a, b, tier });
+}
+/* planted */
+P.priya.emerg = P.arjun; P.arjun.emerg = P.priya; P.arjun.dep = P.priya; P.priya.declared = P.arjun; P.arjun.declared = P.priya;
+P.priya.bank = '1f0a…b7c2'; P.arjun.bank = '9d44…3e1a';
+P.priya.roofTag = P.arjun.roofTag = 'declared'; roofs.push({ a: P.priya, b: P.arjun, tier: 'declared' });
+P.claire.bank = '7c1e…9a4f'; P.tomas.bank = '7c1e…9a4f'; P.tomas.bankPrev = 'e02b…31d7';
+P.claire.roofTag = P.tomas.roofTag = 'inferred'; roofs.push({ a: P.claire, b: P.tomas, tier: 'inferred' });
+P.noor.roofTag = P.elias.roofTag = 'watch'; roofs.push({ a: P.noor, b: P.elias, tier: 'watch' });
+P.owen.bank = '4b7d…e01c';
+/* generated: same city, no line within two levels, no commissions path */
+const commissionsRegion = { claire: 'Enterprise East', devika: 'Enterprise West', piotr: 'EMEA' };
+function commissionsAnalystFor(p) {
+  if (!p.region || !(p.dept === 'Sales')) return null;
+  const key = Object.keys(commissionsRegion).find(k => commissionsRegion[k] === p.region);
+  return key ? P[key] : null;
+}
+function approvalPath(a, b) {
+  if (lineWithin(a, b, 2)) return 'line';
+  if (commissionsAnalystFor(b) === a || commissionsAnalystFor(a) === b) return 'commissions';
+  return null;
+}
+function pairable(a, b) {
+  return a !== b && !a.planted && !b.planted && !a.roofTag && !b.roofTag && a.loc === b.loc && !a.fennel === !b.fennel &&
+    branchOf(a) !== branchOf(b) && !approvalPath(a, b) && a.last !== b.last;
+}
+function makeRoofs(n, tier) {
+  let made = 0, guard = 0;
+  while (made < n && guard++ < 20000) {
+    const a = pick(people), b = pick(people);
+    if (!pairable(a, b)) continue;
+    if (tier === 'declared') tie(a, b, tier, { surname: R() < 0.36, bank: R() < 0.66, emerg: R() < 0.55, dep: R() < 0.45 });
+    else if (tier === 'inferred') { const w = R(); tie(a, b, tier, { surname: R() < 0.08, bank: w < 0.55, emerg: w >= 0.55 && w < 0.85, dep: w >= 0.85 }); }
+    else tie(a, b, tier, {});
+    made++;
+  }
+}
+makeRoofs(37, 'declared');
+makeRoofs(22, 'inferred');
+makeRoofs(3, 'watch');
+
+/* delegations: a handful of cross-branch acting approvers, the kind a
+   leave of absence creates; none of them lands on a roof */
+const delegations = [];
+(function makeDelegations() {
+  let guard = 0;
+  while (delegations.length < 6 && guard++ < 5000) {
+    const mgr = pick(people.filter(p => p.kids.length && p.depth === 4 && !p.planted));
+    const cover = pick(people.filter(p => p.depth === 4 && p.kids.length && branchOf(p) !== branchOf(mgr) && !p.planted));
+    if (!mgr || !cover) continue;
+    if (mgr.kids.some(k => k.roofTag) || cover.roofTag) continue;
+    delegations.push({ from: cover, over: mgr, reason: pick(['parental leave cover','medical leave cover','sabbatical cover']) });
+    mgr.coveredBy = cover;
+  }
+})();
+
+/* vendors: a master of 1,204, of which eleven touch a person */
+const vendors = [];
+const northlake = { id: 'V-18822', name: 'Northlake Technical Writing Ltd.', key: 'northlake', owner: P.owen, approver: P.dana, bank: P.owen.bank, addr: P.owen.addr, created: '2025-11-09', paid: 38400, invoices: 9, declared: false, knot: true, category: 'Contractors / Documentation' };
+vendors.push(northlake);
+(function makeVendors() {
+  const kinds = ['Consulting Inc.','Design Studio','Advisory Ltd.','Photography','Creative Co.','Analytics LLC','Labs Inc.','Services Ltd.','Studio'];
+  let guard = 0;
+  while (vendors.length < 10 && guard++ < 4000) {
+    const o = pick(people);
+    if (o.planted || o.roofTag || o.dept === 'Finance and Legal' || o.depth < 3 || o.fennel) continue;
+    if (vendors.some(v => v.owner === o)) continue;
+    vendors.push({ id: 'V-' + ri(11000, 19999), name: o.last + ' ' + pick(kinds), owner: o, approver: P.procMgr, bank: o.bank, addr: o.addr, created: dateBetween(2023, 2025), paid: ri(18, 96) * 100, invoices: ri(1, 6), declared: true, knot: false, category: pick(['Contractors / Design','Contractors / Advisory','Events','Content']) });
+  }
+  vendors.push({ id: 'V-14077', name: 'Patel & Associates Bookkeeping', owner: null, approver: P.apMgr, bank: hash(), addr: { num: 411, st: 'Richmond St W', unit: '', city: 'Toronto' }, created: '2022-03-17', paid: 12600, invoices: 14, declared: false, knot: false, surnameOnly: 'Patel', category: 'Professional services' });
+})();
+
+/* ---------- the agent's walk: the joins and rules ---------- */
+const A = {};   // analysis results
+function walk() {
+  /* roofs by tier, knots among them */
+  const knotsRoof = roofs.filter(r => approvalPath(r.a, r.b) || pendingPath(r.a, r.b));
+  A.roofs = roofs.length;
+  A.declared = roofs.filter(r => r.tier === 'declared').length;
+  A.inferred = roofs.filter(r => r.tier === 'inferred').length;
+  A.watch = roofs.filter(r => r.tier === 'watch' && !approvalPath(r.a, r.b) && !pendingPath(r.a, r.b)).length;
+  A.clear = roofs.filter(r => r.tier !== 'watch' && !approvalPath(r.a, r.b) && !pendingPath(r.a, r.b)).length;
+  A.knotRoofs = knotsRoof;
+  /* same surname inside a line, nothing else shared */
+  const surnamePairs = [];
+  people.forEach(p => {
+    chainUp(p, 2).forEach(m => { if (m.last === p.last && !(p.roofTag && m.roofTag && roofs.some(r => (r.a === p && r.b === m) || (r.a === m && r.b === p)))) surnamePairs.push([p, m]); });
+  });
+  A.surnamePairs = surnamePairs;
+  const tally = {}; people.forEach(p => { tally[p.last] = (tally[p.last] || 0) + 1; });
+  A.surnameTop = Object.entries(tally).sort((x, y) => y[1] - x[1]).slice(0, 3);
+  /* same building, different unit */
+  const byBldg = {};
+  people.forEach(p => { const k = (p.addr.num + ' ' + p.addr.st + ' | ' + p.addr.city).toUpperCase(); (byBldg[k] = byBldg[k] || []).push(p); });
+  const bldgPairs = [];
+  Object.values(byBldg).forEach(list => { for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) if (list[i].addr.unit !== list[j].addr.unit) bldgPairs.push([list[i], list[j]]); });
+  A.bldgPairs = bldgPairs;
+  /* vendors */
+  A.vendorsDeclared = vendors.filter(v => v.declared && v.owner).length;
+  A.vendorKnots = vendors.filter(v => v.knot);
+  /* pairs checked: every line pair within two levels, every commissions
+     pair, every delegation pair, every roof, every building pair */
+  let linePairs = 0; people.forEach(p => { linePairs += chainUp(p, 2).length; });
+  let commPairs = 0; people.forEach(p => { if (commissionsAnalystFor(p)) commPairs++; });
+  let delPairs = 0; delegations.forEach(d => { delPairs += d.over.kids.length; });
+  A.pairs = linePairs + commPairs + delPairs + roofs.length + bldgPairs.length;
+  A.fennel = people.filter(p => p.fennel).length;
+}
+function pendingPath(a, b) { return (a.pending && (a.pending === b || a.pending.parent === b)) || (b.pending && (b.pending === a || b.pending.parent === a)); }
+walk();
+
+/* ====================================================================
+   LAYOUT · a radial tree. Ring = distance from the CEO. Each subtree
+   gets a slice of the circle in proportion to the people in it, with
+   gaps between the executives' slices so the departments read as
+   sectors. Leaves jitter a little off their ring so the rim looks
+   like people rather than a ruled line.
+   ==================================================================== */
+const RING = [0, 150, 330, 560, 820, 1130, 1400];
+const MAXD = people.reduce((m, p) => Math.max(m, p.depth), 0);
+const RIM = RING[Math.min(MAXD, RING.length - 1)], VEND_R = RIM + 110;
+(function layout() {
+  (function weigh(n) { if (!n.kids.length) { n.w = 1; return 1; } let s = 0; n.kids.forEach(k => { s += weigh(k); }); n.w = s + 0.45; return n.w; })(ROOT);
+  const GAP = [0.105, 0.028, 0.006, 0.0018, 0.0008];
+  function place(n, a0, a1) {
+    if (!n.kids.length) { n.a = (a0 + a1) / 2; return; }
+    const g = GAP[Math.min(n.depth, GAP.length - 1)];
+    const span = (a1 - a0) - g * (n.kids.length - 1);
+    const W = n.kids.reduce((s, k) => s + k.w, 0);
+    let a = a0;
+    n.kids.forEach(k => { const da = span * k.w / W; place(k, a, a + da); a += da + g; });
+    n.a = (n.kids[0].a + n.kids[n.kids.length - 1].a) / 2;
+  }
+  /* the range leaves half a gap each side of twelve o'clock, so the last
+     sector and the first do not touch and the ring labels sit in the gap */
+  place(ROOT, -Math.PI / 2 + GAP[0] / 2, Math.PI * 1.5 - GAP[0] / 2);
+  people.forEach(p => {
+    const base = RING[Math.min(p.depth, RING.length - 1)];
+    const r = p.depth === 0 ? 0 : base + (p.kids.length ? 0 : (R() - 0.5) * 52);
+    p.x = Math.cos(p.a) * r; p.y = Math.sin(p.a) * r; p.rad = r;
+  });
+  vendors.forEach((v, i) => {
+    const a = v.owner ? v.owner.a + (R() - 0.5) * 0.01 : (P.apMgr.a + 0.02);
+    v.a = a; v.x = Math.cos(a) * VEND_R; v.y = Math.sin(a) * VEND_R;
+  });
+})();
+const SECTORS = ROOT.kids.map(e => ({ name: e.sector, a: e.a, node: e }));
+
+/* ====================================================================
+   RENDERER · one canvas, redrawn every frame. Cheap enough: the
+   reporting edges are one path, the people are six fills, and only
+   what is on screen gets a label.
+   ==================================================================== */
+const view = $('#view'), cv = $('#gfx'), ctx = cv.getContext('2d');
+let W = 10, H = 10, DPR = 1;
+const cam = { x: 0, y: 0, k: 0.28 };
+let fly = null;
+const LAYER = { org: true, home: true, money: false, vendor: true };
+let HL = null;            // {nodes:Set<person>, edges:Set<string>, roofs:Set<roof>, vendors:Set<vendor>, money:[[a,b]...], extra:[...]}
+let hover = null, selected = null, selKnot = null;
+let tagRects = [];
+/* canvas colours, mutable so a theme switch can swap them in place */
+const COL_DARK = { fg: [232, 225, 212], body: [206, 198, 184], muted: [150, 140, 124], accent: [210, 122, 63], good: [143, 172, 119], warn: [201, 162, 75], paper: [27, 22, 17], glow: [255, 240, 220] };
+const COL_LIGHT = { fg: [42, 36, 28], body: [78, 69, 56], muted: [133, 122, 102], accent: [184, 90, 32], good: [94, 127, 69], warn: [154, 122, 44], paper: [243, 237, 224], glow: [60, 40, 20] };
+const COL = Object.assign({}, COL_DARK);
+const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+const NODE_R = [12, 8.5, 6.2, 4.8, 3.6, 2.7, 2.3];
+const NODE_A = [1, 0.96, 0.9, 0.82, 0.7, 0.58, 0.5];
+
+function resize() {
+  const r = view.getBoundingClientRect();
+  W = Math.max(10, r.width); H = Math.max(10, r.height);
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+}
+function w2s(x, y) { return [(x - cam.x) * cam.k + W / 2, (y - cam.y) * cam.k + H / 2]; }
+function s2w(sx, sy) { return [(sx - W / 2) / cam.k + cam.x, (sy - H / 2) / cam.k + cam.y]; }
+function fitScale() { return (Math.min(W, H) / 2 - 26) / (VEND_R + 170); }
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function flyTo(x, y, k, ms) {
+  k = clamp(k, 0.12, 7);
+  if (ms === 0) { cam.x = x; cam.y = y; cam.k = k; fly = null; return; }
+  fly = { x0: cam.x, y0: cam.y, k0: cam.k, x1: x, y1: y, k1: k, t0: performance.now(), ms: ms || 900 };
+}
+function fitAll(ms) { flyTo(0, 0, fitScale(), ms == null ? 900 : ms); }
+function fitNodes(list, pad, kmax, ms) {
+  if (!list.length) return;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  list.forEach(p => { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); });
+  pad = pad == null ? 120 : pad;
+  const bw = Math.max(40, x1 - x0), bh = Math.max(40, y1 - y0);
+  const usableW = Math.max(80, W - (isPanelOpen() ? Math.min(404, W * 0.94) : 0) - 40);
+  const k = clamp(Math.min(usableW / (bw + pad * 2), (H - 40) / (bh + pad * 2)), 0.2, kmax || 2.4);
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  /* centre in the part of the view the panel does not cover */
+  const shift = isPanelOpen() ? (W - usableW) / 2 / k : 0;
+  flyTo(cx + shift, cy, k, ms == null ? 900 : ms);
+}
+/* below about 700px the panel covers nearly the whole view anyway, so
+   there is nothing left to centre in */
+function isPanelOpen() { return $('#panel').classList.contains('open') && W >= 700; }
+
+function roofColor(r) { return r.tier === 'declared' ? COL.good : COL.warn; }
+/* control point of a roof arc, in world units: pulled toward the centre so
+   far pairs read as chords, and bowed sideways so a pair that sits on one
+   radius does not hide its arc under the reporting line */
+function arcCtrl(a, b) {
+  const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
+  const px = -dy / d, py = dx / d;
+  return [mx * 0.38 + px * d * 0.16, my * 0.38 + py * d * 0.16];
+}
+function arcMid(a, b) { const [cx, cy] = arcCtrl(a, b); return [0.25 * a.x + 0.5 * cx + 0.25 * b.x, 0.25 * a.y + 0.5 * cy + 0.25 * b.y]; }
+function edgeKey(a, b) { return a.id < b.id ? a.id + '|' + b.id : b.id + '|' + a.id; }
+function knotOf(p) { return KNOTS.find(k => k.live && k.people.includes(p)); }
+
+function draw(now) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  /* ground: a soft vignette */
+  const g = ctx.createRadialGradient(W / 2, H * 0.46, 10, W / 2, H * 0.46, Math.max(W, H) * 0.72);
+  g.addColorStop(0, rgba(COL.glow, 0.035)); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  const k = cam.k, dim = HL ? 0.16 : 1;
+  const [cx0, cy0] = w2s(0, 0);
+  const margin = 40;
+  const onScreen = (sx, sy) => sx > -margin && sx < W + margin && sy > -margin && sy < H + margin;
+
+  /* ring guides */
+  ctx.lineWidth = 1;
+  for (let d = 1; d < RING.length; d++) {
+    const rr = RING[d] * k; if (rr < 8) continue;
+    ctx.beginPath(); ctx.arc(cx0, cy0, rr, 0, Math.PI * 2);
+    ctx.strokeStyle = rgba(COL.fg, 0.035 * dim); ctx.stroke();
+  }
+  if (k < 0.95) {
+    const names = ['', 'executives', 'vice presidents', 'directors', 'managers', 'everyone else'];
+    ctx.font = '600 8.5px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillStyle = rgba(COL.muted, 0.55 * dim * clamp((0.95 - k) / 0.3, 0, 1));
+    for (let d = 1; d < 6; d++) ctx.fillText(names[d].toUpperCase(), cx0, cy0 - RING[d] * k - 4);
+  }
+
+  /* reporting edges */
+  if (LAYER.org) {
+    ctx.beginPath();
+    for (const p of people) {
+      if (!p.parent) continue;
+      const [x1, y1] = w2s(p.x, p.y), [x2, y2] = w2s(p.parent.x, p.parent.y);
+      if (!onScreen(x1, y1) && !onScreen(x2, y2)) continue;
+      ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    }
+    ctx.lineWidth = 1; ctx.strokeStyle = rgba(COL.fg, (k < 0.6 ? 0.10 : 0.15) * dim); ctx.stroke();
+    /* highlighted line edges drawn bright */
+    if (HL && HL.edges.size) {
+      ctx.beginPath();
+      for (const p of people) { if (p.parent && HL.edges.has(edgeKey(p, p.parent))) { const [x1, y1] = w2s(p.x, p.y), [x2, y2] = w2s(p.parent.x, p.parent.y); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); } }
+      ctx.lineWidth = 1.6; ctx.strokeStyle = rgba(COL.fg, 0.85); ctx.stroke();
+    }
+  }
+
+  /* money: who approves pay across the tree (commissions, delegations) */
+  if (LAYER.money || (HL && HL.money && HL.money.length)) {
+    const list = [];
+    if (LAYER.money) {
+      people.forEach(p => { const an = commissionsAnalystFor(p); if (an) list.push([an, p, 'comm']); });
+      delegations.forEach(d => d.over.kids.forEach(kid => list.push([d.from, kid, 'del'])));
+      vendors.forEach(v => { if (v.owner) list.push([v.approver, v, 'vend']); });
+    }
+    if (HL && HL.money) HL.money.forEach(m => list.push([m[0], m[1], 'hl']));
+    ctx.setLineDash([4, 4]);
+    for (const [a, b, kind] of list) {
+      const [x1, y1] = w2s(a.x, a.y), [x2, y2] = w2s(b.x, b.y);
+      if (!onScreen(x1, y1) && !onScreen(x2, y2)) continue;
+      const hot = kind === 'hl';
+      ctx.beginPath(); ctx.moveTo(x1, y1);
+      const mx = (x1 + x2) / 2 + (cx0 - (x1 + x2) / 2) * 0.45, my = (y1 + y2) / 2 + (cy0 - (y1 + y2) / 2) * 0.45;
+      ctx.quadraticCurveTo(mx, my, x2, y2);
+      ctx.lineWidth = hot ? 1.8 : 0.8;
+      ctx.strokeStyle = hot ? rgba(COL.accent, 0.95) : rgba(COL.accent, (kind === 'comm' ? 0.16 : 0.3) * dim);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  /* roofs: the lines nobody drew */
+  if (LAYER.home || HL) {
+    for (const r of roofs) {
+      const isKnot = A.knotRoofs.includes(r);
+      const inHL = HL && HL.roofs.has(r);
+      if (!LAYER.home && !inHL) continue;
+      const [x1, y1] = w2s(r.a.x, r.a.y), [x2, y2] = w2s(r.b.x, r.b.y);
+      if (!onScreen(x1, y1) && !onScreen(x2, y2) && !(Math.abs(x1 - x2) > W)) continue;
+      const [wcx, wcy] = arcCtrl(r.a, r.b); const [mx, my] = w2s(wcx, wcy);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(mx, my, x2, y2);
+      if (r.tier === 'watch') ctx.setLineDash([3, 5]); else ctx.setLineDash([]);
+      const a = HL ? (inHL ? 0.95 : 0.07) : (isKnot ? 0.9 : 0.42);
+      ctx.lineWidth = (isKnot || inHL) ? 1.8 : 1.1;
+      ctx.strokeStyle = isKnot ? rgba(COL.accent, a) : rgba(roofColor(r), a);
+      ctx.stroke();
+      if (isKnot && !HL) { ctx.lineWidth = 6; ctx.strokeStyle = rgba(COL.accent, 0.10 + 0.06 * Math.sin(now / 400)); ctx.stroke(); }
+    }
+    ctx.setLineDash([]);
+  }
+  /* a pending line: a transfer that would create a reporting line */
+  for (const p of people) {
+    if (!p.pending) continue;
+    const [x1, y1] = w2s(p.x, p.y), [x2, y2] = w2s(p.pending.x, p.pending.y);
+    ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x1, y1);
+    const mx = (x1 + x2) / 2 + (cx0 - (x1 + x2) / 2) * 0.5, my = (y1 + y2) / 2 + (cy0 - (y1 + y2) / 2) * 0.5;
+    ctx.quadraticCurveTo(mx, my, x2, y2);
+    ctx.lineWidth = 1.6; ctx.strokeStyle = rgba(COL.accent, HL && !(HL.nodes.has(p)) ? 0.1 : 0.9); ctx.stroke(); ctx.setLineDash([]);
+  }
+  /* proposals the human drafted: a dashed green line to the proposed manager */
+  for (const p of people) {
+    if (!p.proposed) continue;
+    const [x1, y1] = w2s(p.x, p.y), [x2, y2] = w2s(p.proposed.x, p.proposed.y);
+    ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(COL.good, HL && !(HL.nodes.has(p)) ? 0.12 : 0.8); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  /* vendors */
+  if (LAYER.vendor || (HL && HL.vendors.size)) {
+    for (const v of vendors) {
+      if (!v.owner) continue;
+      const inHL = HL && HL.vendors.has(v);
+      if (!LAYER.vendor && !inHL) continue;
+      const [vx, vy] = w2s(v.x, v.y), [ox, oy] = w2s(v.owner.x, v.owner.y);
+      const a = HL ? (inHL ? 0.95 : 0.08) : (v.knot ? 0.9 : 0.38);
+      ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(vx, vy);
+      ctx.lineWidth = 1; ctx.strokeStyle = v.knot ? rgba(COL.accent, a) : rgba(COL.body, a); ctx.stroke(); ctx.setLineDash([]);
+      const s = clamp(4.5 * k, 3, 8);
+      ctx.fillStyle = v.knot ? rgba(COL.accent, a) : rgba(COL.body, a);
+      ctx.fillRect(vx - s / 2, vy - s / 2, s, s);
+      if (k > 0.7 || inHL || v.knot && k > 0.45) {
+        ctx.font = '500 ' + (inHL ? 11 : 10) + 'px ' + SANS; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = v.knot ? rgba(COL.accent, a) : rgba(COL.muted, a);
+        ctx.fillText(v.name, vx + s + 4, vy);
+      }
+    }
+  }
+
+  /* people, batched by depth for one fill per ring */
+  const pulse = 0.5 + 0.5 * Math.sin(now / 320);
+  for (let d = 0; d < NODE_R.length; d++) {
+    ctx.beginPath();
+    const sr = clamp(NODE_R[d] * k, 1.15, 13);
+    let any = false;
+    for (const p of people) {
+      if (p.depth !== d) continue;
+      if (HL && HL.nodes.has(p)) continue;
+      const [sx, sy] = w2s(p.x, p.y);
+      if (!onScreen(sx, sy)) continue;
+      ctx.moveTo(sx + sr, sy); ctx.arc(sx, sy, sr, 0, Math.PI * 2); any = true;
+    }
+    if (any) { ctx.fillStyle = rgba(COL.fg, NODE_A[d] * dim); ctx.fill(); }
+  }
+  /* Fennel, its own payroll: a touch dimmer, so the seam shows */
+  if (!HL) {
+    ctx.beginPath();
+    for (const p of people) { if (!p.fennel) continue; const [sx, sy] = w2s(p.x, p.y); if (!onScreen(sx, sy)) continue; const sr = clamp(NODE_R[p.depth] * k, 1.15, 13); ctx.moveTo(sx + sr, sy); ctx.arc(sx, sy, sr, 0, Math.PI * 2); }
+    ctx.fillStyle = rgba(COL.paper, 0.38); ctx.fill();
+  }
+  /* highlighted people, full strength, a little larger */
+  if (HL) {
+    for (const p of HL.nodes) {
+      const [sx, sy] = w2s(p.x, p.y); const sr = clamp(NODE_R[p.depth] * k, 2.2, 13) + 1;
+      ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fillStyle = rgba(COL.fg, 1); ctx.fill();
+    }
+  }
+  /* knot pulses */
+  for (const kn of KNOTS) {
+    if (!kn.live) continue;
+    const settled = kn.status === 'done';
+    for (const p of kn.people) {
+      if (HL && !HL.nodes.has(p)) continue;
+      const [sx, sy] = w2s(p.x, p.y); if (!onScreen(sx, sy)) continue;
+      const sr = clamp(NODE_R[p.depth] * k, 1.15, 13);
+      ctx.beginPath(); ctx.arc(sx, sy, sr + 4 + (settled ? 0 : 3 * pulse), 0, Math.PI * 2);
+      ctx.lineWidth = 1.5; ctx.strokeStyle = settled ? rgba(COL.good, 0.7) : rgba(COL.accent, 0.45 + 0.5 * pulse); ctx.stroke();
+      if (!settled) { ctx.beginPath(); ctx.arc(sx, sy, sr + 10 + 6 * pulse, 0, Math.PI * 2); ctx.lineWidth = 1; ctx.strokeStyle = rgba(COL.accent, 0.25 * (1 - pulse)); ctx.stroke(); }
+    }
+  }
+  /* hover + selection rings */
+  if (selected && selected.x != null) {
+    const [sx, sy] = w2s(selected.x, selected.y); const sr = clamp(NODE_R[selected.depth || 5] * k, 1.15, 13);
+    ctx.beginPath(); ctx.arc(sx, sy, sr + 5, 0, Math.PI * 2); ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(COL.fg, 0.9); ctx.stroke();
+  }
+  if (hover && hover !== selected) {
+    const [sx, sy] = w2s(hover.x, hover.y); const sr = clamp(NODE_R[hover.depth || 5] * k, 1.15, 13);
+    ctx.beginPath(); ctx.arc(sx, sy, sr + 4, 0, Math.PI * 2); ctx.lineWidth = 1; ctx.strokeStyle = rgba(COL.fg, 0.6); ctx.stroke();
+  }
+
+  /* labels */
+  ctx.textBaseline = 'middle';
+  if (k < 0.75) {
+    /* sector names around the rim */
+    const a = clamp((0.75 - k) / 0.25, 0, 1) * dim;
+    ctx.font = 'italic 500 14px ' + SERIF; ctx.fillStyle = rgba(COL.muted, 0.95 * a);
+    for (const s of SECTORS) {
+      const rr = (RIM + 165) * k; const sx = cx0 + Math.cos(s.a) * rr, sy = cy0 + Math.sin(s.a) * rr;
+      ctx.textAlign = Math.cos(s.a) > 0.25 ? 'left' : Math.cos(s.a) < -0.25 ? 'right' : 'center';
+      ctx.fillText(s.name, sx, sy);
+    }
+  }
+  const labelled = new Set();
+  const label = (p, size, strong, bg) => {
+    if (labelled.has(p)) return; labelled.add(p);
+    const [sx, sy] = w2s(p.x, p.y); if (!onScreen(sx, sy)) return;
+    const sr = clamp(NODE_R[p.depth] * k, 1.15, 13);
+    ctx.font = (strong ? '600 ' : '400 ') + size + 'px ' + SANS;
+    const text = p.name; const tw = ctx.measureText(text).width;
+    /* put the label on the side facing away from the centre */
+    const outward = Math.cos(p.a || 0) >= 0;
+    const tx = outward ? sx + sr + 5 : sx - sr - 5;
+    ctx.textAlign = outward ? 'left' : 'right';
+    if (bg) { ctx.fillStyle = rgba(COL.paper, 0.82); const bx = outward ? tx - 3 : tx - tw - 3; roundRect(bx, sy - size * 0.75, tw + 6, size * 1.5, 3); ctx.fill(); }
+    ctx.fillStyle = strong ? rgba(COL.fg, 1) : rgba(COL.body, 0.9 * (HL ? 0.35 : 1));
+    ctx.fillText(text, tx, sy);
+  };
+  if (HL) HL.nodes.forEach(p => label(p, 11.5, true, true));
+  if (selected && selected.depth != null) label(selected, 11.5, true, true);
+  if (hover && hover.depth != null) label(hover, 11, true, true);
+  if (k >= 0.5) {
+    /* executives and VPs always once you lean in; everyone once you are close */
+    const maxDepth = k >= 1.35 ? 9 : k >= 0.9 ? 3 : 2;
+    let budget = 320;
+    for (const p of people) {
+      if (p.depth > maxDepth) continue;
+      const [sx, sy] = w2s(p.x, p.y); if (!onScreen(sx, sy)) continue;
+      if (budget-- <= 0) break;
+      label(p, p.depth <= 1 ? 12 : p.depth <= 3 ? 11 : 10, p.depth <= 2, false);
+    }
+  }
+  /* knot tags: a pill at each knot, always readable, always clickable */
+  tagRects = [];
+  ctx.font = '600 9px ' + MONO; ctx.textAlign = 'center';
+  for (const kn of KNOTS) {
+    if (!kn.live) continue;
+    if (HL && !kn.people.some(p => HL.nodes.has(p))) continue;
+    const a = kn.anchor();
+    const [sx, sy] = w2s(a[0], a[1]);
+    if (!onScreen(sx, sy)) continue;
+    const text = kn.tag, tw = ctx.measureText(text).width + 12, th = 16;
+    const bx = sx - tw / 2, by = sy - 26;
+    ctx.fillStyle = rgba(COL.paper, 0.92); roundRect(bx, by, tw, th, 8); ctx.fill();
+    ctx.lineWidth = 1; ctx.strokeStyle = kn.status === 'done' ? rgba(COL.good, 0.9) : rgba(COL.accent, 0.95); ctx.stroke();
+    ctx.fillStyle = kn.status === 'done' ? rgba(COL.good, 1) : rgba(COL.accent, 1); ctx.textBaseline = 'middle';
+    ctx.fillText(text, sx, by + th / 2 + 0.5);
+    tagRects.push({ kn, x: bx, y: by, w: tw, h: th });
+  }
+}
+function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+const SANS = '"Instrument Sans", system-ui, sans-serif', SERIF = '"Cormorant Garamond", Georgia, serif', MONO = 'ui-monospace, "Cascadia Mono", Consolas, monospace';
+
+let sizedOnce = false;
+function frame(now) {
+  /* the pane can change size without a resize event; a size check per
+     frame is cheap, and the first real size gets the fit-all */
+  const cw = cv.clientWidth, ch = cv.clientHeight;
+  if (cw > 20 && ch > 20 && (Math.abs(cw - W) > 1 || Math.abs(ch - H) > 1)) { resize(); if (!sizedOnce) { sizedOnce = true; fitAll(0); } }
+  if (fly) {
+    const t = clamp((now - fly.t0) / fly.ms, 0, 1), e = ease(t);
+    cam.x = fly.x0 + (fly.x1 - fly.x0) * e; cam.y = fly.y0 + (fly.y1 - fly.y0) * e;
+    cam.k = Math.exp(Math.log(fly.k0) + (Math.log(fly.k1) - Math.log(fly.k0)) * e);
+    if (t >= 1) fly = null;
+  }
+  if (!document.hidden) draw(now);
+  requestAnimationFrame(frame);
+}
+
+/* ---------- pointer: pan, zoom, pinch, hover, click ---------- */
+const ptrs = new Map();
+let drag = null, pinch = null;
+function hitTest(sx, sy) {
+  for (const t of tagRects) if (sx >= t.x - 2 && sx <= t.x + t.w + 2 && sy >= t.y - 2 && sy <= t.y + t.h + 2) return { kind: 'knot', kn: t.kn };
+  const k = cam.k; let best = null, bd = 1e9;
+  if (LAYER.vendor || (HL && HL.vendors.size)) for (const v of vendors) {
+    if (!v.owner) continue;
+    const [vx, vy] = w2s(v.x, v.y); const d = Math.hypot(vx - sx, vy - sy);
+    if (d < 9 && d < bd) { bd = d; best = { kind: 'vendor', v }; }
+  }
+  for (const p of people) {
+    const [px, py] = w2s(p.x, p.y); if (Math.abs(px - sx) > 14 || Math.abs(py - sy) > 14) continue;
+    const sr = clamp(NODE_R[p.depth] * k, 1.15, 13);
+    const d = Math.hypot(px - sx, py - sy) - sr;
+    if (d < 7 && d < bd) { bd = d; best = { kind: 'person', p }; }
+  }
+  return best;
+}
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 1) drag = { sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  else if (ptrs.size === 2) { const [a, b] = Array.from(ptrs.values()); pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: cam.k }; drag = null; }
+  fly = null;
+});
+cv.addEventListener('pointermove', e => {
+  const rect = cv.getBoundingClientRect(); const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && ptrs.size === 2) {
+    const [a, b] = Array.from(ptrs.values()); const d = Math.hypot(a.x - b.x, a.y - b.y);
+    const mx = (a.x + b.x) / 2 - rect.left, my = (a.y + b.y) / 2 - rect.top;
+    zoomAt(mx, my, clamp(pinch.k * d / pinch.d, 0.12, 7) / cam.k);
+    return;
+  }
+  if (drag) {
+    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (Math.hypot(dx, dy) > 3) drag.moved = true;
+    if (drag.moved) { cam.x = drag.cx - dx / cam.k; cam.y = drag.cy - dy / cam.k; cv.classList.add('drag'); }
+    return;
+  }
+  const h = hitTest(sx, sy);
+  const tip = $('#tip');
+  if (h && h.kind === 'person') { hover = h.p; tip.innerHTML = '<b>' + esc(h.p.name) + '</b><span class="t2">' + esc(h.p.title) + ' · ' + esc(h.p.dept) + '</span>' + (knotOf(h.p) ? '<span class="t3">' + knotOf(h.p).tag + ' · ' + esc(knotOf(h.p).title) + '</span>' : ''); }
+  else if (h && h.kind === 'vendor') { hover = h.v; tip.innerHTML = '<b>' + esc(h.v.name) + '</b><span class="t2">vendor ' + h.v.id + ' · ' + (h.v.declared ? 'declared side business' : 'not in the register') + '</span>'; }
+  else if (h && h.kind === 'knot') { hover = null; tip.innerHTML = '<b>' + h.kn.tag + ' · ' + esc(h.kn.title) + '</b><span class="t2">' + esc(h.kn.short) + '</span>'; }
+  else { hover = null; }
+  if (h) { tip.style.opacity = 1; tip.style.left = Math.min(sx + 14, W - 270) + 'px'; tip.style.top = (sy + 16) + 'px'; cv.classList.add('hov'); }
+  else { tip.style.opacity = 0; cv.classList.remove('hov'); }
+});
+function endPtr(e) {
+  const rect = cv.getBoundingClientRect(); const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  ptrs.delete(e.pointerId);
+  if (drag && !drag.moved && e.type === 'pointerup') {
+    const h = hitTest(sx, sy);
+    if (h && h.kind === 'person') selectPerson(h.p);
+    else if (h && h.kind === 'vendor') selectVendor(h.v);
+    else if (h && h.kind === 'knot') openKnot(h.kn);
+    else if (HL && !selected) { clearHL(); }
+  }
+  if (ptrs.size < 2) pinch = null;
+  if (ptrs.size === 0) drag = null;
+  cv.classList.remove('drag');
+}
+cv.addEventListener('pointerup', endPtr);
+cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { if (!drag) { hover = null; $('#tip').style.opacity = 0; cv.classList.remove('hov'); } });
+function zoomAt(sx, sy, factor) {
+  const [wx, wy] = s2w(sx, sy);
+  cam.k = clamp(cam.k * factor, 0.12, 7);
+  const [nx, ny] = s2w(sx, sy);
+  cam.x += wx - nx; cam.y += wy - ny;
+}
+cv.addEventListener('wheel', e => {
+  e.preventDefault(); fly = null;
+  const rect = cv.getBoundingClientRect();
+  zoomAt(e.clientX - rect.left, e.clientY - rect.top, Math.exp(-e.deltaY * 0.0016));
+}, { passive: false });
+cv.addEventListener('dblclick', e => { const rect = cv.getBoundingClientRect(); const [wx, wy] = s2w(e.clientX - rect.left, e.clientY - rect.top); flyTo(wx, wy, cam.k * 1.9, 500); });
+window.addEventListener('resize', resize);
+$('#fitBtn').addEventListener('click', () => { clearHL(); fitAll(); });
+$$('.vtog').forEach(b => b.addEventListener('click', () => { const l = b.dataset.layer; LAYER[l] = !LAYER[l]; b.classList.toggle('on', LAYER[l]); if (l === 'money' && LAYER.money) log('you', 'you switched on the pay-approval layer: commissions, delegations and vendor approvers drawn across the tree'); }));
+
+function setHL(spec) { HL = Object.assign({ nodes: new Set(), edges: new Set(), roofs: new Set(), vendors: new Set(), money: [] }, spec); }
+function clearHL() { HL = null; $$('.hrow.on').forEach(h => h.classList.remove('on')); }
+
+/* ====================================================================
+   THE KNOTS · three tied overnight, one that arrives while you are
+   here. Each carries the records it was tied from, what it is and is
+   not saying, and the fork only a person may take.
+   ==================================================================== */
+const mid = (a, b) => arcMid(a, b);
+const rec = (src, claim, raw, fn) => ({ src, claim, raw, fn });
+const KNOTS = [
+  {
+    key: 'k1', tag: 'K1', title: 'A spouse in the line', tier: 'now', tied: '02:14', live: true, status: 'open', call: null,
+    short: 'Priya and Arjun Venkataraman · Platform Services · 158 days',
+    people: [P.priya, P.lena, P.arjun], pair: [P.priya, P.arjun], lineEdges: [[P.arjun, P.lena], [P.lena, P.priya]], money: [], vendors: [],
+    anchor() { return mid(P.priya, P.arjun); },
+    rule: 'Policy 4.2 · nobody within two levels of a relative or partner',
+    claim: 'Arjun Venkataraman reports, through Lena Forsberg, to <b>Priya Venkataraman</b>. Priya approved the merit pool that set his pay in April. They have shared a home since 2019, and said so in January.',
+    evidence: [
+      rec('HRIS · Workday mirror', 'Arjun (GW-04471) reports to Lena Forsberg, who reports to <b>Priya</b> (GW-01188). In place since <b>14 March</b>, re-org RQ-2291.',
+        'worker_id     <b>GW-04471</b>  Venkataraman, Arjun   Staff Engineer, Data Platform\nmanager_id    GW-02940  Forsberg, Lena        Engineering Manager, Data Platform\nmanager_id+1  <b>GW-01188</b>  Venkataraman, Priya   Director of Engineering, Platform Services\neffective     2026-03-14   source: re-org RQ-2291, approved T. Lindqvist (VP)',
+        'Two levels is inside the rule. The re-org form asked "any conflicts to declare?" and the VP who signed it ticked no. He did not know.'),
+      rec('Payroll · ADP Canada mirror', 'Both payslips go to the same home: <b>18 Yorkville Ave, unit 2204, Toronto</b>. Typed differently in two records; the same door.',
+        'GW-01188  addr_line_1  "2204-18 Yorkville Avenue"   Toronto  M4W 0A4   since 2019-08\nGW-04471  addr_line_1  "18 Yorkville Ave #2204"       Toronto  M4W 0A4   since 2022-02\nnormalized → 18 YORKVILLE AVE | UNIT 2204 | TORONTO | M4W0A4   <b>match: exact</b>',
+        'Normalizing an address is the cheap part. The model only reads one when the rule cannot decide on its own.'),
+      rec('Benefits · Sun Life mirror', 'Arjun\'s enrolment names Priya as <b>spouse</b>, for coordination of benefits. Since 2021.',
+        'member GW-04471  plan EXT-HEALTH   cob_spouse "Venkataraman, Priya"   cob_employer "Greywell Software"   since 2021-09-01', ''),
+      rec('HRIS · emergency contacts', 'Each lists the other.',
+        'GW-01188  emerg_1 "Arjun Venkataraman"  rel spouse\nGW-04471  emerg_1 "Priya Venkataraman"  rel spouse', ''),
+      rec('Attestation · January 2026', 'Both <b>declared</b> the relationship in January, as policy asks. Declared, then re-organized into one line two months later.',
+        'form COI-2026  GW-01188  q4 "relative or partner employed at Greywell?"  YES  "Arjun Venkataraman, spouse, Engineering"   signed 2026-01-21\nform COI-2026  GW-04471  q4 "relative or partner employed at Greywell?"  YES  "Priya Venkataraman, spouse, Engineering"   signed 2026-01-19',
+        'The attestation is a snapshot. The org chart is not.'),
+      rec('Comp cycle · Workday mirror', 'Priya approved the FY26 Platform merit pool on 9 April. It includes Arjun\'s increase. <b>Amounts not read.</b>',
+        'cycle FY26-MERIT   pool PLATFORM-SVCS   approver <b>GW-01188</b>   approved 2026-04-09   members 31 (includes GW-04471)   amounts: not in scope', '')
+    ],
+    how: 'Everyone did their part. They declared in January. The March re-org moved Lena\'s team under Priya, and the re-org form asked a VP about conflicts he did not know about. Nobody re-ran the household check, because until now that check was three weeks of spreadsheets, once a year.',
+    notSaying: 'Anything about the people. Not that anyone did anything wrong, and not what anyone is paid. Only that a rule and a record disagree, and have for 158 days.',
+    fork: [
+      { label: 'Draft the re-route', sub: 'Lena\'s team moves under Samuel Adeyemi, Platform Infrastructure, who has room for a fourth team. Arjun\'s comp approvals leave Priya\'s queue today. You send the memo.', pri: true,
+        done: 'Memo to the HRBP drafted and addressed from you, not sent by the agent. A comp-approval exclusion drafted for the Workday admin. The line does not move until people move it; the proposed line is drawn in green.',
+        log: 'K1 · your call: draft the re-route · memo and exclusion drafted, nothing sent', effect() { P.lena.proposed = P.samuel; } },
+      { label: 'Hold for the conversation first', sub: 'You talk to Priya yourself before any paper moves. Re-raise Tuesday.',
+        done: 'Held until Tuesday 08:00. Nothing drafted yet; the exclusion stays a recommendation in the file. The pool is already approved, so nothing else moves before then.',
+        log: 'K1 · your call: hold for the conversation · re-raise Tuesday 08:00' },
+      { label: 'Not a conflict', sub: 'Accept it, with a reason the file will carry under your name.', dismiss: true,
+        done: 'Recorded under your name with the reason. The line stays on the graph, marked accepted. It will raise again if the evidence changes: a new comp event, a new line.',
+        log: 'K1 · your call: not a conflict · reason on file' }
+    ],
+    reasons: ['Known to the CPO, exception already on file', 'The records are wrong', 'Other, I will write it up']
+  },
+  {
+    key: 'k2', tag: 'K2', title: 'One account, two payslips', tier: 'now', tied: '02:14', live: true, status: 'open', call: null,
+    short: 'Claire Dubois approves commissions for Enterprise East · Tomás Ferreira is in it',
+    people: [P.claire, P.tomas], pair: [P.claire, P.tomas], lineEdges: [], money: [[P.claire, P.tomas]], vendors: [],
+    anchor() { return mid(P.claire, P.tomas); },
+    rule: 'Policy 4.3 · nobody approves pay for someone they live with or share finances with',
+    claim: '<b>Claire Dubois</b> approves the monthly commission statements for Enterprise East. Tomás Ferreira is a sales engineer in Enterprise East. Since June both payslips land in the <b>same bank account</b>, and both addresses resolve to the same door.',
+    evidence: [
+      rec('Payroll · ADP Canada mirror', 'Two employee records, one payroll account. The hash is the same; the number is never read. Tomás\'s account changed on <b>15 June</b>.',
+        'GW-03377  Dubois, Claire     bank_hash <b>7c1e…9a4f</b>   since 2021-04\nGW-05102  Ferreira, Tomás    bank_hash <b>7c1e…9a4f</b>   since 2026-06-15   (was e02b…31d7)',
+        'A joint account is a strong signal on its own. A parent and an adult child can share one; a couple usually do.'),
+      rec('Payroll · ADP Canada mirror', 'Claire\'s address changed on <b>2 June</b> to 77 Harbour Square, apt 1208. Tomás has lived at 1208-77 Harbour Sq since 2023.',
+        'GW-03377  addr_line_1  "77 Harbour Square, Apt 1208"  Toronto  M5J 2S2   since 2026-06-02   (was 41 Logan Ave)\nGW-05102  addr_line_1  "1208-77 Harbour Sq"           Toronto  M5J 2S2   since 2023-05\nnormalized → 77 HARBOUR SQUARE | UNIT 1208 | TORONTO | M5J2S2   <b>match: exact</b>', ''),
+      rec('Commissions · Workday mirror', 'Claire is the analyst of record for <b>Enterprise East</b>. She approved Tomás\'s July statement on 28 July. Amounts not read.',
+        'plan SE-COMM-2026   region ENT-EAST   analyst <b>GW-03377</b>\nstatement 2026-07   payee <b>GW-05102</b>   approved 2026-07-28 by GW-03377   amount: not in scope', ''),
+      rec('Attestation · January 2026', 'Both attested <b>no conflicts</b> on 21 January. Probably true then. The account and the address both changed in June.',
+        'form COI-2026  GW-03377  q4 "relative or partner employed at Greywell?"  NO   signed 2026-01-21\nform COI-2026  GW-05102  q4 "relative or partner employed at Greywell?"  NO   signed 2026-01-21', ''),
+      rec('HRIS and benefits · everything else', 'Nothing. Different surnames, no dependant record, emergency contacts outside the company. Two signals, both strong.',
+        'GW-03377  emerg_1 "M. Dubois" (not an employee)     dependants: none on file\nGW-05102  emerg_1 "R. Ferreira" (not an employee)   dependants: none on file', '')
+    ],
+    how: 'Nothing in the January attestation was false. Whatever shares a roof and an account formed after it. An annual attestation is a snapshot; a change feed is not. The agent re-walked Claire\'s neighbourhood the night her address changed and again the night Tomás\'s account changed. The second walk tied this.',
+    notSaying: 'Whether they are a couple. It has a roof and an account, not a relationship. That is enough for the rule: the person approving the statement shares a bank account with the person being paid.',
+    fork: [
+      { label: 'Re-route now, ask after', sub: 'Enterprise East statements move to Devika Menon from the August run. The agent drafts that, and a note to the Controller and the HRBP for the conversation.', pri: true,
+        done: 'Reassignment drafted for Victor Nakamura to make, not made. Note to the Controller and the HRBP drafted. The July statement stays as it is: on the record as approved by Claire.',
+        log: 'K2 · your call: re-route the statements · reassignment and note drafted', effect() { P.tomas.proposed = P.devika; } },
+      { label: 'Ask first', sub: 'The HRBP talks to Claire before anything changes. Re-raise before the August run on the 28th.',
+        done: 'Held. Re-raise 26 August, two days before the run, with the draft reassignment ready if you want it.',
+        log: 'K2 · your call: ask first · re-raise 26 August' },
+      { label: 'Not a conflict', sub: 'Accept it, with a reason the file will carry under your name.', dismiss: true,
+        done: 'Recorded under your name with the reason. Two strong signals and money already moved, so it will raise again at the next statement unless the approval path changes.',
+        log: 'K2 · your call: not a conflict · reason on file' }
+    ],
+    reasons: ['Disclosed to the Controller, exception on file', 'The records are wrong', 'Other, I will write it up']
+  },
+  {
+    key: 'k3', tag: 'K3', title: 'The vendor on the payroll', tier: 'now', tied: '02:14', live: true, status: 'open', call: null,
+    short: 'Northlake Technical Writing · paid to Owen Castellanos\'s account · approved by his manager',
+    people: [P.owen, P.dana], pair: [P.owen, northlake], lineEdges: [[P.owen, P.dana]], money: [[P.dana, northlake]], vendors: [northlake],
+    anchor() { return [(P.owen.x + northlake.x) / 2, (P.owen.y + northlake.y) / 2]; },
+    rule: 'Policy 4.4 · nobody approves payments to a company owned by a direct report · outside work is declared',
+    claim: '<b>Northlake Technical Writing Ltd.</b> has invoiced Greywell $38,400 for documentation work. Its bank account is Owen Castellanos\'s payroll account. Its address is his home. Every invoice was approved by <b>Dana Whitfield</b>, his manager.',
+    evidence: [
+      rec('Vendor master · NetSuite mirror', 'Vendor V-18822 was created on <b>9 November</b>, thirteen days after Owen\'s start date. Its remit-to account hash matches Owen\'s payroll hash.',
+        'vendor <b>V-18822</b>  "Northlake Technical Writing Ltd."   created 2025-11-09   category Contractors / Documentation   remit_hash <b>4b7d…e01c</b>\nGW-05520  Castellanos, Owen   Technical Writer II   start 2025-10-27   bank_hash <b>4b7d…e01c</b>',
+        'Procurement sees a vendor. Payroll sees an employee. Neither sees both.'),
+      rec('Vendor master · NetSuite mirror', 'Registered address <b>1402-30 Gloucester St, Toronto</b>. Owen\'s home address.',
+        'V-18822   address "1402-30 Gloucester St, Toronto ON"\nGW-05520  addr_line_1 "1402-30 Gloucester St"   Toronto\nnormalized → 30 GLOUCESTER ST | UNIT 1402 | TORONTO   <b>match: exact</b>', ''),
+      rec('AP · invoice approvals', 'Nine invoices, $38,400, monthly since December. Approver on every one: <b>Dana Whitfield</b>, Manager, Documentation. Owen\'s manager.',
+        'INV-0917  2025-12-02  $4,200  approved D. Whitfield\nINV-0988  2026-01-05  $4,200  approved D. Whitfield\nINV-1041  2026-02-03  $4,200  approved D. Whitfield\nINV-1102  2026-03-02  $4,400  approved D. Whitfield\nINV-1166  2026-04-01  $4,200  approved D. Whitfield\nINV-1230  2026-05-04  $4,400  approved D. Whitfield\nINV-1291  2026-06-01  $4,200  approved D. Whitfield\nINV-1350  2026-07-01  $4,200  approved D. Whitfield\nINV-1412  2026-08-03  $4,400  approved D. Whitfield   <b>total $38,400</b>', ''),
+      rec('Outside-business register', 'Owen is <b>not in the register</b>. Nine people declared side businesses this year; he is not one of them.',
+        'register OB-2026   lookup GW-05520 → <b>no entry</b>\nentries this year: 9   (all approved by procurement, none approved inside the owner\'s line)', ''),
+      rec('Expenses · Brex', 'Nothing unusual. Owen\'s own expenses are small and approved by Dana, as they should be.',
+        'GW-05520  reports YTD 3   total $412   approver GW-02216 (D. Whitfield)   flags: none', '')
+    ],
+    how: 'A contractor paid by Owen\'s manager, to Owen\'s account, at Owen\'s address, for the work Owen is employed to do. The vendor master and the payroll each hold half of that sentence. The agent holds both.',
+    notSaying: 'Whether Dana knows. It cannot tell. Which is exactly why the file it drafts leaves her off the distribution list.',
+    fork: [
+      { label: 'Escalate to the fraud review now', sub: 'An AP hold request for Northlake, drafted for AP to action. The nine invoices and four matches packaged for the CFO and General Counsel. Dana off the distribution.', pri: true,
+        done: 'Hold request drafted; only AP can place a hold, and it has not. Case file drafted to the CFO and General Counsel, Dana Whitfield not on it. Nothing has moved but paper, and the paper is in your name.',
+        log: 'K3 · your call: escalate · AP hold request and case file drafted, Dana off distribution' },
+      { label: 'Watch another thirty days', sub: 'It keeps reading. Another month adds one invoice and one month of exposure.',
+        done: 'Held to 18 September. It will raise again on the next invoice, or sooner if the vendor\'s details change. Every invoice so far is in the file already.',
+        log: 'K3 · your call: watch thirty days · re-raise on the next invoice' },
+      { label: 'Known to the CFO', sub: 'A disclosed side business that never made the register. Say so, with a reason the file will carry.', dismiss: true,
+        done: 'Recorded under your name. If the business is disclosed, the register needs the entry, and the approvals still have to leave Owen\'s line: 4.4 holds either way. It will raise again on the next invoice Dana approves.',
+        log: 'K3 · your call: known to the CFO · reason on file, approvals still inside the line' }
+    ],
+    reasons: ['A disclosed side business, missing from the register', 'The records are wrong', 'Other, I will write it up']
+  },
+  {
+    key: 'k4', tag: 'K4', title: 'A knot that would tie on Monday', tier: 'live', tied: '08:52', live: false, status: 'open', call: null,
+    short: 'Transfer TR-3318 · Noor Haddad under Elias Brandt · one roof since April',
+    people: [P.noor, P.elias], pair: [P.noor, P.elias], lineEdges: [], money: [], vendors: [],
+    anchor() { return mid(P.noor, P.elias); },
+    rule: 'Policy 4.2 · nobody within two levels of a relative or partner · checked before the line exists, not after',
+    claim: 'Transfer request <b>TR-3318</b> moves Noor Haddad into Customer Success, Mid-Market 1, reporting to <b>Elias Brandt</b>, effective Monday. They have shared an address since April. Until this morning there was no line between them, so there was nothing to raise.',
+    evidence: [
+      rec('HRIS · Workday change feed', 'TR-3318 submitted {T} by Internal Mobility. Hiring manager: Elias Brandt. Effective <b>Monday 24 August</b>.',
+        'event TR-3318   type transfer   worker GW-06240 Haddad, Noor\nfrom  Tier 2 Support (Americas)        mgr GW-03390\nto    Customer Success, Mid-Market 1   mgr <b>GW-04018 Brandt, Elias</b>   title Customer Success Manager I\nsubmitted 2026-08-20 {T} by Internal Mobility   effective <b>2026-08-24</b>   status queued for approval', ''),
+      rec('Payroll · ADP US mirror', 'Both addresses resolve to <b>1711-9 Rainey St, Austin</b>. Noor\'s since 24 April. Elias\'s since 2024.',
+        'GW-06240  addr_line_1 "9 Rainey St Apt 1711"    Austin TX 78701   since 2026-04-24   (was 2210 Manor Rd)\nGW-04018  addr_line_1 "1711-9 Rainey Street"    Austin TX 78701   since 2024-03\nnormalized → 9 RAINEY ST | UNIT 1711 | AUSTIN | 78701   <b>match: exact</b>', ''),
+      rec('Everything else', 'Different surnames. Different bank accounts. No dependant record, no shared emergency contact, nothing declared in January. One signal. On the watch list since April for exactly this.',
+        'watch W-0091   GW-06240 Haddad, Noor × GW-04018 Brandt, Elias\nsignals: address   bank: no   dependant: no   emergency: no   declared: no\nline: <b>none</b> (until TR-3318)   opened 2026-04-25 02:11', 'A shared address alone is not a household. It could be a roommate. So it watched, and raised nothing.'),
+      rec('Internal postings', 'The same req family has an opening in Mid-Market 2, under Rafael Ortiz. Same role, same team size.',
+        'req MM-CSM-07   Customer Success Manager I   Team 1 (E. Brandt)    status open, TR-3318 pending\nreq MM-CSM-08   Customer Success Manager I   Team 2 (R. Ortiz)     status <b>open</b>', '')
+    ],
+    how: 'The watch list exists for this. A roof alone is not a finding, so nothing was raised in April. The transfer would turn the roof into a line, so it raises now, before Monday, while the transfer is still a form.',
+    notSaying: 'Whether they are a couple. One signal is not a finding. One signal plus a line is a question the HRBP should ask before the line exists.',
+    fork: [
+      { label: 'Flag it before it lands', sub: 'A note to the HRBP and the recruiter, drafted now: the Team 2 opening under Rafael Ortiz, or a declaration and a different line. Nothing stops the transfer except a person.', pri: true,
+        done: 'Note drafted to the HRBP and Internal Mobility with the Team 2 alternative, from you. The transfer is still queued; only Workday\'s approvers can change it, and now they know what to ask.',
+        log: 'K4 · your call: flag before it lands · note drafted with the Team 2 alternative', effect() { P.noor.proposed = P.rafael; } },
+      { label: 'Let it land, ask Monday', sub: 'Re-raise Monday 08:00 with the line live. Noor\'s first expense report would route to Elias.',
+        done: 'Held. Re-raise Monday 08:00. If the line goes live, the rule is broken from day one, and the file will say you chose to ask after.',
+        log: 'K4 · your call: let it land · re-raise Monday 08:00' },
+      { label: 'Not a household', sub: 'A roof is not a relationship. Say so, with a reason the file will carry.', dismiss: true,
+        done: 'Recorded under your name. The watch stays: one more signal, an account or a dependant record, and it raises again with your reason attached.',
+        log: 'K4 · your call: not a household · reason on file, watch stays' }
+    ],
+    reasons: ['Roommates, confirmed by the HRBP', 'The address record is wrong', 'Other, I will write it up']
+  }
+];
+
+/* ====================================================================
+   STATE, CLOCK, TRAIL
+   ==================================================================== */
+const S = { started: false, t0: 0, min: 0, spend: 1.12, calls: 0, trail: 0, eventFired: false, firstCallAt: null, opened: new Set(), ended: false };
+const CAP = 6.0;
+function clockStr(min) { const m = 8 * 60 + 40 + min; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+function now() { return clockStr(S.min); }
+function log(kind, text) {
+  S.trail++;
+  const rows = $('#trailRows');
+  rows.appendChild(el('div', 'lrow ' + kind, '<span class="t">' + now() + '</span><span class="x">' + text + '</span>'));
+  rows.parentElement.scrollTop = rows.parentElement.scrollHeight;
+  $('#tick').innerHTML = '<span class="t">' + now() + '</span>' + text;
+  $('#trailCount').textContent = S.trail; $('#trailCount2').textContent = S.trail + (S.trail === 1 ? ' entry' : ' entries');
+}
+function spend(d) {
+  S.spend = Math.min(CAP, S.spend + d);
+  $('#spendChip').textContent = money(S.spend); $('#spendNum').textContent = money(S.spend);
+  $('#spendBar').style.width = (S.spend / CAP * 100).toFixed(1) + '%';
+}
+function setState(s, cls) { const c = $('#stateChip'); c.textContent = s; c.className = 'statechip ' + cls; }
+function toast(html, goText, goFn, ms) {
+  const t = $('#toast');
+  t.innerHTML = '<div class="tx">' + html + '</div>' + (goText ? '<button class="go">' + goText + '</button>' : '') + '<button class="no" aria-label="Dismiss">later</button>';
+  t.classList.add('on');
+  const hide = () => t.classList.remove('on');
+  if (goText) $('.go', t).addEventListener('click', () => { hide(); goFn && goFn(); });
+  $('.no', t).addEventListener('click', hide);
+  if (ms) setTimeout(hide, ms);
+}
+
+/* ====================================================================
+   RAIL · stats, the board, held back, find anyone
+   ==================================================================== */
+function renderStats() {
+  $('#stPeople').textContent = fmt(people.length);
+  $('#stPairs').textContent = fmt(A.pairs);
+  $('#stRoofs').textContent = fmt(A.roofs);
+  $('#stKnots').textContent = KNOTS.filter(k => k.live).length;
+  $('#stCalls').textContent = S.calls;
+  $('#knotCount').textContent = KNOTS.filter(k => k.live).length;
+}
+function renderBoard() {
+  const b = $('#board'); b.innerHTML = '';
+  KNOTS.filter(k => k.live).forEach(kn => {
+    const done = kn.status === 'done';
+    const sev = done ? '<span class="sev done">your call</span>' : kn.tier === 'live' ? '<span class="sev now">live · Monday</span>' : '<span class="sev now">now</span>';
+    const card = el('button', 'bcard' + (done ? ' settled' : '') + (selKnot === kn ? ' sel' : '') + (kn.fresh ? ' fresh' : ''),
+      '<div class="r1"><span class="kid">' + kn.tag + '</span><span class="aname">' + esc(kn.title) + '</span>' + sev + '</div>' +
+      '<div class="line">' + (done ? esc(kn.call.label) + (kn.call.reason ? ' · ' + esc(kn.call.reason) : '') + ' · ' + kn.call.at : esc(kn.short)) + '</div>');
+    card.type = 'button';
+    card.addEventListener('click', () => openKnot(kn));
+    b.appendChild(card);
+  });
+  if (!KNOTS.some(k => k.live)) b.appendChild(el('div', 'empty', 'nothing tied'));
+}
+function renderHeld() {
+  const h = $('#held'); h.innerHTML = '';
+  const rows = [
+    { n: A.surnamePairs.length, h: 'same surname in a line, nothing else', g: 'A surname is not a signal: the payroll has ' + A.surnameTop[0][1] + ' ' + A.surnameTop[0][0] + 's and ' + A.surnameTop[1][1] + ' ' + A.surnameTop[1][0] + 's. Held back.',
+      hl: () => ({ nodes: new Set(A.surnamePairs.flat()), edges: new Set(A.surnamePairs.map(([a, b]) => edgeKey(a, b))) }),
+      say: 'Each of these shares a surname with someone in their line and nothing else: not a roof, not an account, not a contact. <b>Held back.</b>' },
+    { n: A.bldgPairs.length, h: 'same building, different unit', g: 'Normalized, the addresses do not match. Not a household. Noted, not raised.',
+      hl: () => ({ nodes: new Set(A.bldgPairs.flat()) }),
+      say: 'Neighbours in the same towers near the offices. Different units, so <b>not a household</b>, and none in each other\'s line anyway.' },
+    { n: A.watch, h: 'under one roof, nothing else, no line between them', g: 'Could be a household, could be a roommate. Watching, not raising: a knot needs a line.',
+      hl: () => { const rs = roofs.filter(r => r.tier === 'watch' && !approvalPath(r.a, r.b) && !pendingPath(r.a, r.b)); return { nodes: new Set(rs.flatMap(r => [r.a, r.b])), roofs: new Set(rs) }; },
+      say: 'One shared address each, nothing else. <b>Watched, not raised.</b> The morning a line forms between one of these pairs, it raises before the line is live.' },
+    { n: A.clear, h: 'households off each other\'s lines', g: A.declared + ' declared in January, ' + A.inferred + ' found in the records. Checked against every approval path anyway. Clear.',
+      hl: () => { const rs = roofs.filter(r => r.tier !== 'watch' && !approvalPath(r.a, r.b) && !pendingPath(r.a, r.b)); return { nodes: new Set(rs.flatMap(r => [r.a, r.b])), roofs: new Set(rs) }; },
+      say: 'Every household the records hold, declared or not, checked against every approval path. <b>None of these touch a rule.</b> Green is declared; amber is found in the records.' },
+    { n: A.vendorsDeclared, h: 'vendors owned by employees, declared', g: 'In the outside-business register, approved by procurement, none inside the owner\'s line. One more shares a surname with six people and nothing else: held back.',
+      hl: () => { const vs = vendors.filter(v => v.owner && v.declared); return { nodes: new Set(vs.map(v => v.owner)), vendors: new Set(vs) }; },
+      say: 'Nine side businesses, all <b>in the register</b>, all approved outside the owner\'s line. The tenth vendor on the list matches a surname and nothing else, so it is not on the graph at all.' },
+    { n: A.fennel, h: 'Fennel Analytics, its own payroll', g: 'The export carries no emergency contacts, so only three of four signals reach here. Noted in the log, not hidden.',
+      hl: () => ({ nodes: new Set(people.filter(p => p.fennel)), edges: new Set(people.filter(p => p.fennel && p.parent).map(p => edgeKey(p, p.parent))) }),
+      say: 'Fennel came with its own HRIS and payroll fourteen months ago. <b>Three signals of four</b> reach the graph from there; the gap is in the log, and in the file the auditors will read.' }
+  ];
+  rows.forEach(r => {
+    const row = el('button', 'hrow', '<span class="n">' + fmt(r.n) + '</span><span class="h">' + r.h + '</span><span class="g">' + r.g + '</span>');
+    row.type = 'button';
+    row.addEventListener('click', () => {
+      if (row.classList.contains('on')) { clearHL(); return; }
+      $$('.hrow.on').forEach(x => x.classList.remove('on')); row.classList.add('on');
+      selected = null; selKnot = null; closePanel();
+      setHL(r.hl());
+      fitAll();
+      toast(r.say, null, null, 7000);
+    });
+    h.appendChild(row);
+  });
+}
+const searchBox = $('#search'), sres = $('#sres');
+searchBox.addEventListener('input', () => {
+  const q = searchBox.value.trim().toLowerCase(); sres.innerHTML = '';
+  if (q.length < 2) return;
+  const hits = people.filter(p => p.name.toLowerCase().includes(q) || p.title.toLowerCase().includes(q) || p.dept.toLowerCase().includes(q)).slice(0, 7);
+  hits.forEach(p => {
+    const kn = knotOf(p);
+    const r = el('button', 'srow', '<span class="nm">' + esc(p.name) + '</span><span class="tt">' + esc(p.title) + '</span>' + (kn ? '<span class="kk">' + kn.tag + '</span>' : ''));
+    r.type = 'button'; r.addEventListener('click', () => { selectPerson(p, true); });
+    sres.appendChild(r);
+  });
+  if (!hits.length) sres.appendChild(el('div', 'empty', 'nobody by that name'));
+});
+
+/* ====================================================================
+   PANEL · a person, a vendor, a knot
+   ==================================================================== */
+const panel = $('#panel'), pBody = $('#pBody');
+function openPanel(kind, name, sub) { $('#pKind').innerHTML = kind; $('#pName').innerHTML = name; $('#pSub').innerHTML = sub; panel.classList.add('open'); pBody.scrollTop = 0; }
+function closePanel() { panel.classList.remove('open'); }
+$('#pClose').addEventListener('click', () => { closePanel(); selected = null; selKnot = null; clearHL(); renderBoard(); });
+const chip = (p, cls) => '<button class="pchip ' + (cls || '') + '" data-pid="' + p.id + '">' + esc(p.name) + '</button>';
+function bindChips(root) { $$('.pchip[data-pid]', root).forEach(c => c.addEventListener('click', () => selectPerson(byId.get(c.dataset.pid), true))); }
+function neighbourhood(p) {
+  const nodes = new Set([p]); const edges = new Set(); const rs = new Set(); const vs = new Set();
+  chainUp(p, 2).forEach((m, i) => { nodes.add(m); edges.add(edgeKey(i === 0 ? p : chainUp(p, 2)[i - 1], m)); });
+  p.kids.forEach(k => { nodes.add(k); edges.add(edgeKey(p, k)); });
+  roofs.forEach(r => { if (r.a === p || r.b === p) { nodes.add(r.a); nodes.add(r.b); rs.add(r); } });
+  vendors.forEach(v => { if (v.owner === p) vs.add(v); });
+  if (p.pending) nodes.add(p.pending);
+  return { nodes, edges, roofs: rs, vendors: vs };
+}
+function selectPerson(p, flyIn) {
+  selected = p; selKnot = null;
+  setHL(neighbourhood(p));
+  renderBoard();
+  const kn = knotOf(p);
+  const up = chainUp(p, 9);
+  const direct = p.kids.length; let org = 0; (function count(n) { n.kids.forEach(k => { org++; count(k); }); })(p);
+  const roof = roofs.find(r => r.a === p || r.b === p);
+  const other = roof ? (roof.a === p ? roof.b : roof.a) : null;
+  const bldg = A.bldgPairs.filter(pr => pr[0] === p || pr[1] === p).map(pr => pr[0] === p ? pr[1] : pr[0]);
+  const vend = vendors.find(v => v.owner === p);
+  const mgr = p.parent, skip = mgr ? mgr.parent : null;
+  const comm = commissionsAnalystFor(p);
+  const isAnalyst = Object.keys(commissionsRegion).find(k => P[k] === p);
+  const sub = p.id + ' · ' + esc(p.loc) + ' · hired ' + p.hired + (p === P.you ? ' · <b>this is you</b>' : '');
+  openPanel('Person · ' + esc(p.dept) + ' · ' + esc(p.ent), esc(p.name), sub);
+  let h = '';
+  h += '<div class="kv">' +
+    '<span class="k">Title</span><span class="v"><b>' + esc(p.title) + '</b></span>' +
+    '<span class="k">Reports to</span><span class="v"><span class="chainrow">' + (up.length ? up.slice(0, 3).map(m => chip(m)).join('<span class="ar">›</span>') + (up.length > 3 ? '<span class="ar">› … › ' + esc(ROOT.name) + '</span>' : '') : 'nobody; this is the top') + '</span></span>' +
+    (direct ? '<span class="k">Manages</span><span class="v"><b>' + direct + '</b> directly, <b>' + fmt(org) + '</b> in the org</span>' : '') +
+    (p.pending ? '<span class="k">Pending</span><span class="v"><b>transfer TR-3318</b> to ' + chip(p.pending, 'kn') + ', effective Monday</span>' : '') +
+    (p.proposed ? '<span class="k">Proposed</span><span class="v">drafted by you, not yet moved: ' + chip(p.proposed) + '</span>' : '') +
+    '</div>';
+  const hris = p.fennel ? 'BambooHR · Fennel export' : 'Workday';
+  const srow = (k, v, cls, ok) => '<div class="srow2"><span class="' + (ok === false ? 'no' : 'ok') + '"></span><span class="sk">' + k + '</span><span class="sv ' + (cls || '') + '">' + v + '</span></div>';
+  h += '<div><div class="pcap">Records fused · what the agent holds on this person</div><div class="srcs">' +
+    srow('<b>HRIS</b> · ' + hris, p.id) +
+    srow('<b>Payroll</b> · ' + PAYROLL[p.ent], 'bank ' + p.bank + (p.bankPrev ? ' <span class="dim">(was ' + p.bankPrev + ')</span>' : ''), (roof && roof.a.bank === roof.b.bank) ? 'warm' : '') +
+    srow('<b>Home address</b> · payroll record', esc(prettyAddr(p.addr))) +
+    srow('<b>Benefits</b> · ' + BENEFITS[p.ent], p.dep ? 'dependant: ' + esc(p.dep.name) : 'no employee dependant', p.dep ? 'warm' : 'dim') +
+    srow('<b>Expenses</b> · Brex', p.expenses + ' reports YTD · approver ' + (mgr ? esc(mgr.first) : 'n/a')) +
+    srow('<b>Equity</b> · Carta', p.equity ? 'grant on file' : 'no grant', p.equity ? '' : 'dim') +
+    srow('<b>Emergency contact</b> · HRIS', p.fennel ? 'not in the Fennel export' : p.emerg ? esc(p.emerg.name) + ' (employee)' : 'on file, not an employee', p.fennel ? 'dim' : p.emerg ? 'warm' : '', !p.fennel) +
+    srow('<b>Attestation</b> · January 2026', p.declared ? 'declared: ' + esc(p.declared.name) : 'no conflicts declared', p.declared ? 'warm' : '') +
+    srow('<b>Vendor master</b> · NetSuite', vend ? esc(vend.name) + (vend.declared ? ' · declared' : ' · <b>not declared</b>') : 'no match', vend ? (vend.declared ? '' : 'warm') : 'dim') +
+    '</div></div>';
+  /* lines nobody drew */
+  let lines = '';
+  if (roof) {
+    const sig = [];
+    if (roof.a.bank === roof.b.bank) sig.push('the same bank account');
+    if (roof.a.emerg === roof.b && roof.b.emerg === roof.a) sig.push('each other as emergency contact');
+    if (roof.a.dep === roof.b || roof.b.dep === roof.a) sig.push('a dependant record');
+    if (roof.a.last === roof.b.last) sig.push('a surname');
+    const tier = roof.tier === 'declared' ? 'Declared in January.' : roof.tier === 'inferred' ? 'Not declared; found in the records.' : 'One signal only: the address. On the watch list.';
+    lines = '<p class="pnote">Shares a roof with ' + chip(other, kn && kn.people.includes(other) ? 'kn' : '') + ' at ' + esc(prettyAddr(p.addr)) + (sig.length ? ', plus ' + sig.join(', ') : '') + '. ' + tier + (approvalPath(p, other) || pendingPath(p, other) ? ' <b class="who">There is a line between them. That is the knot.</b>' : ' No line between them, no rule touched.') + '</p>';
+  } else if (bldg.length) {
+    lines = '<p class="pnote">Same building as ' + bldg.map(b => chip(b)).join(' ') + ', different unit. Normalized, the addresses do not match. <b>Not a household.</b></p>';
+  } else {
+    lines = '<p class="pnote">Nothing. No shared roof, account, contact or dependant with anyone on the payroll. The usual state, for ' + fmt(people.length - roofs.length * 2) + ' of ' + fmt(people.length) + ' people.</p>';
+  }
+  h += '<div><div class="pcap">Lines nobody drew</div>' + lines + '</div>';
+  /* pay paths */
+  let pay = '';
+  if (mgr) pay += '<p class="pnote">Pay and expenses approved by ' + chip(mgr) + (skip ? ', then ' + chip(skip) + ' one level up' : '') + '.</p>';
+  if (direct) { let skipN = 0; p.kids.forEach(k => { skipN += k.kids.length; }); pay += '<p class="pnote">Approves comp and expenses for <b>' + direct + '</b> ' + (direct === 1 ? 'person' : 'people') + (skipN ? ', and sits on the skip-level approval for <b>' + skipN + '</b> more' : '') + '.</p>'; }
+  if (comm) pay += '<p class="pnote">Commission statements approved by ' + chip(comm, kn && kn.people.includes(comm) ? 'kn' : '') + ', Sales Commissions, for ' + esc(p.region) + '.</p>';
+  if (isAnalyst) { const n = people.filter(x => commissionsAnalystFor(x) === p).length; pay += '<p class="pnote">Approves commission statements for <b>' + n + '</b> people in ' + esc(commissionsRegion[isAnalyst]) + '. That reach is drawn when the pay layer is on.</p>'; }
+  if (p.coveredBy) pay += '<p class="pnote">This team\'s expenses are currently approved by ' + chip(p.coveredBy) + ' (' + esc(delegations.find(d => d.over === p).reason) + ').</p>';
+  delegations.filter(d => d.from === p).forEach(d => { pay += '<p class="pnote">Acting approver for ' + chip(d.over) + '\'s team (' + esc(d.reason) + ').</p>'; });
+  if (vend) pay += '<p class="pnote">Owns vendor <b>' + esc(vend.name) + '</b>, invoices approved by ' + chip(vend.approver, vend.knot ? 'kn' : '') + (vend.declared ? ', outside the owner\'s line, as the register requires.' : '. <b class="who">Inside the owner\'s line.</b>') + '</p>';
+  h += '<div><div class="pcap">Who approves whose pay</div>' + (pay || '<p class="pnote">Nothing beyond the line above.</p>') + '</div>';
+  /* the agent's line */
+  if (kn) h += '<div><div class="pcap">Tied</div><button class="fbtn pri" id="openKnBtn">' + kn.tag + ' · ' + esc(kn.title) + '<span class="s2">' + esc(kn.short) + '</span></button></div>';
+  else h += '<p class="pnote">Walked at 02:14 in the nightly pass' + (p.fennel ? ', from the Fennel export' : '') + '. <b>Nothing tied here.</b></p>';
+  if (p === P.you) h += '<p class="pnote">Head of internal audit. The Knot Finder answers to this node, and to nobody else. Findings do not go to a channel; they come here.</p>';
+  pBody.innerHTML = h; bindChips(pBody);
+  const ob = $('#openKnBtn'); if (ob) ob.addEventListener('click', () => openKnot(kn));
+  if (flyIn) { fitNodes(Array.from(HL.nodes), 90, 2.2); }
+}
+function selectVendor(v) {
+  selected = v; selKnot = null;
+  setHL({ nodes: new Set(v.owner ? [v.owner, v.approver] : [v.approver]), vendors: new Set([v]), money: v.owner ? [[v.approver, v]] : [] });
+  renderBoard();
+  openPanel('Vendor · AP master · NetSuite', esc(v.name), v.id + ' · created ' + v.created + ' · ' + esc(v.category));
+  const kn = KNOTS.find(k => k.vendors.includes(v));
+  let h = '<div class="kv">' +
+    '<span class="k">Remit-to</span><span class="v"><span class="mono">' + v.bank + '</span>' + (v.owner && v.owner.bank === v.bank ? ' · <b>matches ' + esc(v.owner.name) + '\'s payroll account</b>' : ' · matches nobody on payroll') + '</span>' +
+    '<span class="k">Address</span><span class="v">' + esc(prettyAddr(v.addr)) + (v.owner ? ' · <b>' + esc(v.owner.first) + '\'s home</b>' : '') + '</span>' +
+    '<span class="k">Approver</span><span class="v"><span class="chainrow">' + chip(v.approver, v.knot ? 'kn' : '') + '</span></span>' +
+    '<span class="k">Paid</span><span class="v"><b>$' + fmt(v.paid) + '</b> over ' + v.invoices + (v.invoices === 1 ? ' invoice' : ' invoices') + '</span>' +
+    '<span class="k">Register</span><span class="v">' + (v.declared ? 'in the outside-business register, approved' : '<b>not in the register</b>') + '</span>' +
+    '</div>';
+  if (v.owner) h += '<div><div class="pcap">Owner</div><div class="ppl"><button class="prow2" data-pid="' + v.owner.id + '"><span class="d"></span><span><div class="nm">' + esc(v.owner.name) + '</div><div class="tt">' + esc(v.owner.title) + ' · ' + esc(v.owner.dept) + '</div></span><span class="go">›</span></button></div></div>';
+  if (kn) h += '<div><div class="pcap">Tied</div><button class="fbtn pri" id="openKnBtn">' + kn.tag + ' · ' + esc(kn.title) + '<span class="s2">' + esc(kn.short) + '</span></button></div>';
+  else if (v.surnameOnly) h += '<p class="pnote">Shares a surname with six people on the payroll and nothing else: no address, no account, no approver in any of their lines. <b>Held back.</b></p>';
+  else h += '<p class="pnote">A declared side business. Invoices approved by procurement, outside the owner\'s line, as the register requires. <b>Nothing tied.</b></p>';
+  pBody.innerHTML = h; bindChips(pBody);
+  $$('.prow2[data-pid]', pBody).forEach(b => b.addEventListener('click', () => selectPerson(byId.get(b.dataset.pid), true)));
+  const ob = $('#openKnBtn'); if (ob) ob.addEventListener('click', () => openKnot(kn));
+}
+function openKnot(kn) {
+  if (!kn.live) return;
+  selKnot = kn; selected = null; kn.fresh = false;
+  const nodes = new Set(kn.people); const edges = new Set(kn.lineEdges.map(([a, b]) => edgeKey(a, b)));
+  const rs = new Set(roofs.filter(r => kn.pair.includes(r.a) && kn.pair.includes(r.b)));
+  setHL({ nodes, edges, roofs: rs, vendors: new Set(kn.vendors), money: kn.money });
+  renderBoard();
+  const fitList = kn.people.concat(kn.vendors);
+  fitNodes(fitList, 110, kn.vendors.length ? 1.8 : 2.4);
+  if (!S.opened.has(kn.key)) { S.opened.add(kn.key); spend(0.03); log('walk', kn.tag + ' opened · the file and a draft memo assembled for you · about three cents of model time'); }
+  renderKnot(kn);
+}
+function renderKnot(kn) {
+  const sectorOf = kn.people[0].sector;
+  openPanel('Knot ' + kn.tag + ' · tied ' + kn.tied + ' · ' + esc(sectorOf), esc(kn.title), esc(kn.rule));
+  const done = kn.status === 'done';
+  let h = '<div class="find">' +
+    '<div class="fr1">' + (done ? '<span class="sev done">your call · ' + kn.call.at + '</span>' : kn.tier === 'live' ? '<span class="sev now">live · effective Monday</span>' : '<span class="sev now">now</span>') + '<span class="ftime">' + kn.tag + ' · tied ' + kn.tied + '</span></div>' +
+    '<div class="ftitle">' + kn.claim + '</div>' +
+    '<div class="fsec"><div class="fk">How it knows <span class="cnt">' + kn.evidence.length + ' records</span> · tap one for the row behind it</div><div class="ev">' +
+    kn.evidence.map((e, i) => '<button class="evrow" data-ev="' + i + '"><span class="src">' + esc(e.src) + '</span><span class="opn">record</span><span class="clm">' + e.claim.split('{T}').join(kn.tied) + '</span></button><div class="evraw" hidden><pre>' + e.raw.split('{T}').join(kn.tied) + '</pre>' + (e.fn ? '<div class="fn">' + esc(e.fn) + '</div>' : '') + '</div>').join('') +
+    '</div></div>' +
+    '<div class="fsec"><div class="fk">How it got here</div><div class="ft">' + esc(kn.how) + '</div></div>' +
+    '<div class="fsec"><div class="fk">What it is not saying</div><div class="ft">' + esc(kn.notSaying) + '</div></div>';
+  if (!done) {
+    h += '<div class="fsec"><div class="fk">Your call · the part no agent should make</div><div class="fork">' +
+      kn.fork.map((f, i) => '<button class="fbtn ' + (f.pri ? 'pri' : 'sec') + '" data-fork="' + i + '">' + esc(f.label) + '<span class="s2">' + esc(f.sub) + '</span></button>').join('') +
+      '</div><div id="reasons"></div></div>';
+  } else {
+    h += '<div class="fdone"><b>Your call:</b> ' + esc(kn.call.label) + (kn.call.reason ? ' · ' + esc(kn.call.reason) : '') + '. ' + esc(kn.call.done) + '<span class="lg">logged ' + kn.call.at + ' · under your name · ' + kn.tag + '</span></div>';
+  }
+  h += '</div>';
+  h += '<div><div class="pcap">The people</div><div class="ppl">' +
+    kn.people.map(p => '<button class="prow2" data-pid="' + p.id + '"><span class="d"></span><span><div class="nm">' + esc(p.name) + '</div><div class="tt">' + esc(p.title) + ' · ' + esc(p.dept) + '</div></span><span class="go">›</span></button>').join('') +
+    kn.vendors.map(v => '<button class="prow2" data-vid="' + v.id + '"><span class="d v"></span><span><div class="nm">' + esc(v.name) + '</div><div class="tt">vendor ' + v.id + ' · approved by ' + esc(v.approver.name) + '</div></span><span class="go">›</span></button>').join('') +
+    '</div></div>';
+  pBody.innerHTML = h;
+  $$('.evrow', pBody).forEach(b => b.addEventListener('click', () => { const raw = b.nextElementSibling; const open = raw.hidden; raw.hidden = !open; b.classList.toggle('open', open); if (open) log('you', 'you opened the ' + b.querySelector('.src').textContent + ' record behind ' + kn.tag); }));
+  $$('.prow2[data-pid]', pBody).forEach(b => b.addEventListener('click', () => selectPerson(byId.get(b.dataset.pid), true)));
+  $$('.prow2[data-vid]', pBody).forEach(b => b.addEventListener('click', () => selectVendor(vendors.find(v => v.id === b.dataset.vid))));
+  $$('.fbtn[data-fork]', pBody).forEach(b => b.addEventListener('click', () => {
+    const f = kn.fork[+b.dataset.fork];
+    if (f.dismiss) {
+      const box = $('#reasons');
+      box.innerHTML = '<div class="reasons"><div class="rc">A reason, for the file</div>' + kn.reasons.map((r, i) => '<button class="rbtn" data-r="' + i + '">' + esc(r) + '</button>').join('') + '</div>';
+      $$('.rbtn', box).forEach(rb => rb.addEventListener('click', () => decide(kn, f, kn.reasons[+rb.dataset.r])));
+      box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    decide(kn, f, null);
+  }));
+}
+function decide(kn, f, reason) {
+  if (kn.status === 'done') return;
+  kn.status = 'done'; kn.call = { label: f.label, reason, done: f.done, at: now() };
+  S.calls++; if (S.firstCallAt == null) S.firstCallAt = S.min;
+  if (f.effect) f.effect();
+  spend(0.02);
+  log('you', f.log + (reason ? ' · "' + reason + '"' : ''));
+  renderKnot(kn); renderBoard(); renderStats(); renderHeld();
+  setState('Walking', 'on');
+  const left = KNOTS.filter(k => k.live && k.status !== 'done').length;
+  const db = $('#digestBtn'); db.hidden = false;
+  if (!left && S.eventFired) {
+    db.classList.add('glow'); S.ended = true;
+    setTimeout(() => toast('<b>Every knot has your name on it.</b> Four calls, four files, nothing moved that a person did not move. The walk is written up.', 'Read it', openDigest), 1200);
+  } else if (left === 1 && !S.eventFired) {
+    /* nothing: the live knot is about to arrive */
+  }
+}
+
+/* ====================================================================
+   CLOCK, QUIET TICKS, THE LIVE EVENT
+   ==================================================================== */
+const TICKS = [
+  [2, 'Brex: 6 expense reports submitted since 08:00 · approvers checked against ' + A.roofs + ' roofs · nothing tied', 0],
+  [4, 'Workday: 2 events, a title change and a cost-centre change · 2 neighbourhoods re-walked · nothing tied', 0.03],
+  [6, 'ADP Canada: 1 bank-detail change, hash only · neighbourhood re-walked · nothing tied', 0.015],
+  [8, 'the change feed is quiet · that is the normal state', 0],
+  [10, 'NetSuite: 1 new vendor · name, address and remit hash checked against ' + fmt(people.length) + ' people · nothing tied', 0.015],
+  [15, 'Carta: 0 grant events · Sun Life: 3 dependant changes · 3 neighbourhoods re-walked · nothing tied', 0.02],
+  [19, 'the change feed is quiet', 0],
+  [23, 'Workday: 1 hire queued for Monday · neighbourhood walked before the line exists · nothing tied', 0.015],
+  [28, 'quiet · ' + fmt(people.length) + ' people, nothing moved', 0],
+  [34, 'Brex: 11 more expense reports · approvers checked · nothing tied', 0],
+  [41, 'the change feed is quiet', 0],
+  [49, 'ADP US: 2 address changes · 2 neighbourhoods re-walked · one building match, different units, not a household', 0.03],
+  [58, 'quiet', 0]
+];
+let tickIx = 0;
+function tickLoop() {
+  if (!S.started) return;
+  const min = Math.floor((performance.now() - S.t0) / 4000);
+  if (min !== S.min) { S.min = min; $('#clock').textContent = now(); }
+  while (tickIx < TICKS.length && TICKS[tickIx][0] <= S.min) { const t = TICKS[tickIx++]; if (t[2]) spend(t[2]); log('walk', t[1]); }
+  if (!S.eventFired && (S.min >= 12 || (S.firstCallAt != null && S.min >= S.firstCallAt + 1 && S.min >= 5))) fireEvent();
+}
+function fireEvent() {
+  S.eventFired = true;
+  setState('Re-walking', 'busy');
+  log('walk', 'Workday: transfer request TR-3318 queued, effective Monday · re-walking Noor Haddad\'s neighbourhood before the line exists');
+  $('#wxEvents').textContent = '15';
+  setTimeout(() => {
+    P.noor.pending = P.elias;
+    const k4 = KNOTS[3]; k4.live = true; k4.fresh = true; k4.tied = now();
+    walk(); spend(0.02);
+    renderStats(); renderBoard(); renderHeld();
+    setState('Waiting on you', 'wait');
+    log('find', 'K4 · a knot would tie on Monday · Noor Haddad under Elias Brandt, one roof since April · raised while the transfer is still a form');
+    $('#wx').innerHTML = 'Thursday · nightly walk done <b>02:14</b> · <b>15</b> events since, <b>one</b> knot pending for Monday';
+    toast('<b>A knot would tie on Monday.</b> Transfer TR-3318 moves Noor Haddad under Elias Brandt, and they have shared an address since April. It is not tied yet. That is the point.', 'Open K4', () => openKnot(k4));
+  }, 2600);
+}
+
+/* ====================================================================
+   OVERLAYS · under the hood, the digest
+   ==================================================================== */
+function openOvl(id) { $('#' + id).classList.add('on'); }
+function closeOvl(id) { $('#' + id).classList.remove('on'); }
+$$('[data-close]').forEach(b => b.addEventListener('click', () => closeOvl(b.dataset.close)));
+$$('.ovl').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('on'); }));
+$('#hoodBtn').addEventListener('click', () => openOvl('hood'));
+$('#digestBtn').addEventListener('click', openDigest);
+$('#againBtn').addEventListener('click', () => { closeOvl('digest'); reset(); });
+$('#logTog').addEventListener('click', () => { const t = $('#trail'); const open = !t.classList.contains('open'); t.classList.toggle('open', open); $('#logTog').setAttribute('aria-expanded', open); });
+$('#railTog').addEventListener('click', () => $('#rail').classList.toggle('open'));
+$('#resetBtn').addEventListener('click', reset);
+function openDigest() {
+  const calls = KNOTS.filter(k => k.status === 'done');
+  $('#dgrid').innerHTML =
+    '<div class="dstat"><div class="n">' + fmt(people.length) + '</div><div class="l">people, one graph</div></div>' +
+    '<div class="dstat"><div class="n">' + fmt(A.pairs) + '</div><div class="l">pairs checked against a rule</div></div>' +
+    '<div class="dstat"><div class="n">2.9M</div><div class="l">vendor-to-person matches run</div></div>' +
+    '<div class="dstat"><div class="n acc">' + KNOTS.filter(k => k.live).length + '</div><div class="l">knots tied, each with its records</div></div>' +
+    '<div class="dstat"><div class="n gd">' + S.calls + '</div><div class="l">calls, all yours</div></div>' +
+    '<div class="dstat"><div class="n">' + money(S.spend) + '</div><div class="l">spent today, of a $6.00 cap</div></div>';
+  $('#dcalls').innerHTML = calls.length ? calls.map(k => '<div class="callrow"><span class="kid">' + k.tag + '</span><span><b>' + esc(k.title) + '</b> · ' + esc(k.call.label) + (k.call.reason ? ' · ' + esc(k.call.reason) : '') + ' · ' + k.call.at + '</span></div>').join('') : '<div class="callrow"><span class="kid">·</span><span>No calls yet. The knots are waiting on you, which is the design.</span></div>';
+  const open = KNOTS.filter(k => k.live && k.status !== 'done').length;
+  $('#dline').innerHTML = (open ? '<b>' + open + (open === 1 ? ' knot is' : ' knots are') + ' still waiting on you.</b> ' : '<b>Every knot has a name on it.</b> ') +
+    'Three weeks of spreadsheets used to produce a sample. This produced the population: every line, every roof, every account, every vendor, checked overnight and again on every change, and four questions only a person could answer. Nothing moved that a person did not move.';
+  openOvl('digest');
+}
+
+/* ====================================================================
+   RESET, START, DEBUG
+   ==================================================================== */
+function reset() {
+  closeOvl('digest'); closeOvl('hood'); closePanel();
+  KNOTS.forEach(k => { k.status = 'open'; k.call = null; k.fresh = false; });
+  KNOTS[3].live = false; KNOTS[3].tied = '08:52';
+  P.noor.pending = null; people.forEach(p => { p.proposed = null; });
+  walk();
+  Object.assign(S, { started: false, t0: 0, min: 0, spend: 1.12, calls: 0, trail: 0, eventFired: false, firstCallAt: null, ended: false });
+  S.opened = new Set(); tickIx = 0;
+  $('#trailRows').innerHTML = ''; $('#trailCount').textContent = '0'; $('#trailCount2').textContent = '0 entries';
+  $('#tick').innerHTML = '<span class="t">08:40</span>nightly walk done at 02:14 · 14 events since, 14 neighbourhoods re-walked, nothing tied · the change feed is quiet, which is the normal state';
+  $('#clock').textContent = '08:40'; spend(0);
+  $('#digestBtn').hidden = true; $('#digestBtn').classList.remove('glow');
+  $('#wx').innerHTML = 'Thursday · nightly walk done <b>02:14</b> · <b id="wxEvents">14</b> events since, nothing tied';
+  setState('Walking', 'on');
+  selected = null; selKnot = null; clearHL();
+  renderStats(); renderBoard(); renderHeld();
+  fitAll(600);
+  begin();
+}
+function begin() {
+  if (S.started) return;
+  S.started = true; S.t0 = performance.now();
+  log('walk', 'you are on the graph with it · ' + fmt(people.length) + ' people, ' + A.roofs + ' roofs, ' + fmt(A.pairs) + ' pairs checked overnight · 3 knots waiting on you');
+  setTimeout(() => {
+    if (S.calls > 0 || selKnot || S.ended) return;
+    toast('<b>Three knots are up</b> from the night walk, orange on the graph. Open one, or click anyone first: every person opens to their records.', 'Take me to the first knot', () => openKnot(KNOTS[0]));
+  }, 9000);
+}
+setInterval(tickLoop, 500);
+
+/* boot */
+resize(); fitAll(0); renderStats(); renderBoard(); renderHeld();
+requestAnimationFrame(frame);
+/* the clock does not start until the console is actually on screen, so
+   the feed is still quiet when the reader arrives at it. Polled rather
+   than observed: a rect check is cheap and cannot be defeated by a
+   browser that throttles observers on a backgrounded tab. */
+(function watchForArrival() {
+  /* the standalone twin holds the start until its intro closes */
+  if (window.__kfHold) return;
+  const app = $('#kfApp');
+  const check = () => {
+    if (S.started) return true;
+    const r = app.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.top < vh * 0.8 && r.bottom > vh * 0.2) { begin(); return true; }
+    return false;
+  };
+  if (check()) return;
+  const poll = setInterval(() => { if (check()) clearInterval(poll); }, 400);
+  app.addEventListener('pointerdown', () => { begin(); clearInterval(poll); }, { once: true });
+})();
+/* a debug hook, for driving the demo from the console */
+window.__kf = {
+  S, P, people, roofs, vendors, KNOTS, A, cam,
+  start: begin, open: i => openKnot(KNOTS[i]), call: (i, j, r) => decide(KNOTS[i], KNOTS[i].fork[j], r || null),
+  event: fireEvent, digest: openDigest, hood: () => openOvl('hood'), reset, fit: fitAll, find: q => people.filter(p => p.name.toLowerCase().includes(q.toLowerCase())),
+  select: p => selectPerson(typeof p === 'string' ? byId.get(p) || people.find(x => x.name === p) : p, true),
+  draw: () => { resize(); if (fly) { cam.x = fly.x1; cam.y = fly.y1; cam.k = fly.k1; fly = null; } draw(performance.now()); return cv.toDataURL('image/png'); },
+  layers: LAYER, hl: () => HL,
+  theme: t => { Object.assign(COL, t === 'light' ? COL_LIGHT : COL_DARK); }
+};
+})();
+</script>
+</body>
+</html>

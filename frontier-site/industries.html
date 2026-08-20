@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Industries — Agentic Standard</title>
-<meta name="description" content="Pick your industry and see what agents actually do there: twelve industries, three agents each.">
+<meta name="description" content="Pick your world and see what agents actually do there: twelve of them, three agents each.">
 <meta property="og:title" content="Industries — Agentic Standard">
-<meta property="og:description" content="Pick your industry and see what agents actually do there: twelve industries, three agents each.">
+<meta property="og:description" content="Pick your world and see what agents actually do there: twelve of them, three agents each.">
 <meta property="og:site_name" content="Agentic Standard">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Industries — Agentic Standard">
-<meta name="twitter:description" content="Pick your industry and see what agents actually do there: twelve industries, three agents each.">
+<meta name="twitter:description" content="Pick your world and see what agents actually do there: twelve of them, three agents each.">
 <meta name="theme-color" content="#100D0A">
 <link rel="icon" href="/favicon.ico" sizes="48x48 32x32 16x16">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -112,7 +112,7 @@
 ::view-transition-group(ind-logistics),
 ::view-transition-group(ind-manufacturing),
 ::view-transition-group(ind-ecommerce),
-::view-transition-group(ind-saas),
+::view-transition-group(ind-audit),
 ::view-transition-group(ind-services),
 ::view-transition-group(ind-agencies),
 ::view-transition-group(ind-property),
@@ -176,7 +176,7 @@
     <div class="container">
       <div class="kicker accent rise">Proof, by industry</div>
       <div class="page-title"><h1 class="rise">Your industry. Your team, <em>multiplied</em>.</h1></div>
-      <p class="lead rise">Saving a few hours is nice. One person doing the work of nine is better. Nobody gets shown the door; your team finally takes on the work it kept turning away. Pick your industry below and see what agents actually do in it.</p>
+      <p class="lead rise">Saving a few hours is nice. One person doing the work of nine is better. Nobody gets shown the door; your team finally takes on the work it kept turning away. Pick yours below and see what agents actually do in it.</p>
     </div>
   </section>
 
@@ -253,19 +253,21 @@
           </div>
 
           <div class="card-slot">
-            <a class="card ind-card" href="/industries/saas">
-              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-saas">
+            <a class="card ind-card" href="/industries/audit">
+              <span class="ind-icon" aria-hidden="true" style="view-transition-name: ind-audit">
                 <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
                   <g stroke="currentColor" stroke-width="3" stroke-linecap="square">
-                    <rect x="12" y="20" width="72" height="56"/>
-                    <path d="M12 32 h72"/>
-                    <path d="M24 44 l10 9 -10 9"/>
+                    <circle cx="48" cy="22" r="8"/>
+                    <circle cx="22" cy="70" r="8"/>
+                    <circle cx="74" cy="70" r="8"/>
+                    <path d="M42 29 L28 62"/>
+                    <path d="M54 29 L68 62"/>
                   </g>
-                  <rect x="42" y="59" width="12" height="4" fill="var(--accent)"/>
+                  <rect x="30" y="68" width="36" height="4" fill="var(--accent)"/>
                 </svg>
               </span>
-              <span class="ind-name">SaaS &amp; Software</span>
-              <span class="ind-hook">PQLs surfaced, renewals briefed, the whole company held as one graph.</span>
+              <span class="ind-name">Audit &amp; Compliance</span>
+              <span class="ind-hook">Conflicts caught, access reviewed, evidence pulled before they ask.</span>
               <span class="card-cta">See the agents <span class="arrow" aria-hidden="true">&#8594;</span></span>
             </a>
           </div>
@@ -510,7 +512,7 @@
 /* The industries now live on their own pages. Old #hash deep links redirect. */
 (function () {
   "use strict";
-  var slugs = ["logistics", "manufacturing", "ecommerce", "saas", "services", "agencies", "property", "finops", "healthops", "oilgas", "engineering", "fieldservices"];
+  var slugs = ["logistics", "manufacturing", "ecommerce", "audit", "services", "agencies", "property", "finops", "healthops", "oilgas", "engineering", "fieldservices"];
   var h = location.hash.replace(/^#/, "");
   if (slugs.indexOf(h) !== -1) location.replace("/industries/" + h);
 })();

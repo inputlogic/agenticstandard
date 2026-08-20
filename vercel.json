@@ -4,6 +4,9 @@
   "installCommand": "echo 'static site - no install'",
   "buildCommand": "echo 'static site - no build'",
   "outputDirectory": "frontier-site",
+  "redirects": [
+    { "source": "/industries/saas", "destination": "/industries/audit", "permanent": true }
+  ],
   "cleanUrls": true,
   "trailingSlash": false
 }

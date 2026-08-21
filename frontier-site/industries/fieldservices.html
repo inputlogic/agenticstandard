@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Field Services &amp; Trades — Agentic Standard</title>
-<meta name="description" content="Jobs triaged, quotes chased, warranty money recovered. Three agents for Field Services &amp; Trades.">
+<meta name="description" content="Jobs triaged, quotes built and chased, warranty money recovered. Three agents for Field Services &amp; Trades, and a live quoting desk you can drive.">
 <meta property="og:title" content="Field Services &amp; Trades — Agentic Standard">
-<meta property="og:description" content="Jobs triaged, quotes chased, warranty money recovered. Three agents for Field Services &amp; Trades.">
+<meta property="og:description" content="Jobs triaged, quotes built and chased, warranty money recovered. Three agents for Field Services &amp; Trades, and a live quoting desk you can drive.">
 <meta property="og:site_name" content="Agentic Standard">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Field Services &amp; Trades — Agentic Standard">
-<meta name="twitter:description" content="Jobs triaged, quotes chased, warranty money recovered. Three agents for Field Services &amp; Trades.">
+<meta name="twitter:description" content="Jobs triaged, quotes built and chased, warranty money recovered. Three agents for Field Services &amp; Trades, and a live quoting desk you can drive.">
 <meta name="theme-color" content="#100D0A">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,6 +310,106 @@ button.ind-card:focus-visible {
 .ind-panel-head { margin-block-start: clamp(1.4rem, 3.5vw, 2rem); }
 .ind-panel-head h1 { font-size: var(--text-h2); margin-block-end: 0; max-width: 24ch; }
 a.ind-back { text-decoration: none; }
+
+/* -- agent card rows ---------------------------------------------------------
+   The multiplier, How it works and the demo link should sit on shared lines
+   across all three cards, which they only do when the three descriptions
+   wrap to the same line count. Subgrid is unavailable (.card-slot carries
+   container-type for the type scale), so the description reserves the
+   tallest count its band needs. Bands measured against this copy; re-measure
+   if it changes. */
+@supports (height: 1lh) {
+  @container card (max-width: 343px) { .ind-agents .card > h3 + p { min-height: 4lh; } }
+  @container card (min-width: 344px) { .ind-agents .card > h3 + p { min-height: 3lh; } }
+  /* the multiplier gloss flips between one and two lines inside the same
+     range; reserving two keeps How it works on one row across the three */
+  .ind-agents .agent-stat-gloss { min-height: 2lh; }
+}
+
+/* ==== live demo teaser (#takeoff-demo) ===================================
+   One card that should read as a door, not a paragraph: a warm spotlight
+   sits under the pointer's default, and a slow accent arc marks the way in. */
+@property --demo-spin { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+#takeoff-demo .lead { max-width: 62ch; }
+.demo-grid {
+  margin-block-start: clamp(1.5rem, 3.5vw, 2.25rem);
+  display: grid; gap: clamp(1rem, 2.5vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.demo-grid.solo { grid-template-columns: minmax(min(100%, 20rem), 38rem); }
+
+.demo-card {
+  position: relative;
+  display: grid; align-content: start; gap: 0.55rem;
+  padding: clamp(1.35rem, 3vw, 1.9rem);
+  background: var(--panel);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 2px;
+  text-decoration: none;
+  isolation: isolate;
+  transition: border-color 0.2s ease, translate 0.2s ease, opacity 0.25s ease;
+}
+.demo-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s ease;
+  background: radial-gradient(
+    22rem circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in oklch, var(--accent) 16%, transparent), transparent 68%);
+}
+.demo-card:hover, .demo-card:focus-visible { border-color: var(--accent); translate: 0 -2px; }
+.demo-card:hover::before, .demo-card:focus-visible::before { opacity: 1; }
+.demo-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.demo-card.is-featured::after {
+  content: ""; position: absolute; inset: 0; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--demo-spin),
+    transparent 0 58%, var(--accent) 76%, transparent 88% 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: demo-spin 9s linear infinite;
+}
+@keyframes demo-spin { to { --demo-spin: 360deg; } }
+
+.demo-eyebrow {
+  display: flex; align-items: center; gap: 0.5em;
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+}
+.demo-eyebrow .dot {
+  width: 6px; height: 6px; background: var(--accent); flex: none;
+  animation: demo-blink 2.4s ease-in-out infinite;
+}
+@keyframes demo-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.demo-card h3 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem); line-height: 1.15;
+  letter-spacing: -0.01em; color: var(--fg); margin: 0; text-wrap: balance;
+}
+.demo-card p { margin: 0; color: var(--fg-body); font-size: var(--text-small); line-height: 1.6; }
+
+.demo-meta {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; margin: 0.35rem 0 0; padding: 0;
+}
+.demo-meta li {
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--hairline); padding: 0.35em 0.6em;
+}
+.demo-go {
+  margin-block-start: 0.75rem; display: inline-flex; align-items: center; gap: 0.5em;
+  font-weight: 600; font-size: var(--text-small); color: var(--accent-soft);
+}
+.demo-go .arrow { transition: translate 0.2s ease; }
+.demo-card:hover .demo-go .arrow { translate: 4px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-card.is-featured::after, .demo-eyebrow .dot { animation: none; }
+  .demo-card:hover { translate: none; }
+  .demo-go .arrow, .demo-card:hover .demo-go .arrow { translate: none; }
+}
 </style>
 <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-G8dLSoHsvMzCZqnnk7Fmv.js"></script>
@@ -405,23 +505,24 @@ a.ind-back { text-decoration: none; }
           <div class="card-slot">
             <article class="card">
               <div class="card-tag">Agent 02</div>
-              <h3>The Quote Runner</h3>
-              <p>Chases every aging quote at the right cadence, logs the replies, and drops a close-rate digest every Friday.</p>
-              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">7&#215;</span><span class="agent-stat-gloss">Chases every aging quote at cadence, none goes cold.</span></p>
+              <h3>The Takeoff Clerk</h3>
+              <p>Builds the whole quote from a messy request: the reg-table counts, the bylaw lines, the priced sheet. Then chases it to an answer.</p>
+              <p class="agent-stat"><span class="agent-stat-label">Worker multiplier</span><span class="agent-stat-num">9&#215;</span><span class="agent-stat-gloss">Builds every quote in minutes, cited to code, then chases it.</span></p>
               <details class="agent-how">
                 <summary>How it works</summary>
                 <div class="agent-how-body">
-                  <p><strong>The loop:</strong> Runs daily. Reads open quotes from the FSM system. Sends follow-ups at the right cadence. Logs replies, posts Friday's close-rate digest. Humans set the price.</p>
+                  <p><strong>The loop:</strong> Runs on every request. Reads the rate card, the safety-reg and bylaw digests, and the job history. Builds the sheet with every line cited, flags its assumptions, drafts the questions. You dispose, price and send. Then it chases at cadence until the quote answers.</p>
                   <p><strong>What it needs:</strong></p>
                   <ul class="agent-needs">
-                    <li>Read: the open-quote report</li>
-                    <li>Send: follow-ups from a scoped mailbox</li>
-                    <li>Owner: your service manager</li>
-                    <li>Per-run budget cap, enforced</li>
-                    <li>Every send logged</li>
+                    <li>Read: the rate card and the rule digests</li>
+                    <li>Draft: quotes and questions, the send stays yours</li>
+                    <li>Owner: your estimator</li>
+                    <li>Assumptions flagged, never silent</li>
+                    <li>Per-quote spend cap, every line logged</li>
                   </ul>
                 </div>
               </details>
+              <p class="card-cta"><a class="text-link" href="/industries/takeoff-clerk-desk">Build a quote with it <span aria-hidden="true">&#8594;</span></a></p>
             </article>
           </div>
           <div class="card-slot">
@@ -451,6 +552,31 @@ a.ind-back { text-decoration: none; }
         <p class="honest-note">An example scenario. The multipliers are estimates. Your real numbers come from the Readiness Map.</p>
         <p class="ind-cta"><a class="text-link" href="/book">Get your real numbers <span aria-hidden="true">&#8594;</span></a></p>
       </section>
+    </div>
+  </section>
+
+  <!-- 2b. Live demo teaser -->
+  <section class="section section-rule" id="takeoff-demo" aria-labelledby="takeoff-demo-title">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">Live Demo &middot; Agent 02</div>
+        <h2 id="takeoff-demo-title">A messy email in. An <em>accurate</em> quote out.</h2>
+        <p class="lead">Not a video of the Takeoff Clerk. The Takeoff Clerk. A GC's two-paragraph email becomes a priced site-setup sheet in six minutes: the toilet count off the reg table, the hoarding off the bylaw, the trench box off the depth, and a why chip on every number. The judgment stays at your desk: three assumptions need your name before Send unlocks.</p>
+      </div>
+      <div class="demo-grid solo reveal reveal-late" id="demoGrid">
+        <a class="demo-card is-featured" href="/industries/takeoff-clerk-desk">
+          <span class="demo-eyebrow"><span class="dot" aria-hidden="true"></span> Start here &middot; the agent does the arithmetic</span>
+          <h3>Build a quote with the Takeoff Clerk</h3>
+          <p>A teardown, a corner lot, a crew that is "15 to 20", a trench the GC forgets until mid-review. Watch the sheet assemble itself line by cited line, open the rule behind any number, dispose the three assumptions your way, and send it under your own name. Change the crew by one worker and watch the toilet table turn.</p>
+          <ul class="demo-meta">
+            <li>6 minutes</li>
+            <li>you play the estimator</li>
+            <li>3 assumptions, 1 live event</li>
+          </ul>
+          <span class="demo-go">Open the desk <span class="arrow" aria-hidden="true">&#8594;</span></span>
+        </a>
+      </div>
+      <p class="ind-note">It reads the rate card and the rule digests, and it writes drafts. It cannot edit a rate, waive a code line silently, or send a quote: the send button is wired to a person, and a price under the discretion floor escalates to the owner instead of shipping.</p>
     </div>
   </section>
 

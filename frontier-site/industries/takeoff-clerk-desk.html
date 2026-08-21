@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Quote With The Takeoff Clerk &middot; Field Services &amp; Trades — Agentic Standard</title>
+<meta name="description" content="A messy two-paragraph email becomes a priced, code-sized site quote in six minutes. Every line cites the rule that put it there: the toilet table, the trench depth, the hoarding bylaw. The agent does the arithmetic. The assumptions stay yours.">
+<meta property="og:title" content="A Quote With The Takeoff Clerk — Agentic Standard">
+<meta property="og:description" content="A messy email in, an accurate site quote out, six minutes door to door. Every line cites its rule. You own the assumptions and the send button.">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A Quote With The Takeoff Clerk — Agentic Standard">
+<meta name="twitter:description" content="A messy email in, an accurate site quote out, six minutes door to door. Every line cites its rule. You own the assumptions and the send button.">
+<meta name="theme-color" content="#100D0A">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-G8dLSoHsvMzCZqnnk7Fmv.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+<style>
+/* ==== A Quote With The Takeoff Clerk =====================================
+   The operator's cut for Field Services & Trades, and the eighth perspective
+   in the set: logistics put you beside an agent, manufacturing handed you
+   its finished work, e-commerce made you the customer, oil and gas put the
+   agent on the map, finance ops made you the adjudicator, audit gave one
+   head the whole company. Here THE AGENT DOES THE ARITHMETIC AND THE HUMAN
+   OWNS THE ASSUMPTIONS: a messy email becomes a priced worksheet where
+   every line cites the rule that put it there, and the send button stays
+   dim until every assumption on the sheet is yours.
+
+   Everything below is scoped under .tc-app so none of it reaches the rest
+   of the page, and the page's own tokens do not reach in. Dark only: the
+   site has no light mode. No libraries: the rulebook, the takeoff engine
+   and the sheet renderer are plain JavaScript. */
+.tc-app{
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:'Instrument Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:ui-monospace,'Cascadia Mono','Segoe UI Mono',Consolas,monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --r:14px;
+  --bg:#100D0A; --fg:#E8E1D4; --body:#CEC6B8; --muted:#968C7C; --muted-2:#6d6355;
+  --accent:#D27A3F; --accent-soft:#b9794d; --hair:#463E34; --hair-soft:#2c2620;
+  --panel:#1B1611; --panel-2:#221b15; --panel-3:#191410; --good:#8FAC77; --warn:#C9A24B;
+  --accent-ink:#1a120b; --veil:rgba(16,13,10,.78);
+  --paper:#ECE5D5; --paper-2:#e2d9c6; --ink:#2A241C; --ink-soft:#5b5142;
+  position:relative;
+  color:var(--body); font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.tc-app *{box-sizing:border-box}
+.tc-app ::selection{background:var(--accent); color:var(--bg)}
+.tc-app button,.tc-app input{font-family:var(--sans)}
+.tc-app p{margin:0}
+
+/* ============================ SHELL ============================ */
+.tc-app .shell{position:relative; z-index:1; width:100%; height:min(900px,86vh); min-height:640px; display:flex; flex-direction:column}
+.tc-app .bracket{position:absolute; width:clamp(24px,2.6vw,38px); height:clamp(24px,2.6vw,38px); color:var(--fg); opacity:.9; pointer-events:none; z-index:5}
+.tc-app .bracket.tl{top:-7px;left:-7px} .tc-app .bracket.br{bottom:-7px;right:-7px}
+
+/* ============================ TOPBAR ============================ */
+.tc-app .topbar{display:flex; align-items:center; gap:12px; padding:2px 4px 11px}
+.tc-app .topbar .role{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tc-app .topbar .spacer{flex:1}
+.tc-app .envchip{flex:none; display:flex; align-items:center; gap:7px; border:1px solid var(--hair); border-radius:99px; padding:5px 11px; font-size:11px; color:var(--muted); white-space:nowrap}
+.tc-app .envchip b{color:var(--body); font-weight:600; font-variant-numeric:tabular-nums}
+.tc-app .envchip .cl{font-family:var(--mono); font-size:11.5px; color:var(--fg)}
+.tc-app .iconbtn{
+  appearance:none; background:transparent; border:1px solid var(--hair); color:var(--body);
+  width:33px;height:33px;border-radius:9px; cursor:pointer; display:grid;place-items:center; flex:none;
+  transition:.18s var(--ease);
+}
+.tc-app .iconbtn:hover{border-color:var(--accent); color:var(--fg)}
+.tc-app .iconbtn svg{width:15px;height:15px}
+.tc-app .wordbtn{
+  appearance:none; background:transparent; border:1px solid var(--hair); color:var(--body); flex:none;
+  height:33px; border-radius:9px; padding:0 13px; cursor:pointer; font-size:11px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; transition:.18s var(--ease); white-space:nowrap;
+}
+.tc-app .wordbtn:hover{border-color:var(--accent); color:var(--fg)}
+.tc-app .wordbtn.glow{color:var(--accent); border-color:var(--accent); animation:tc-breathe 1.5s var(--ease) infinite}
+.tc-app .wordbtn[hidden]{display:none}
+@keyframes tc-breathe{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ============================ STAGE ============================ */
+.tc-app .stage{flex:1; min-height:0; position:relative; display:flex; border:1px solid var(--hair); border-radius:var(--r); overflow:hidden; background:var(--panel)}
+
+/* ---------------- LEFT · RAIL ---------------- */
+.tc-app .rail{width:296px; flex:none; background:var(--panel-3); border-right:1px solid var(--hair); display:flex; flex-direction:column; min-height:0}
+.tc-app .rail-head{padding:12px 15px; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hair-soft); display:flex; align-items:center; gap:8px; flex:none; white-space:nowrap}
+.tc-app .rail-head b{color:var(--body); font-weight:600}
+.tc-app .pulse{width:6px;height:6px;border-radius:50%;background:var(--good); flex:none}
+.tc-app.live .pulse{animation:tc-breathe 1.8s var(--ease) infinite}
+.tc-app .rail-scroll{overflow-y:auto; overflow-x:hidden; padding:13px 12px 18px; display:flex; flex-direction:column; gap:13px; min-height:0}
+
+.tc-app .agent-id{border:1px solid var(--hair); border-radius:11px; padding:11px; background:var(--panel); display:flex; gap:10px; align-items:center; flex:none}
+.tc-app .agent-id .avatar{width:34px;height:34px; flex:none; border-radius:9px; background:var(--panel-2); display:grid; place-items:center; border:1px solid var(--hair)}
+.tc-app .agent-id .avatar svg{width:19px;height:19px}
+.tc-app .agent-id .nm{font-weight:600; color:var(--fg); font-size:12.5px; line-height:1.2}
+.tc-app .agent-id .tg{font-size:10px; color:var(--muted); letter-spacing:.06em; margin-top:2px}
+.tc-app .statechip{margin-left:auto; flex:none; font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--hair); color:var(--muted); border-radius:99px; padding:4px 8px; white-space:nowrap; transition:.2s var(--ease)}
+.tc-app .statechip.on{color:var(--good); border-color:color-mix(in srgb, var(--good) 45%, transparent)}
+.tc-app .statechip.busy{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 55%, transparent)}
+
+.tc-app .statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; flex:none}
+.tc-app .sstat{border:1px solid var(--hair-soft); border-radius:9px; padding:8px 9px; background:var(--panel); min-width:0}
+.tc-app .sstat .n{font-family:var(--mono); font-size:14.5px; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap}
+.tc-app .sstat .n.acc{color:var(--accent)}
+.tc-app .sstat .l{font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:3px; line-height:1.3}
+
+.tc-app .panelcap{font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; flex:none}
+.tc-app .panelcap::after{content:""; flex:1; height:1px; background:var(--hair-soft)}
+.tc-app .panelcap .cnt{color:var(--accent); font-weight:600}
+
+/* the morning queue */
+.tc-app .qitem{border:1px solid var(--hair-soft); border-radius:10px; background:var(--panel); padding:9px 11px; display:flex; align-items:center; gap:9px; flex:none}
+.tc-app .qitem .qs{width:7px;height:7px;border-radius:50%;flex:none;background:var(--good)}
+.tc-app .qitem.hot .qs{background:var(--accent); animation:tc-breathe 1.4s var(--ease) infinite}
+.tc-app .qitem .qn{font-size:11.5px; color:var(--body); font-weight:600; line-height:1.25; min-width:0}
+.tc-app .qitem .qd{font-size:9.5px; color:var(--muted); margin-top:2px; font-weight:400}
+.tc-app .qitem .qv{margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--muted); white-space:nowrap; flex:none}
+.tc-app .qitem.hot .qv{color:var(--accent)}
+
+/* the rulebook card */
+.tc-app .rulebook{border:1px solid var(--hair); border-radius:11px; background:var(--panel); padding:11px; display:grid; gap:7px; flex:none}
+.tc-app .rulebook .rrow{display:flex; justify-content:space-between; gap:10px; font-size:11px; color:var(--muted)}
+.tc-app .rulebook .rrow b{font-family:var(--mono); color:var(--body); font-weight:500; font-variant-numeric:tabular-nums; white-space:nowrap}
+.tc-app .rulebook .rfoot{font-size:10px; color:var(--muted-2); line-height:1.5; border-top:1px solid var(--hair-soft); padding-top:7px}
+
+/* assumptions rail panel */
+.tc-app .assume{border:1px solid var(--hair); border-radius:11px; background:var(--panel); overflow:hidden; flex:none}
+.tc-app .assume .arow{display:flex; align-items:flex-start; gap:9px; width:100%; text-align:left; appearance:none; background:transparent; border:0; border-bottom:1px solid var(--hair-soft); color:var(--body); padding:10px 11px; cursor:pointer; transition:background .18s var(--ease)}
+.tc-app .assume .arow:last-child{border-bottom:0}
+.tc-app .assume .arow:hover{background:var(--panel-2)}
+.tc-app .assume .arow .ad{width:8px;height:8px;border-radius:50%;flex:none;margin-top:4px;background:var(--warn)}
+.tc-app .assume .arow.done .ad{background:var(--good)}
+.tc-app .assume .arow .at{font-size:11.5px; line-height:1.45; min-width:0}
+.tc-app .assume .arow .at b{color:var(--fg); font-weight:600}
+.tc-app .assume .arow .at .sub{display:block; color:var(--muted); font-size:10.5px; margin-top:2px}
+.tc-app .assume .arow.done .at .sub{color:var(--good)}
+
+/* rules-fired feed */
+.tc-app .feed{display:flex; flex-direction:column; gap:6px; flex:none}
+.tc-app .feed .frow{border-left:2px solid var(--hair); padding:2px 0 2px 10px; font-size:10.5px; line-height:1.5; color:var(--muted)}
+.tc-app .feed .frow b{color:var(--body); font-weight:600}
+.tc-app .feed .frow.hit{border-left-color:var(--accent)}
+.tc-app .feed .frow.hit b{color:var(--accent)}
+
+/* ---------------- CENTER · DESK ---------------- */
+.tc-app .desk{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--panel)}
+
+/* sheet header strip */
+.tc-app .sheetbar{flex:none; border-bottom:1px solid var(--hair); background:var(--panel-2); padding:10px 14px; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.tc-app .facts{display:flex; gap:6px; flex-wrap:wrap; min-width:0}
+.tc-app .fact{display:flex; align-items:center; gap:6px; border:1px solid var(--hair); border-radius:99px; padding:4px 10px; font-size:10.5px; color:var(--muted); background:var(--panel); transition:border-color .2s var(--ease)}
+.tc-app .fact b{color:var(--fg); font-weight:600; font-variant-numeric:tabular-nums}
+.tc-app .fact .fk{letter-spacing:.08em; text-transform:uppercase; font-size:9px}
+.tc-app .fact.assumed{border-color:color-mix(in srgb, var(--warn) 55%, transparent)}
+.tc-app .fact.assumed b{color:var(--warn)}
+.tc-app .fact.flash{border-color:var(--accent)}
+.tc-app .fact .stepbtn{appearance:none; border:0; background:transparent; color:var(--muted); width:16px; height:16px; line-height:1; cursor:pointer; font-size:12px; padding:0; display:none; place-items:center}
+.tc-app .fact.editable .stepbtn{display:grid}
+.tc-app .fact .stepbtn:hover{color:var(--accent)}
+.tc-app .totalbox{margin-left:auto; display:flex; align-items:center; gap:14px; flex:none}
+.tc-app .totalbox .tl{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); text-align:right; line-height:1.4}
+.tc-app .totalbox .tn{font-family:var(--mono); font-size:clamp(17px,2vw,21px); color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap}
+.tc-app .totalbox .tn.bump{animation:tc-bump .5s var(--ease)}
+@keyframes tc-bump{0%{color:var(--accent)}100%{color:var(--fg)}}
+.tc-app .sendbtn{
+  appearance:none; border:1px solid var(--hair); background:transparent; color:var(--muted-2);
+  height:36px; border-radius:9px; padding:0 16px; font-size:11px; font-weight:600; letter-spacing:.12em;
+  text-transform:uppercase; cursor:not-allowed; transition:.2s var(--ease); white-space:nowrap; flex:none;
+}
+.tc-app .sendbtn.ready{color:var(--accent-ink); background:var(--accent); border-color:var(--accent); cursor:pointer; animation:tc-breathe 2s var(--ease) infinite}
+.tc-app .sendbtn.ready:hover{animation:none; opacity:1}
+.tc-app .lockline{flex-basis:100%; font-size:10px; color:var(--muted-2); letter-spacing:.06em; display:flex; align-items:center; gap:7px}
+.tc-app .lockline .ic{width:11px;height:11px;flex:none;color:var(--warn)}
+.tc-app .lockline.ok .ic{color:var(--good)}
+
+/* scroller that holds intake + sheet */
+.tc-app .deskscroll{flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:16px clamp(12px,2.2vw,24px) 26px; scroll-behavior:smooth}
+
+/* ---- the intake mail ---- */
+.tc-app .mail{border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); overflow:hidden; max-width:720px; margin-inline:auto}
+.tc-app .mail .mhead{padding:11px 15px; border-bottom:1px solid var(--hair-soft); display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+.tc-app .mail .mfrom{font-weight:600; color:var(--fg); font-size:12.5px}
+.tc-app .mail .msub{color:var(--muted); font-size:11.5px}
+.tc-app .mail .mtime{margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--muted-2)}
+.tc-app .mail .mbody{padding:15px; font-size:13px; line-height:1.75; color:var(--body)}
+.tc-app .mail .mbody p{margin:0 0 10px}
+.tc-app .mail .mbody p:last-child{margin-bottom:0}
+.tc-app .mail mark{background:transparent; color:inherit; border-bottom:1px dashed transparent; transition:.25s var(--ease); padding-bottom:1px}
+.tc-app .mail mark.lit{color:var(--fg); border-bottom-color:var(--accent)}
+.tc-app .mailrow{display:flex; gap:10px; align-items:center; justify-content:center; margin:14px auto 0; max-width:720px}
+.tc-app .bigbtn{
+  appearance:none; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink);
+  height:40px; border-radius:10px; padding:0 20px; font-size:11.5px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; cursor:pointer; transition:.2s var(--ease); white-space:nowrap;
+}
+.tc-app .bigbtn:hover{filter:brightness(1.08)}
+.tc-app .bigbtn.quiet{background:transparent; color:var(--body); border-color:var(--hair)}
+.tc-app .bigbtn.quiet:hover{border-color:var(--accent); color:var(--fg); filter:none}
+.tc-app .mail.second{margin-top:14px; border-color:color-mix(in srgb, var(--accent) 45%, transparent)}
+
+/* parse chips that fly out of the mail */
+.tc-app .parsed{display:flex; flex-wrap:wrap; gap:6px; padding:0 15px 14px}
+.tc-app .pchip{border:1px solid var(--hair); border-radius:99px; background:var(--panel); color:var(--body); font-size:10.5px; padding:4px 10px; display:flex; gap:6px; align-items:center; opacity:0; translate:0 4px; transition:.35s var(--ease)}
+.tc-app .pchip.in{opacity:1; translate:0 0}
+.tc-app .pchip .pk{font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.tc-app .pchip b{font-weight:600; color:var(--fg)}
+.tc-app .pchip.src-assume{border-color:color-mix(in srgb, var(--warn) 55%, transparent)}
+.tc-app .pchip.src-assume b{color:var(--warn)}
+.tc-app .pchip.src-lookup{border-color:color-mix(in srgb, var(--good) 40%, transparent)}
+
+/* ---- the sheet ---- */
+.tc-app .sheet{max-width:760px; margin:16px auto 0; display:none}
+.tc-app .sheet.on{display:block}
+.tc-app .sheethead{display:flex; align-items:baseline; gap:12px; padding:0 2px 10px; flex-wrap:wrap}
+.tc-app .sheethead .sh1{font-family:var(--serif); font-size:clamp(19px,2.4vw,24px); color:var(--fg); font-weight:600; letter-spacing:.01em}
+.tc-app .sheethead .sh2{font-size:11px; color:var(--muted)}
+.tc-app .sheethead .shref{margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--muted-2); white-space:nowrap}
+
+.tc-app .grp{border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); overflow:hidden; margin-bottom:12px}
+.tc-app .grp .ghead{display:flex; align-items:center; gap:9px; padding:9px 13px; background:var(--panel-2); border-bottom:1px solid var(--hair-soft); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+.tc-app .grp .ghead .gsub{margin-left:auto; font-family:var(--mono); letter-spacing:0; text-transform:none; color:var(--body); font-size:11px; font-variant-numeric:tabular-nums}
+.tc-app .grp .ghead svg{width:13px; height:13px; color:var(--accent); flex:none}
+
+.tc-app .line{display:grid; grid-template-columns:1fr auto; gap:2px 14px; padding:9px 13px; border-bottom:1px solid var(--hair-soft); position:relative; transition:background .25s var(--ease)}
+.tc-app .line:last-child{border-bottom:0}
+.tc-app .line .ln{font-size:12.5px; color:var(--fg); font-weight:500; line-height:1.4; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; min-width:0}
+.tc-app .line .lc{grid-row:2; font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.tc-app .line .lv{grid-row:1 / span 2; align-self:center; font-family:var(--mono); font-size:12.5px; color:var(--body); font-variant-numeric:tabular-nums; white-space:nowrap}
+.tc-app .line.entering{animation:tc-landin .45s var(--ease) both}
+@keyframes tc-landin{from{opacity:0; translate:0 6px; background:color-mix(in srgb, var(--accent) 9%, transparent)} to{opacity:1; translate:0 0}}
+.tc-app .line.changed{background:color-mix(in srgb, var(--accent) 7%, transparent)}
+.tc-app .line.leaving{opacity:.35; text-decoration:line-through; text-decoration-color:var(--muted-2)}
+.tc-app .whychip{
+  appearance:none; border:1px solid var(--hair); background:transparent; color:var(--muted); border-radius:99px;
+  font-size:9px; letter-spacing:.1em; text-transform:uppercase; font-weight:600; padding:2.5px 8px; cursor:pointer;
+  transition:.18s var(--ease); flex:none;
+}
+.tc-app .whychip:hover{border-color:var(--accent); color:var(--accent)}
+.tc-app .whychip.reg{border-color:color-mix(in srgb, var(--accent) 45%, transparent); color:var(--accent-soft)}
+.tc-app .tag-new{font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--accent); border:1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius:99px; padding:2px 7px; flex:none}
+.tc-app .tag-asm{font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--warn); border:1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius:99px; padding:2px 7px; flex:none; cursor:pointer}
+
+/* totals block */
+.tc-app .totals{border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); overflow:hidden; margin-bottom:12px}
+.tc-app .trow{display:flex; justify-content:space-between; gap:14px; padding:8px 13px; border-bottom:1px solid var(--hair-soft); font-size:12px; color:var(--muted)}
+.tc-app .trow:last-child{border-bottom:0}
+.tc-app .trow .tv{font-family:var(--mono); color:var(--body); font-variant-numeric:tabular-nums; white-space:nowrap}
+.tc-app .trow.grand{background:var(--panel-2)}
+.tc-app .trow.grand .tk{color:var(--fg); font-weight:600; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px}
+.tc-app .trow.grand .tv{color:var(--accent); font-size:14.5px; font-weight:600}
+.tc-app .trow .whychip{margin-left:8px}
+.tc-app .trow .tk{display:flex; align-items:center}
+
+/* notes + exclusions on the sheet */
+.tc-app .notesbox{border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); padding:11px 13px; margin-bottom:12px; display:grid; gap:7px}
+.tc-app .notesbox .ncap{font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+.tc-app .notesbox .nrow{font-size:11.5px; line-height:1.6; color:var(--muted); padding-left:14px; position:relative}
+.tc-app .notesbox .nrow::before{content:""; position:absolute; left:0; top:.55em; width:6px; height:6px; background:var(--hair)}
+.tc-app .notesbox .nrow b{color:var(--body); font-weight:600}
+.tc-app .notesbox .nrow.excl::before{background:var(--warn)}
+
+/* ---------------- DOCK · paper trail ---------------- */
+.tc-app .dock{flex:none; margin-top:12px; border:1px solid var(--hair); border-radius:12px; background:var(--panel-3); overflow:hidden}
+.tc-app .dock .dhead{display:flex; align-items:center; gap:9px; padding:8px 13px; border-bottom:1px solid var(--hair-soft); font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+.tc-app .dock .dhead .cnt{color:var(--accent); font-weight:600}
+.tc-app .tickline{padding:9px 13px; font-size:11px; line-height:1.6; color:var(--muted); font-variant-numeric:tabular-nums; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
+.tc-app .tickline .t{font-family:var(--mono); color:var(--accent-soft); margin-right:8px}
+
+/* ---------------- OVERLAYS ---------------- */
+.tc-app .ovl{position:fixed; inset:0; z-index:60; background:var(--veil); backdrop-filter:blur(6px); display:none; align-items:flex-start; justify-content:center; padding:4vh 14px 6vh; overflow-y:auto}
+.tc-app .ovl.on{display:flex}
+.tc-app .ocard{position:relative; width:min(880px,100%); background:var(--panel); border:1px solid var(--hair); border-radius:16px; padding:clamp(18px,3vw,30px)}
+.tc-app .ocard.wide{width:min(980px,100%)}
+.tc-app .ocard .x{position:absolute; top:14px; right:14px}
+.tc-app .okick{font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--accent); margin-bottom:8px}
+.tc-app .ohead{font-family:var(--serif); font-weight:600; color:var(--fg); line-height:1.15; margin:0 0 14px; letter-spacing:.005em}
+.tc-app .ohead em{font-style:italic; color:var(--accent)}
+.tc-app .olead{font-size:13px; line-height:1.7; color:var(--body); max-width:64ch; margin-bottom:14px}
+.tc-app .fine{font-size:10.5px; color:var(--muted-2); line-height:1.6; max-width:70ch}
+
+/* why card */
+.tc-app .whybox{display:grid; gap:12px}
+.tc-app .whychain{border:1px solid var(--hair); border-radius:12px; overflow:hidden}
+.tc-app .whychain .wstep{display:flex; gap:11px; padding:11px 14px; border-bottom:1px solid var(--hair-soft); font-size:12.5px; line-height:1.6; color:var(--body)}
+.tc-app .whychain .wstep:last-child{border-bottom:0}
+.tc-app .whychain .wstep .wn{font-family:var(--mono); color:var(--muted-2); flex:none; font-size:11px; padding-top:2px}
+.tc-app .whychain .wstep b{color:var(--fg); font-weight:600; font-variant-numeric:tabular-nums}
+.tc-app .srcbox{border-left:2px solid var(--accent); background:color-mix(in srgb, var(--accent) 5%, transparent); padding:11px 14px; border-radius:0 10px 10px 0}
+.tc-app .srcbox .stag{font-size:9px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; color:var(--accent); margin-bottom:5px}
+.tc-app .srcbox .stxt{font-size:12px; line-height:1.65; color:var(--body); font-style:italic; font-family:var(--serif); font-size:14.5px}
+.tc-app .regtable{border:1px solid var(--hair); border-radius:10px; overflow:hidden; font-variant-numeric:tabular-nums}
+.tc-app .regtable .rr{display:flex; justify-content:space-between; padding:7px 13px; font-size:11.5px; color:var(--muted); border-bottom:1px solid var(--hair-soft); font-family:var(--mono)}
+.tc-app .regtable .rr:last-child{border-bottom:0}
+.tc-app .regtable .rr.hot{color:var(--fg); background:color-mix(in srgb, var(--accent) 9%, transparent)}
+.tc-app .regtable .rr.hot b{color:var(--accent)}
+
+/* assumption fork */
+.tc-app .forkrow{display:grid; gap:10px; grid-template-columns:1fr 1fr}
+@media (max-width:640px){.tc-app .forkrow{grid-template-columns:1fr}}
+.tc-app .forkbtn{
+  appearance:none; text-align:left; border:1px solid var(--hair); background:var(--panel-2); color:var(--body);
+  border-radius:12px; padding:13px 15px; cursor:pointer; transition:.18s var(--ease); display:grid; gap:5px;
+}
+.tc-app .forkbtn:hover{border-color:var(--accent)}
+.tc-app .forkbtn .fbt{font-weight:600; color:var(--fg); font-size:13px; line-height:1.35}
+.tc-app .forkbtn .fbs{font-size:11.5px; line-height:1.55; color:var(--muted)}
+.tc-app .forkbtn .fbtag{font-size:9px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--accent)}
+
+/* ---- the paper (customer-facing quote) ---- */
+.tc-app .paper{background:var(--paper); color:var(--ink); border-radius:6px; padding:clamp(20px,3.4vw,34px); font-size:12.5px; line-height:1.55; box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.tc-app .paper .php{display:flex; justify-content:space-between; gap:14px; align-items:flex-start; border-bottom:2px solid var(--ink); padding-bottom:12px; margin-bottom:14px; flex-wrap:wrap}
+.tc-app .paper .plogo{font-family:var(--serif); font-weight:700; font-size:21px; letter-spacing:.01em}
+.tc-app .paper .plogo span{color:var(--accent); font-style:italic}
+.tc-app .paper .pmeta{font-size:10.5px; color:var(--ink-soft); text-align:right; line-height:1.6; font-variant-numeric:tabular-nums}
+.tc-app .paper .paddr{display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:13px; font-size:11.5px; color:var(--ink-soft)}
+.tc-app .paper .paddr b{color:var(--ink); font-weight:600}
+.tc-app .paper table{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.tc-app .paper th{font-size:9px; letter-spacing:.16em; text-transform:uppercase; text-align:left; color:var(--ink-soft); border-bottom:1px solid var(--ink); padding:5px 6px}
+.tc-app .paper th:last-child, .tc-app .paper td:last-child{text-align:right}
+.tc-app .paper td{padding:5px 6px; border-bottom:1px solid rgba(42,36,28,.14); vertical-align:top}
+.tc-app .paper td .pcalc{color:var(--ink-soft); font-size:10.5px}
+.tc-app .paper tr.pg td{font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--ink-soft); background:var(--paper-2); border-bottom:1px solid rgba(42,36,28,.2)}
+.tc-app .paper tr.pt td{font-weight:700; border-bottom:0; font-size:13.5px}
+.tc-app .paper .pnotes{margin-top:13px; font-size:10.5px; color:var(--ink-soft); line-height:1.65}
+.tc-app .paper .pnotes b{color:var(--ink)}
+.tc-app .paper .pnotes .px{color:#8a4a1f; font-weight:600}
+.tc-app .paper .psig{margin-top:16px; display:flex; justify-content:space-between; gap:14px; align-items:flex-end; flex-wrap:wrap}
+.tc-app .paper .psig .signame{font-family:var(--serif); font-style:italic; font-size:23px; color:var(--ink)}
+.tc-app .paper .psig .sigrole{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-top:3px}
+.tc-app .paper .psig .pvalid{font-size:10.5px; color:var(--ink-soft); text-align:right; line-height:1.6}
+.tc-app .sendrow{display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap}
+.tc-app .sendnote{font-size:11px; color:var(--muted); line-height:1.55; flex:1; min-width:220px}
+
+/* digest */
+.tc-app .dgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:16px}
+.tc-app .dstat{border:1px solid var(--hair); border-radius:12px; background:var(--panel-2); padding:13px 14px}
+.tc-app .dstat .n{font-family:var(--mono); font-size:20px; color:var(--fg); font-variant-numeric:tabular-nums}
+.tc-app .dstat .n em{font-style:normal; color:var(--accent)}
+.tc-app .dstat .l{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:5px; line-height:1.45}
+.tc-app .calls{border:1px solid var(--hair); border-radius:12px; overflow:hidden; margin-bottom:14px}
+.tc-app .calls .crow{display:flex; gap:10px; padding:9px 13px; border-bottom:1px solid var(--hair-soft); font-size:11.5px; line-height:1.55; color:var(--muted)}
+.tc-app .calls .crow:last-child{border-bottom:0}
+.tc-app .calls .crow b{color:var(--body); font-weight:600}
+.tc-app .calls .crow .ct{font-family:var(--mono); color:var(--accent-soft); flex:none; font-size:10.5px; padding-top:2px}
+.tc-app .dquote{border-left:2px solid var(--accent); padding:4px 0 4px 16px; font-family:var(--serif); font-style:italic; font-size:16.5px; line-height:1.55; color:var(--fg); margin:16px 0}
+.tc-app .chips{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:9px; margin-bottom:16px}
+.tc-app .chip{border:1px solid var(--hair); border-radius:11px; background:var(--panel-2); padding:11px 13px}
+.tc-app .chip .cn{font-weight:600; color:var(--fg); font-size:12px; margin-bottom:4px}
+.tc-app .chip .cl2{font-size:11px; line-height:1.55; color:var(--muted)}
+.tc-app .cta-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:4px 0 10px}
+.tc-app .btn-go{
+  display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--accent); background:var(--accent);
+  color:var(--accent-ink); height:40px; border-radius:10px; padding:0 20px; font-size:11.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:.2s var(--ease);
+}
+.tc-app .btn-go:hover{filter:brightness(1.08)}
+.tc-app .btn-quiet{appearance:none; background:transparent; border:0; color:var(--muted); font-size:12px; cursor:pointer; text-decoration:underline; text-underline-offset:3px}
+.tc-app .btn-quiet:hover{color:var(--fg)}
+
+/* under the hood: loop + pnl + fence */
+.tc-app .hood-grid{display:flex; flex-direction:column; gap:20px}
+.tc-app .loop{border:1px solid var(--hair); border-radius:12px; overflow:hidden}
+.tc-app .lnode{display:flex; gap:12px; padding:12px 14px; border-bottom:1px solid var(--hair-soft)}
+.tc-app .lnode:last-child{border-bottom:0}
+.tc-app .ldot{width:30px; height:30px; flex:none; border-radius:9px; border:1px solid var(--hair); display:grid; place-items:center; color:var(--accent)}
+.tc-app .ldot svg{width:15px; height:15px}
+.tc-app .lname{font-weight:600; color:var(--fg); font-size:12.5px; margin-bottom:2px}
+.tc-app .lgloss{font-size:11.5px; line-height:1.6; color:var(--muted)}
+.tc-app .pnl{border:1px solid var(--hair); border-radius:12px; overflow:hidden}
+.tc-app .pnl .ph{padding:10px 13px; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hair-soft); background:var(--panel-2)}
+.tc-app .pnl .ph b{color:var(--accent)}
+.tc-app .prow{display:flex; gap:12px; padding:10px 13px; border-bottom:1px solid var(--hair-soft); font-size:11.5px; line-height:1.6}
+.tc-app .prow:last-child{border-bottom:0}
+.tc-app .prow .k{flex:none; width:74px; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); padding-top:2px}
+.tc-app .prow .v{color:var(--body)}
+.tc-app .prow .v b{color:var(--fg); font-weight:600}
+.tc-app .meter{display:block; height:4px; border-radius:99px; background:var(--hair-soft); margin:8px 0 5px; overflow:hidden}
+.tc-app .meter i{display:block; height:100%; width:19%; background:var(--accent); border-radius:99px; transition:width .4s var(--ease)}
+.tc-app .spendline{display:flex; justify-content:space-between; font-size:10px; color:var(--muted-2)}
+.tc-app .spendline b{font-family:var(--mono); color:var(--body)}
+.tc-app .fence{border:1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius:12px; padding:13px 15px; background:color-mix(in srgb, var(--accent) 4%, transparent)}
+.tc-app .fence .fh{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:9px}
+.tc-app .fence ul{margin:0; padding:0; list-style:none; display:grid; gap:8px}
+.tc-app .fence li{font-size:11.5px; line-height:1.6; color:var(--body); padding-left:16px; position:relative}
+.tc-app .fence li::before{content:""; position:absolute; left:0; top:.5em; width:7px; height:7px; background:var(--accent)}
+.tc-app .fence li b{color:var(--fg); font-weight:600}
+
+/* toast */
+.tc-app .toast{position:fixed; z-index:70; left:50%; bottom:26px; translate:-50% 0; background:var(--panel-2); border:1px solid var(--hair); border-radius:12px; padding:11px 16px; font-size:12px; color:var(--body); box-shadow:0 18px 50px rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:.35s var(--ease)}
+.tc-app .toast.on{opacity:1}
+.tc-app .toast b{color:var(--accent)}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width:900px){
+  .tc-app .rail{display:none}
+  .tc-app .shell{height:auto; min-height:0}
+  .tc-app .stage{flex-direction:column}
+  .tc-app .deskscroll{max-height:72vh}
+}
+@media (max-width:640px){
+  .tc-app .topbar .role{display:none}
+  .tc-app .totalbox{margin-left:0; width:100%; justify-content:space-between}
+}
+@media (prefers-reduced-motion: reduce){
+  .tc-app .line.entering{animation:none}
+  .tc-app .wordbtn.glow,.tc-app .sendbtn.ready,.tc-app .pulse,.tc-app .qitem.hot .qs{animation:none !important}
+}
+
+/* ==== page-level styles (outside the app) ================================ */
+.tc-controls{display:flex; flex-wrap:wrap; gap:8px; margin-block-start:1.4rem}
+.tc-control{font-size:0.72rem; color:var(--muted); border:1px solid var(--hairline); padding:0.45em 0.9em}
+.tc-control b{color:var(--accent); font-weight:600}
+.tc-honest{
+  display:flex; gap:0.7rem; align-items:flex-start; max-width:70ch;
+  color:var(--muted); font-size:var(--text-small); line-height:1.65; margin-block-start:1.4rem;
+}
+.tc-honest::before{content:""; flex:none; width:8px; height:8px; margin-block-start:0.45em; background:var(--accent)}
+.tc-next .lead{max-width:66ch}
+</style>
+</head>
+<body class="grain">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="site-header-inner container">
+    <a class="site-lockup" href="/" aria-label="Agentic Standard — home">
+      <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+          <path d="M 24 56 L 24 22 L 58 22"/>
+          <path d="M 96 64 L 96 98 L 62 98"/>
+        </g>
+        <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+      </svg>
+      <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/standard">Standard</a>
+      <a href="/foundation">Foundation</a>
+      <a href="/continuum">Continuum</a>
+      <a href="/about">About</a>
+      <a href="/industries" aria-current="page">Industries</a>
+      <a class="nav-cta" href="/book">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="container">
+      <p><a class="text-link" href="/industries/fieldservices"><span aria-hidden="true">&#8592;</span> Back to Field Services &amp; Trades</a></p>
+      <div class="kicker accent rise" style="margin-block-start: 1.4rem;">Live Demo &middot; Agent 02 &middot; Field Services &amp; Trades</div>
+      <h1 class="rise">The agent does the arithmetic. The assumptions stay <em>yours</em>.</h1>
+      <p class="lead rise">You are the estimator at Ridgepole Site Services: fence, sanitation, bins, trench protection, everything a construction site needs before the first trade shows up. Quoting a full site is the hardest desk job in the shop. A teardown has one set of rules, a trench has another, the toilet count comes off a table in the safety reg, and the hoarding question is buried in a municipal bylaw. A good estimator holds all of it. Ridgepole's did, for thirty years, and Rob retired in March.</p>
+      <p class="lead rise">The agent on this desk is the Takeoff Clerk. A takeoff is the old estimating word for the count: what the job needs, counted before it is priced. The clerk reads the customer's messy email, pulls the lot off the parcel register, walks the rulebook, and builds the sheet line by line with the rule pinned to every number. What it will not do is guess silently or send. Three of the numbers on this sheet are assumptions, and the send button stays dim until each one is yours.</p>
+      <div class="tc-controls rise" aria-label="How this demo works">
+        <span class="tc-control"><b>Click</b> any why chip for the rule behind the number</span>
+        <span class="tc-control"><b>Amber</b> is an assumption, and assumptions are yours</span>
+        <span class="tc-control"><b>Send</b> unlocks when the sheet is yours</span>
+        <span class="tc-control"><b>6 minutes</b> door to door</span>
+      </div>
+      <p class="tc-honest rise">A fictional company in a fictional town. Ridgepole, Halloway &amp; Sons, Brindle Street and the City of Aldermere were all invented for this page. The safety numbers underneath them are real Ontario ones: the toilet table and the 1.2 m trench rule are from O. Reg. 213/91. The rates are invented and the bylaw is Aldermere's, which is to say ours.</p>
+    </div>
+  </section>
+
+  <!-- the console -->
+  <section class="section" id="run" style="padding-block-start: 0;">
+    <div class="container">
+
+<div class="tc-app live" id="tcApp">
+<div class="shell">
+  <svg class="bracket tl" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 6 50 L 6 6 L 50 6" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+  <svg class="bracket br" viewBox="0 0 60 60" fill="none" aria-hidden="true"><path d="M 54 10 L 54 54 L 10 54" stroke="currentColor" stroke-width="6" stroke-linecap="square"/></svg>
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <span class="role">Ridgepole Site Services &middot; you are the estimator &middot; the Takeoff Clerk answers to you</span>
+    <span class="spacer"></span>
+    <span class="envchip" title="Desk time"><span class="cl" id="clock">07:49</span><span>Tuesday</span></span>
+    <span class="envchip" title="Model spend against the per-quote cap">this quote <b id="spendChip">$0.00</b><span>/ $0.75</span></span>
+    <button class="wordbtn" id="digestBtn" hidden>The morning, written up</button>
+    <button class="wordbtn" id="hoodBtn">Under the hood</button>
+    <button class="iconbtn" id="resetBtn" title="Run it again" aria-label="Restart the demo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ STAGE ============ -->
+  <div class="stage">
+
+    <!-- LEFT · RAIL -->
+    <div class="rail" id="rail">
+      <div class="rail-head"><span class="pulse" aria-hidden="true"></span> Agent 02 &middot; <b>the-takeoff-clerk</b></div>
+      <div class="rail-scroll">
+        <div class="agent-id">
+          <div class="avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 3.5h11l3 3V20.5H5z"/><path d="M16 3.5v3h3"/>
+              <path d="M8.5 9h7M8.5 12.5h7M8.5 16H12"/><path d="M15.2 15.2l1.3 1.3 2.3-2.6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="nm">the-takeoff-clerk</div>
+            <div class="tg">counts the job, cites the rule, never guesses silently</div>
+          </div>
+          <span class="statechip on" id="stateChip">watching</span>
+        </div>
+
+        <div class="statgrid" aria-label="This morning so far">
+          <div class="sstat"><div class="n" id="stQuotes">2</div><div class="l">quotes out today</div></div>
+          <div class="sstat"><div class="n" id="stMins">4m</div><div class="l">median build</div></div>
+          <div class="sstat"><div class="n acc" id="stSpend">$0.27</div><div class="l">model spend today</div></div>
+        </div>
+
+        <div class="panelcap">The morning queue</div>
+        <div class="qitem"><span class="qs" aria-hidden="true"></span><div class="qn">Marran Glass &middot; building wrap<div class="qd">sent 07:12 &middot; 3 min build</div></div><span class="qv">$2,130</span></div>
+        <div class="qitem"><span class="qs" aria-hidden="true"></span><div class="qn">Fenwick Paving &middot; depot fence<div class="qd">sent 07:41 &middot; 4 min build</div></div><span class="qv">$8,940</span></div>
+        <div class="qitem hot" id="qHot" hidden><span class="qs" aria-hidden="true"></span><div class="qn">Halloway &amp; Sons &middot; 214 Brindle St<div class="qd" id="qHotSub">landed 07:52 &middot; building</div></div><span class="qv" id="qHotVal">&middot;&middot;&middot;</span></div>
+
+        <div class="panelcap" id="assumeCap" hidden>Assumptions on the sheet <span class="cnt" id="assumeCnt">3 open</span></div>
+        <div class="assume" id="assumeList" hidden></div>
+
+        <div class="panelcap">The rulebook it walks</div>
+        <div class="rulebook">
+          <div class="rrow"><span>Rate card lines</span><b>1,240</b></div>
+          <div class="rrow"><span>Safety reg digest</span><b>61 pages</b></div>
+          <div class="rrow"><span>Municipal bylaw digests</span><b>14 towns</b></div>
+          <div class="rrow"><span>Takeoff factors</span><b>85</b></div>
+          <div class="rrow"><span>Won jobs it learned from</span><b>1,872</b></div>
+          <div class="rfoot">Reg and bylaw texts land through a monthly digest a person approves. The clerk cites them; it never edits them.</div>
+        </div>
+
+        <div class="panelcap" id="feedCap" hidden>Rules that fired</div>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+
+    <!-- CENTER · DESK -->
+    <div class="desk">
+      <div class="sheetbar" id="sheetbar" hidden>
+        <div class="facts" id="facts"></div>
+        <div class="totalbox">
+          <div class="tl">quote total<br>before tax</div>
+          <div class="tn" id="totalNum">$0.00</div>
+          <button class="sendbtn" id="sendBtn" disabled>Send</button>
+        </div>
+        <div class="lockline" id="lockline">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <span id="lockTxt">The sheet ships when its assumptions are yours: 3 open.</span>
+        </div>
+      </div>
+
+      <div class="deskscroll" id="deskscroll">
+
+        <!-- quiet state -->
+        <div id="quietView">
+          <div class="mail" aria-hidden="true" style="opacity:.55">
+            <div class="mhead"><span class="mfrom">The desk is quiet</span><span class="mtime" id="quietClock">07:49</span></div>
+            <div class="mbody"><p>Two quotes went out before you sat down. The clerk is watching the quote mailbox, which is the whole of its job until something lands. Watching costs about a tenth of a cent an hour.</p></div>
+          </div>
+          <div class="mailrow"><button class="bigbtn" id="startBtn">Open the morning</button></div>
+        </div>
+
+        <!-- intake mail -->
+        <div id="mailView" hidden>
+          <div class="mail" id="mail1">
+            <div class="mhead"><span class="mfrom">Mike Halloway &middot; Halloway &amp; Sons Contracting</span><span class="msub">site setup, brindle st</span><span class="mtime">07:52</span></div>
+            <div class="mbody">
+              <p>Rob still owes me a coffee, tell him retirement doesn't cancel debts.</p>
+              <p>We won the teardown at <mark data-f="site">214 Brindle St</mark>. Old bungalow <mark data-f="demo">comes down May 4</mark>, then we form up for the new build. Need the site done up start to finish: <mark data-f="fence">fence the lot</mark>, <mark data-f="san">couple of cans</mark>, <mark data-f="waste">bins for the demo</mark>, the usual kit. Figure <mark data-f="weeks">8 weeks give or take</mark>. Crew is 6 on the teardown, then <mark data-f="crew">15 to 20 once framing starts</mark>.</p>
+              <p>Can you get me a number this morning? Concrete from the old foundation stays, our excavation sub deals with it on the dig.</p>
+            </div>
+            <div class="parsed" id="parsed" hidden></div>
+          </div>
+          <div class="mailrow" id="handRow"><button class="bigbtn" id="handBtn">Hand it to the clerk</button><button class="bigbtn quiet" id="whoBtn">Who is this agent?</button></div>
+
+          <!-- second mail (the event) -->
+          <div class="mail second" id="mail2" hidden>
+            <div class="mhead"><span class="mfrom">Mike Halloway</span><span class="msub">re: site setup, brindle st</span><span class="mtime" id="mail2Time">07:56</span></div>
+            <div class="mbody" id="mail2Body"></div>
+          </div>
+        </div>
+
+        <!-- the sheet -->
+        <div class="sheet" id="sheet">
+          <div class="sheethead">
+            <span class="sh1">Site setup &middot; 214 Brindle Street</span>
+            <span class="sh2">Halloway &amp; Sons Contracting &middot; corner of Brindle St and Quarry Lane, Aldermere</span>
+            <span class="shref">Q-2619 &middot; draft</span>
+          </div>
+          <div id="groups"></div>
+          <div class="totals" id="totals"></div>
+          <div class="notesbox" id="notesbox" hidden>
+            <div class="ncap">Printed on the quote &middot; notes and exclusions</div>
+            <div id="notes"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- DOCK -->
+      <div class="dock" style="margin:0 14px 14px">
+        <div class="dhead">The paper trail &middot; <span class="cnt" id="trailCount">0 entries</span> on this quote</div>
+        <div class="tickline" id="tick"><span class="t">07:49</span>watching the quote mailbox &middot; two quotes out since 07:00 &middot; the quiet is the normal state</div>
+      </div>
+    </div>
+
+  </div><!-- /.stage -->
+</div><!-- /.shell -->
+
+<!-- ============ WHY OVERLAY ============ -->
+<div class="ovl" id="why">
+  <div class="ocard">
+    <button class="iconbtn x" data-close="why" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick" id="whyKick">Why this line</div>
+    <h2 class="ohead" style="font-size:clamp(21px,3vw,27px)" id="whyHead"></h2>
+    <div class="whybox" id="whyBody"></div>
+  </div>
+</div>
+
+<!-- ============ ASSUMPTION FORK OVERLAY ============ -->
+<div class="ovl" id="fork">
+  <div class="ocard">
+    <button class="iconbtn x" data-close="fork" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick" id="forkKick">Assumption</div>
+    <h2 class="ohead" style="font-size:clamp(21px,3vw,27px)" id="forkHead"></h2>
+    <div class="whybox" id="forkBody"></div>
+  </div>
+</div>
+
+<!-- ============ SIGN OVERLAY ============ -->
+<div class="ovl" id="sign">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="sign" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">The paper &middot; what Mike receives</div>
+    <h2 class="ohead" style="font-size:clamp(22px,3.4vw,30px)" id="signHead">One decision left, and it is a <em>pricing</em> one.</h2>
+    <div class="olead" id="signLead">Halloway &amp; Sons has sent Ridgepole 31 jobs in two years. The rate card allows a relationship sharpen of up to 6 percent before anything needs the owner's initials. The clerk prices at book and leaves the knob where it belongs: under your hand.</div>
+    <div class="forkrow" id="sharpenRow" style="margin-bottom:16px">
+      <button class="forkbtn" id="sharpBook">
+        <span class="fbtag">Book rate</span>
+        <span class="fbt">Send at the card</span>
+        <span class="fbs">The number the rulebook built. Nothing to explain to the owner on Friday.</span>
+      </button>
+      <button class="forkbtn" id="sharpCut">
+        <span class="fbtag">Sharpen 4%</span>
+        <span class="fbt">Take it to the floor of your discretion</span>
+        <span class="fbs">Halloway's volume earns it under the card's own rule. The sheet reprints the moment you choose.</span>
+      </button>
+    </div>
+    <div class="paper" id="paper" aria-label="The quote as the customer sees it"></div>
+    <div class="sendrow">
+      <button class="btn-go" id="sendFinal">Send it as J. Mercer</button>
+      <p class="sendnote">The clerk drafted the email and attached the sheet. The send button is wired to you, not to it. Your name goes on the paper because the judgment on it was yours.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DIGEST ============ -->
+<div class="ovl" id="digest">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="digest" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">The morning, written up</div>
+    <h2 class="ohead" style="font-size:clamp(24px,3.6vw,32px)">Three quotes before eight. The old desk owed <em>callbacks</em>.</h2>
+    <div class="dgrid" id="dgrid"></div>
+    <div class="panelcap" style="margin:0 0 8px">Your calls, as logged</div>
+    <div class="calls" id="dcalls"></div>
+    <p class="olead" id="dline"></p>
+    <div class="dquote">"The number that wins is the one that lands while the GC is still standing on the site. The number that survives is the one where every line can say why it is there. This desk now does both, and neither part of that is the clerk's judgment. It is yours, multiplied."</div>
+    <div class="panelcap" style="margin:18px 0 8px">Same clerk &middot; other rate cards</div>
+    <div class="chips">
+      <div class="chip"><div class="cn">Scaffolding &amp; shoring</div><div class="cl2">Elevation drives the count, the engineer's letter drives the schedule. Same sheet, same citations, taller rulebook.</div></div>
+      <div class="chip"><div class="cn">Crane &amp; matting</div><div class="cl2">Ground pressure tables and road permits instead of toilet counts. The permit lead time prints on the quote face.</div></div>
+      <div class="chip"><div class="cn">Temporary power &amp; heat</div><div class="cl2">Load calcs off the trade list, generator sizing off the load, fuel off the season. One email in, a sized spec out.</div></div>
+      <div class="chip"><div class="cn">Aggregate &amp; concrete supply</div><div class="cl2">Volumes off the drawings, truck cycles off the route, wash-out rules off the municipality. Priced while the site walk is still going.</div></div>
+      <div class="chip"><div class="cn">Event &amp; film infrastructure</div><div class="cl2">Occupancy tables set the toilet count here too. Swap the safety reg for the licensing rules and the desk is the same desk.</div></div>
+      <div class="chip"><div class="cn">Equipment rental desks</div><div class="cl2">Attachments, transport class, damage waiver logic. The counter quote that used to take a callback happens in the first call.</div></div>
+    </div>
+    <div class="cta-row">
+      <a class="btn-go" href="/book">Book the call</a>
+      <button class="btn-quiet" id="againBtn">run the morning again</button>
+    </div>
+    <p class="fine">The sheet was the demo. The loop is the product: a trigger, a read-only look at the rulebook, cheap rules before expensive thinking, a drafted action, a named human, a log. The Readiness Map prices it against your real desk.</p>
+  </div>
+</div>
+
+<!-- ============ UNDER THE HOOD ============ -->
+<div class="ovl" id="hood">
+  <div class="ocard wide">
+    <button class="iconbtn x" data-close="hood" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="okick">Under the hood</div>
+    <h2 class="ohead" style="font-size:clamp(24px,3.6vw,32px)">One loop. The same one on <em>every</em> desk we deploy.</h2>
+    <div class="hood-grid">
+      <div>
+        <div class="panelcap" style="margin-bottom:8px">The loop it runs</div>
+        <div class="loop">
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+            <div><div class="lname">Trigger</div><div class="lgloss">the quote mailbox, and nothing else. A request lands, the clerk wakes. Between requests it watches, which costs about a tenth of a cent an hour.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></span>
+            <div><div class="lname">Read</div><div class="lgloss">the rate card, the safety reg digest, the bylaw digest for the job's town, the parcel register, and two years of won jobs. Read-only, every one.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 7a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5 5 5 0 0 1-5-5v0a5 5 0 0 1 5-5z"/><path d="M12 17v4M7.5 9.5 4 7.5M16.5 9.5 20 7.5M7.5 14.5 4 16.5M16.5 14.5 20 16.5"/></svg></span>
+            <div><div class="lname">Think</div><div class="lgloss">rules first: the toilet table, the trench thresholds, the perimeter arithmetic and the takeoff factors are lookups that cost nothing. The model wakes only to read Mike's sentences and label what is stated, assumed and missing.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-3.5-7.5L3 10z"/></svg></span>
+            <div><div class="lname">Act</div><div class="lgloss">a draft sheet with every line cited, assumptions flagged in amber, and a drafted clarifying question when a fact is load-bearing. It cannot send either one.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20.5c.8-4 3.5-6 7-6s6.2 2 7 6"/></svg></span>
+            <div><div class="lname">Your call</div><div class="lgloss">every assumption, every exception to a code line, the sharpen, and the send. The judgment on the sheet is a person's. The clerk just makes it legible.</div></div></div>
+          <div class="lnode"><span class="ldot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9.5 13h6M9.5 16.5h6M9.5 9.5H12"/></svg></span>
+            <div><div class="lname">Log</div><div class="lgloss">every rule that fired, every rate line read, every assumption and who disposed it, every cent of model time. When a customer disputes a line in August, the sheet answers for itself.</div></div></div>
+        </div>
+      </div>
+
+      <div class="pnl" aria-label="The agent's P&amp;L">
+        <div class="ph">The agent's <b>P&amp;L</b> &middot; five lines before it touched real work</div>
+        <div class="prow"><span class="k">Scope</span><span class="v">Turn requests into draft quotes with every line cited, ask when a fact is load-bearing, chase sent quotes at cadence. <b>Nothing else.</b></span></div>
+        <div class="prow"><span class="k">Owner</span><span class="v"><b>You.</b> The estimator. One named human, not a committee and not a channel.</span></div>
+        <div class="prow"><span class="k">Budget</span><span class="v"><b>$0.75 a quote</b>, enforced in the request path. Reading Mike's email cost about nine cents; the rest of this sheet was lookups.
+          <span class="meter"><i id="spendBar"></i></span>
+          <span class="spendline"><span>spent on this quote</span><b id="spendNum">$0.00</b></span>
+        </span></div>
+        <div class="prow"><span class="k">Review</span><span class="v">Monthly, on <b>win rate, margin drift, and lines a customer caught wrong</b>. The third number has been zero for four months, and it is the one that matters.</span></div>
+        <div class="prow"><span class="k">Paper trail</span><span class="v">On since day one. <b id="trailCount2">0 entries</b> on this quote, in the dock under the sheet.</span></div>
+      </div>
+
+      <div class="fence">
+        <div class="fh">The fence around it &middot; why this is safe to own</div>
+        <ul>
+          <li>It reads the rate card. <b>It cannot edit a rate</b>, and a price under your discretion floor escalates to the owner instead of shipping.</li>
+          <li>It cites the reg and the bylaw. <b>It cannot waive them silently.</b> Strike a code line and the exclusion prints on the quote face with the citation attached.</li>
+          <li>Every assumption is <b>labelled amber and listed</b>. The send button is not wired until a person has disposed each one.</li>
+          <li>It drafts the email and the clarifying questions. <b>The send button is wired to you.</b> Nothing leaves the shop under its own name.</li>
+          <li>It reads <b>your documents, not the open web</b>. New reg and bylaw text lands through a monthly digest a person approves.</li>
+          <li>Every quote carries its trail: rules fired, rates read, assumptions and their owners, model spend. <b>A disputed line answers for itself.</b></li>
+        </ul>
+      </div>
+      <p class="fine" style="margin-top:2px">A fictional company, an invented rate card, real safety arithmetic. The loop is the product: swap the rate card and the digests, and the same six boxes quote scaffolding, cranes, temporary power, or an equipment counter.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div><!-- /.tc-app -->
+
+    </div>
+  </section>
+
+  <!-- what this was -->
+  <section class="section section-rule tc-next">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Same Loop</div>
+        <h2>The sheet was the demo. The <em>loop</em> is the product.</h2>
+        <p class="lead">A trigger the agent waits on, a read-only look at documents you already keep, cheap rules before expensive thinking, a drafted action a person signs, and a log of all of it. Swap the rate card and the digests, and the same six boxes quote scaffolding, temporary power, crane pads, or the rental counter. The judgment never moves. It just stops being the bottleneck.</p>
+        <p class="ind-cta" style="margin-block-start: 1.4rem;"><a class="text-link" href="/industries/fieldservices">See the other two agents on this desk <span aria-hidden="true">&#8594;</span></a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- final CTA -->
+  <section class="section inverted cta-final" style="text-align:center;">
+    <div class="container">
+      <div class="reveal">
+        <div class="kicker accent">The Real Numbers</div>
+        <h2 style="max-width:24ch; margin-inline:auto;">Enough demos. Get <em>your</em> number.</h2>
+      </div>
+      <div class="reveal reveal-late">
+        <p class="lead" style="max-width:56ch; margin:0 auto clamp(1.75rem, 4vw, 2.5rem);">Ridgepole is invented. Your quote desk is not. The Readiness Map makes it exact: your rate card, your rulebook, your first agents, with names and owners.</p>
+        <a class="btn" href="/book">Book the call</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-lockup" href="/">
+          <svg class="site-mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="square" stroke-width="7">
+              <path d="M 24 56 L 24 22 L 58 22"/>
+              <path d="M 96 64 L 96 98 L 62 98"/>
+            </g>
+            <circle cx="60" cy="60" r="5.5" fill="var(--accent, #D27A3F)"/>
+          </svg>
+          <span class="site-wordmark">Agentic<span class="wordmark-dot">.</span>Standard</span>
+        </a>
+        <p class="footer-tagline">We put AI agents to work inside your company, and prove it in six weeks.</p>
+      </div>
+      <nav class="footer-col" aria-label="The Work">
+        <div class="footer-heading">The Work</div>
+        <a href="/foundation">The Foundation</a>
+        <a href="/continuum">The Continuum</a>
+      </nav>
+      <nav class="footer-col" aria-label="The Firm">
+        <div class="footer-heading">The Firm</div>
+        <a href="/standard">The Standard</a>
+        <a href="/about">About</a>
+        <a href="/industries">Industries</a>
+        <a href="/book">Book a Call</a>
+      </nav>
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <a href="mailto:jordan@theagenticstandard.com">jordan@theagenticstandard.com</a>
+        <p class="footer-detail">Canada<br>Remote-capable</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Agentic Standard Inc.</div>
+      <div>theagenticstandard.com</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ==== A Quote With The Takeoff Clerk · engine ============================
+   The rulebook is data, the sheet is derived, and every recompute diffs
+   against the last render so changed lines say so out loud. No libraries. */
+(function () {
+'use strict';
+
+var $ = function (s) { return document.querySelector(s); };
+var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+/* ---------------- the world ---------------- */
+var SITE = {
+  frontA: 15.2, frontB: 39.6,          /* two public frontages, corner lot */
+  meshRun: 48,                          /* lane + south line, net of gates  */
+  area: 139,                            /* m² of bungalow, parcel register  */
+  roll: '0421-118'
+};
+
+var RATE = {
+  hoardWk: 9.80, hoardIn: 24.00,
+  meshWk: 3.25, meshIn: 5.50,
+  gateVehIn: 85, gateVehWk: 22, gatePedIn: 40, gatePedWk: 9,
+  toiletWk: 138, washWk: 52, svc2Wk: 35,
+  binMixed: 685, binConc: 585,
+  waterWk: 120, signPack: 60,
+  boxWk: 310, boxDel: 180, plateWk: 85, ladderWk: 28,
+  delivery: 980,
+  waiverPct: 0.08, enviroPct: 0.045,
+  mixedPerM2: 28
+};
+
+function toilets(crew) {
+  if (crew <= 40) { return Math.max(1, Math.ceil(crew / 10)); }
+  return 4 + Math.ceil((crew - 40) / 15);
+}
+
+/* ---------------- state ---------------- */
+var S = {
+  phase: 'quiet',            /* quiet -> mail -> parsing -> building -> assum -> ready -> sent */
+  crew: 20, weeks: 8, trench: false, hoarding: 'bylaw',   /* bylaw | gc */
+  weeksMode: null,           /* 'overrun' (8 + printed overrun rate) or 'flat10' */
+  crewMode: null,            /* 'asked' or 'kept' */
+  sharpen: 0,
+  asum: { crew: false, weeks: false, hoard: false },
+  spend: 0, trail: 0, clockMin: 469,  /* 07:49 */
+  built: false, sent: false, eventDone: false,
+  prevAmounts: {},
+  calls: []
+};
+var CAP = 0.75;
+var TIMERS = [];
+function later(fn, ms) { var id = setTimeout(fn, ms); TIMERS.push(id); return id; }
+function clearTimers() { while (TIMERS.length) { clearTimeout(TIMERS.pop()); } }
+
+/* ---------------- helpers ---------------- */
+function money(n) {
+  var neg = n < 0;
+  var v = Math.abs(n);
+  var s = v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '-$' : '$') + s;
+}
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function clockStr() { return pad(Math.floor(S.clockMin / 60)) + ':' + pad(S.clockMin % 60); }
+function tickClock(mins) { S.clockMin += mins; $('#clock').textContent = clockStr(); }
+function spend(d) {
+  S.spend = Math.min(CAP, S.spend + d);
+  $('#spendChip').textContent = money(S.spend);
+  $('#spendNum').textContent = money(S.spend);
+  $('#spendBar').style.width = (S.spend / CAP * 100).toFixed(1) + '%';
+  $('#stSpend').textContent = money(0.27 + S.spend);
+}
+function log(msg) {
+  S.trail += 1;
+  $('#trailCount').textContent = S.trail + ' entries';
+  $('#trailCount2').textContent = S.trail + ' entries';
+  $('#tick').innerHTML = '<span class="t">' + clockStr() + '</span>' + msg;
+}
+function feed(msg, hit) {
+  $('#feedCap').hidden = false;
+  var el = document.createElement('div');
+  el.className = 'frow' + (hit ? ' hit' : '');
+  el.innerHTML = msg;
+  var f = $('#feed');
+  f.insertBefore(el, f.firstChild);
+  while (f.children.length > 9) { f.removeChild(f.lastChild); }
+}
+function toast(msg, ms) {
+  var t = $('#toast');
+  t.innerHTML = msg;
+  t.classList.add('on');
+  later(function () { t.classList.remove('on'); }, ms || 3400);
+}
+function setState(txt, cls) {
+  var c = $('#stateChip');
+  c.textContent = txt;
+  c.className = 'statechip ' + (cls || 'on');
+}
+
+/* ---------------- sources (the citations) ---------------- */
+var SRC = {
+  reg29: { tag: 'O. Reg. 213/91 (Construction Projects) &middot; s. 29.1', text: 'A constructor shall provide one toilet for each group of ten workers or fewer, up to forty workers, and one more for each additional group of fifteen. The amendments since 2023 added condition, privacy and servicing-record rules; the service schedule on this sheet is how a site passes them.' },
+  regTrench: { tag: 'O. Reg. 213/91 &middot; Part III, excavations', text: 'A worker may not enter a trench deeper than 1.2 m unless the walls are sloped, shored, or protected by a support system. Past 3.0 m the system is designed by an engineer. At 2.4 m a stock trench box carries the job.' },
+  bylaw: { tag: 'City of Aldermere &middot; Bylaw 44-2018, s. 6', text: 'Demolition within 4.5 m of a public way requires solid hoarding not less than 1.8 m in height along that frontage for the duration of the work. Open-mesh fencing is acceptable on frontages not abutting a public way.' },
+  parcel: { tag: 'Aldermere parcel register &middot; roll ' + SITE.roll, text: '214 Brindle Street: 15.2 m by 39.6 m corner parcel at Brindle Street and Quarry Lane. Detached dwelling, one storey, 139 m², built 1954. Two public frontages.' },
+  factor: { tag: 'Ridgepole takeoff factors &middot; teardown table', text: 'Wood-frame teardown: one 40 yd mixed haul per 28 m² of floor area. Clean concrete rides alone in the 14 yd: the axle limit caps the load before the walls do, and one slab in a mixed 40 kills the clean-fill rate.' },
+  card: { tag: 'Ridgepole rate card &middot; spring book', text: 'Rates as filed by the owner in March. The clerk reads this card and cannot write to it. Discretion band for repeat accounts: to 6 percent, on the estimator’s own signature. Deeper goes to the owner.' },
+  mail: { tag: 'Mike’s email &middot; 07:52', text: 'fence the lot &middot; couple of cans &middot; bins for the demo &middot; 8 weeks give or take &middot; crew 15 to 20 once framing starts &middot; concrete stays for the excavation sub.' },
+  mail2: { tag: 'Mike’s reply &middot; this morning', text: 'Call it 24 with the framing subs some days. Also forgot: service trench for the new water line, about 18 m, call it 2.4 deep. We dig it Thursday of week 3, protection is yours.' },
+  won: { tag: 'Won-jobs history &middot; 1,872 quotes', text: 'Quotes answered the same morning close at 2.6 times the rate of quotes answered the next day. Halloway &amp; Sons: 31 jobs in 24 months, no disputes, pays in 28 days.' }
+};
+
+function srcBox(src) {
+  return '<div class="srcbox"><div class="stag">' + src.tag + '</div><div class="stxt">' + src.text + '</div></div>';
+}
+function regTableHtml(crew) {
+  var rows = [ [1, 10, 1], [11, 20, 2], [21, 30, 3], [31, 40, 4] ];
+  var h = '<div class="regtable">';
+  rows.forEach(function (r) {
+    var hot = crew >= r[0] && crew <= r[1];
+    h += '<div class="rr' + (hot ? ' hot' : '') + '"><span>' + r[0] + ' to ' + r[1] + ' workers</span><span>' + (hot ? '<b>' : '') + r[2] + (r[2] > 1 ? ' toilets' : ' toilet') + (hot ? '</b>' : '') + '</span></div>';
+  });
+  h += '<div class="rr' + (crew > 40 ? ' hot' : '') + '"><span>41 and up</span><span>4, then 1 per 15</span></div></div>';
+  return h;
+}
+
+/* ---------------- the takeoff rules ---------------- */
+/* Each rule returns line objects: {id, grp, label, calc, amount, rental, why} */
+function computeLines() {
+  var L = [];
+  var wk = S.weeks;
+  var frontRun = (SITE.frontA + SITE.frontB);         /* 54.8 */
+  var tCount = toilets(S.crew);
+  var washCount = Math.ceil(tCount / 2);
+  var svc2 = S.crew >= 20;
+
+  /* SECURE THE SITE */
+  if (S.hoarding === 'bylaw') {
+    L.push({ id: 'hoardR', grp: 'secure', label: 'Solid hoarding, 2.4 m, both street frontages', calc: frontRun.toFixed(1) + ' m &#215; ' + money(RATE.hoardWk) + '/m&middot;wk &#215; ' + wk + ' wk', amount: frontRun * RATE.hoardWk * wk, rental: true,
+      why: { head: 'Why hoarding, when Mike said fence?', kick: 'Secure the site', chain: [ 'The parcel register says corner lot: <b>two</b> public frontages, Brindle and Quarry, ' + frontRun.toFixed(1) + ' m between them.', 'This is a demolition. The Aldermere bylaw requires <b>solid hoarding at 1.8 m or better</b> along any public frontage during demo. Mesh is not compliant there.', 'Kept for the full ' + wk + ' weeks: a mid-job swap to mesh costs more than the weeks it would save, and the frontage keeps its sightline protection through the build.' ], srcs: [SRC.bylaw, SRC.parcel] } });
+    L.push({ id: 'hoardI', grp: 'secure', label: 'Hoarding supply, install and removal', calc: frontRun.toFixed(1) + ' m &#215; ' + money(RATE.hoardIn) + '/m', amount: frontRun * RATE.hoardIn, rental: false,
+      why: { head: 'Install priced by the metre', kick: 'Secure the site', chain: [ 'Panels, posts, wind bracing and the crew day are folded into one per-metre install rate off the card.', 'Removal at job end is in the same rate, so the last invoice holds no surprise.' ], srcs: [SRC.card] } });
+  }
+  L.push({ id: 'meshR', grp: 'secure', label: 'Temporary mesh fence, lane and south line', calc: SITE.meshRun + ' m &#215; ' + money(RATE.meshWk) + '/m&middot;wk &#215; ' + wk + ' wk', amount: SITE.meshRun * RATE.meshWk * wk, rental: true,
+    why: { head: '"Fence the lot", the compliant half', kick: 'Secure the site', chain: [ 'The two frontages that do not abut a public way take open mesh under the bylaw: the lane and the south lot line.', SITE.meshRun + ' m net of the two gates. Panels on stands, no ground penetration, which matters before locates are in.' ], srcs: [SRC.bylaw, SRC.mail] } });
+  L.push({ id: 'meshI', grp: 'secure', label: 'Mesh install and removal', calc: SITE.meshRun + ' m &#215; ' + money(RATE.meshIn) + '/m', amount: SITE.meshRun * RATE.meshIn, rental: false,
+    why: { head: 'Install priced by the metre', kick: 'Secure the site', chain: ['One crew visit out, one back. Off the card.'], srcs: [SRC.card] } });
+  L.push({ id: 'gateV', grp: 'secure', label: 'Vehicle gate, 6 m double, supplied and hung', calc: money(RATE.gateVehIn) + ' + ' + money(RATE.gateVehWk) + '/wk &#215; ' + wk + ' wk', amount: RATE.gateVehIn + RATE.gateVehWk * wk, rental: true,
+    why: { head: 'One way in for iron', kick: 'Secure the site', chain: [ 'Bins swap and the demo excavator arrives on a float: 6 m clear is the rulebook minimum for a roll-off truck’s turn.', 'Placed on Quarry Lane, off the busier frontage, which is how the last 14 corner-lot jobs ran.' ], srcs: [SRC.card, SRC.won] } });
+  L.push({ id: 'gateP', grp: 'secure', label: 'Pedestrian gate with latch', calc: money(RATE.gatePedIn) + ' + ' + money(RATE.gatePedWk) + '/wk &#215; ' + wk + ' wk', amount: RATE.gatePedIn + RATE.gatePedWk * wk, rental: true,
+    why: { head: 'The crew door', kick: 'Secure the site', chain: ['A separate man-gate keeps the vehicle gate closed, which is the cheapest security line on any site.'], srcs: [SRC.card] } });
+
+  /* SANITATION */
+  L.push({ id: 'toilets', grp: 'san', label: 'Site toilets &#215; ' + tCount + ', weekly service included', calc: tCount + ' &#215; ' + money(RATE.toiletWk) + '/wk &#215; ' + wk + ' wk', amount: tCount * RATE.toiletWk * wk, rental: true, asum: 'crew',
+    why: { head: tCount + ' units is not a guess. It is a table.', kick: 'Sanitation', chain: [ 'Peak crew governs, not the average: <b>' + S.crew + '</b> at framing is the number the reg reads.', 'The table says <b>' + tCount + '</b> for a crew of ' + S.crew + '. Units land day one: the teardown crew of six still needs the first one.', regTableHtml(S.crew) ], srcs: [SRC.reg29] } });
+  L.push({ id: 'wash', grp: 'san', label: 'Hand-wash station' + (washCount > 1 ? 's &#215; ' + washCount : ''), calc: washCount + ' &#215; ' + money(RATE.washWk) + '/wk &#215; ' + wk + ' wk', amount: washCount * RATE.washWk * wk, rental: true, asum: 'crew',
+    why: { head: 'Wash follows the toilet count', kick: 'Sanitation', chain: ['Rulebook pairing: one wash station per two toilet units, and the 2023 amendments made wash-up facilities an inspector’s first stop.'], srcs: [SRC.reg29, SRC.card] } });
+  if (svc2) {
+    L.push({ id: 'svc2', grp: 'san', label: 'Second weekly service visit', calc: tCount + ' units &#215; ' + money(RATE.svc2Wk) + '/wk &#215; ' + wk + ' wk', amount: tCount * RATE.svc2Wk * wk, rental: false, asum: 'crew',
+      why: { head: 'Twice a week past twenty workers', kick: 'Sanitation', chain: [ 'Ridgepole’s own rule, learned from service tickets: past twenty workers, once-a-week service generates complaint calls by week two.', 'It is also the servicing record the newer reg amendments expect a constructor to be able to show.' ], srcs: [SRC.card, SRC.reg29] } });
+  }
+
+  /* WASTE */
+  var hauls = Math.ceil(SITE.area / RATE.mixedPerM2);
+  L.push({ id: 'binMix', grp: 'waste', label: '40 yd mixed C&amp;D bins, ' + hauls + ' hauls (estimate, billed per haul)', calc: hauls + ' &#215; ' + money(RATE.binMixed) + ', 3 t included each, overage $98/t', amount: hauls * RATE.binMixed, rental: false,
+    why: { head: 'Five hauls came off a table, not a hunch', kick: 'Waste', chain: [ 'The parcel register says <b>139 m²</b> of one-storey wood frame.', 'Teardown factor: one 40 yd mixed haul per 28 m² of floor. 139 over 28 is 4.96: <b>five hauls</b>.', 'Estimated and billed per haul, which the quote face says plainly. If Mike’s crew crushes tight and uses four, he pays four.' ], srcs: [SRC.factor, SRC.parcel] } });
+  L.push({ id: 'binConc', grp: 'waste', label: '14 yd clean concrete bins &#215; 2: walk and porch pad only', calc: '2 &#215; ' + money(RATE.binConc) + ' flat', amount: 2 * RATE.binConc, rental: false,
+    why: { head: 'Concrete never rides in the 40', kick: 'Waste', chain: [ 'Weight, not volume: the axle limit fills a 14 yd bin of concrete long before its walls do.', 'And one slab in a mixed 40 kills the clean-fill rate for the whole load.', 'Only the front walk and porch pad are ours: Mike’s email leaves the foundation for his excavation sub, and the sheet prints that exclusion rather than silently quoting it.' ], srcs: [SRC.factor, SRC.mail] } });
+
+  /* DEMOLITION SUPPORT */
+  L.push({ id: 'water', grp: 'demo', label: 'Water tank 1,100 L with pump, dust control, demo phase', calc: '2 wk &#215; ' + money(RATE.waterWk) + '/wk', amount: 2 * RATE.waterWk, rental: true,
+    why: { head: 'Two weeks, not eight', kick: 'Demolition support', chain: [ 'Dust suppression is required while the structure comes down, and the teardown window is weeks one and two.', 'Lines carry their own durations: renting the tank for the full eight weeks would be $720 of nothing.' ], srcs: [SRC.card, SRC.mail] } });
+  L.push({ id: 'sign', grp: 'demo', label: 'Demolition signage and barrier tape pack', calc: 'flat', amount: RATE.signPack, rental: false,
+    why: { head: 'The cheapest line an inspector checks first', kick: 'Demolition support', chain: ['Danger and PPE signage at both gates, per the reg’s posting requirements. Sixty dollars against a stop-work order.'], srcs: [SRC.reg29] } });
+
+  /* TRENCH */
+  if (S.trench) {
+    L.push({ id: 'box', grp: 'trench', label: 'Trench box, 2.4 m rated, week 3', calc: '1 wk &#215; ' + money(RATE.boxWk) + ' + ' + money(RATE.boxDel) + ' heavy delivery', amount: RATE.boxWk + RATE.boxDel, rental: true, isNew: true,
+      why: { head: '2.4 m is past the line where opinion stops', kick: 'Trench protection', chain: [ 'Mike’s trench is <b>2.4 m deep</b>. The reg’s threshold is 1.2 m: past it, no worker enters without sloping, shoring, or a box.', 'Under 3.0 m, a stock box carries it. Past 3.0 m this line would read <b>engineered design</b> and add a lead time to the quote face.', 'Priced for week 3 only. His crew digs; our iron protects.' ], srcs: [SRC.regTrench, SRC.mail2] } });
+    L.push({ id: 'plates', grp: 'trench', label: 'Road plates &#215; 2, drive apron crossing', calc: '2 &#215; ' + money(RATE.plateWk) + '/wk &#215; 1 wk', amount: 2 * RATE.plateWk, rental: true, isNew: true,
+      why: { head: 'An 18 m run crosses the apron', kick: 'Trench protection', chain: ['A water-line trench from the main to the house crosses the drive apron on this lot. Two plates keep Mike’s own deliveries rolling over it.'], srcs: [SRC.mail2, SRC.parcel] } });
+    L.push({ id: 'ladder', grp: 'trench', label: 'Trench access ladder', calc: '1 wk &#215; ' + money(RATE.ladderWk), amount: RATE.ladderWk, rental: true, isNew: true,
+      why: { head: 'The reg reads ladders too', kick: 'Trench protection', chain: ['Safe access within reach of workers in the trench. It is a $28 line, and its absence is the first thing a ministry visit finds.'], srcs: [SRC.regTrench] } });
+  }
+
+  /* DELIVERY */
+  L.push({ id: 'deliv', grp: 'deliv', label: 'Delivery, install crew and pickup, zone 2', calc: '3 trucks out, day one &middot; 1 back, job end', amount: RATE.delivery, rental: false,
+    why: { head: 'One line, three trucks', kick: 'Delivery and service', chain: [ 'Fence truck with the install crew, roll-off placing the first bins, sanitation route truck: day one is three vehicles.', 'Brindle Street sits in zone 2 of the card. Pickup at job end is the fourth movement, priced in.' ], srcs: [SRC.card, SRC.parcel] } });
+
+  return L;
+}
+
+function computeTotals(lines) {
+  var sub = 0, rentBase = 0;
+  lines.forEach(function (l) { sub += l.amount; if (l.rental) { rentBase += l.amount; } });
+  var sharp = S.sharpen > 0 ? -(sub * S.sharpen) : 0;
+  var base = sub + sharp;
+  var rentAfter = rentBase * (S.sharpen > 0 ? (1 - S.sharpen) : 1);
+  var waiver = rentAfter * RATE.waiverPct;
+  var enviro = base * RATE.enviroPct;
+  return { sub: sub, sharp: sharp, waiver: waiver, enviro: enviro, rentBase: rentBase, total: base + waiver + enviro };
+}
+
+/* ---------------- rendering ---------------- */
+var GRP = {
+  secure: { name: 'Secure the site', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M3.5 20V8M10 20V8M17 20V8M3.5 11h17M3.5 16h17"/><path d="M20.5 20V8"/></svg>' },
+  san: { name: 'Sanitation', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="7" y="3.5" width="10" height="17"/><path d="M7 8.5h10"/><circle cx="14.4" cy="13" r="0.9" fill="currentColor" stroke="none"/></svg>' },
+  waste: { name: 'Waste', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M4 9h16l-2 11H6z"/><path d="M2.5 9l3-4.5h13L21.5 9"/></svg>' },
+  demo: { name: 'Demolition support', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M4 20h16"/><path d="M6.5 20V11l5-6 6 4.5V20"/><path d="M11.5 20v-5h3v5"/></svg>' },
+  trench: { name: 'Trench protection', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M3 5h18"/><path d="M7 5v14h10V5"/><path d="M7 12h10"/></svg>' },
+  deliv: { name: 'Delivery and service', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M2.5 16V6h12v10z"/><path d="M14.5 9h4l2.5 3.5V16h-6.5"/><circle cx="6.5" cy="17.8" r="1.8"/><circle cx="17.5" cy="17.8" r="1.8"/></svg>' }
+};
+var GRP_ORDER = ['secure', 'san', 'waste', 'demo', 'trench', 'deliv'];
+
+var WHY_STORE = {};
+
+function lineHtml(l) {
+  var tags = '';
+  if (l.isNew) { tags += '<span class="tag-new">new</span>'; }
+  if (l.asum && !S.asum[l.asum]) { tags += '<span class="tag-asm" data-asum="' + l.asum + '">assumed</span>'; }
+  return '<div class="ln"><span>' + l.label + '</span><button class="whychip' + (l.why.srcs[0] === SRC.reg29 || l.why.srcs[0] === SRC.regTrench || l.why.srcs[0] === SRC.bylaw ? ' reg' : '') + '" data-why="' + l.id + '">why</button>' + tags + '</div>' +
+         '<div class="lc">' + l.calc + '</div>' +
+         '<div class="lv">' + money(l.amount) + '</div>';
+}
+
+function renderSheet(animate) {
+  var lines = computeLines();
+  var totals = computeTotals(lines);
+  var groupsEl = $('#groups');
+
+  var byGrp = {};
+  lines.forEach(function (l) {
+    WHY_STORE[l.id] = l.why;
+    if (!byGrp[l.grp]) { byGrp[l.grp] = []; }
+    byGrp[l.grp].push(l);
+  });
+
+  var html = '';
+  GRP_ORDER.forEach(function (g) {
+    if (!byGrp[g]) { return; }
+    var gsub = 0;
+    var rows = '';
+    byGrp[g].forEach(function (l) {
+      gsub += l.amount;
+      var changed = S.prevAmounts[l.id] !== undefined && Math.abs(S.prevAmounts[l.id] - l.amount) > 0.005;
+      var entering = S.prevAmounts[l.id] === undefined && animate;
+      rows += '<div class="line' + (entering ? ' entering' : '') + (changed ? ' changed' : '') + '" data-line="' + l.id + '">' + lineHtml(l) + '</div>';
+    });
+    html += '<div class="grp" data-grp="' + g + '"><div class="ghead">' + GRP[g].icon + '<span>' + GRP[g].name + '</span><span class="gsub">' + money(gsub) + '</span></div>' + rows + '</div>';
+  });
+  groupsEl.innerHTML = html;
+
+  var t = '';
+  t += '<div class="trow"><span class="tk">Subtotal</span><span class="tv">' + money(totals.sub) + '</span></div>';
+  if (totals.sharp < 0) {
+    t += '<div class="trow"><span class="tk">Relationship rate, 4% within your discretion<button class="whychip" data-why="_sharp">why</button></span><span class="tv">' + money(totals.sharp) + '</span></div>';
+  }
+  t += '<div class="trow"><span class="tk">Damage waiver, 8% of rental lines<button class="whychip" data-why="_waiver">why</button></span><span class="tv">' + money(totals.waiver) + '</span></div>';
+  t += '<div class="trow"><span class="tk">Environmental and fuel recovery, 4.5%<button class="whychip" data-why="_enviro">why</button></span><span class="tv">' + money(totals.enviro) + '</span></div>';
+  t += '<div class="trow grand"><span class="tk">Total before HST</span><span class="tv">' + money(totals.total) + '</span></div>';
+  $('#totals').innerHTML = t;
+
+  WHY_STORE['_waiver'] = { head: 'Waivable, and the sheet says how', kick: 'Quote-level', chain: [ 'Eight percent on the rental lines covers damage to Ridgepole’s iron on site.', 'Waived entirely when the GC’s certificate of insurance names Ridgepole as additional insured: the quote face says so, because a fee a customer can remove is a fee you should show them how to remove.' ], srcs: [SRC.card] };
+  WHY_STORE['_enviro'] = { head: 'The trucks, the fuel, the tipping floor', kick: 'Quote-level', chain: ['A flat recovery on everything that rides a truck. On the card, printed on the face, never buried in a rate.'], srcs: [SRC.card] };
+  WHY_STORE['_sharp'] = { head: 'Inside your discretion, on your signature', kick: 'Quote-level', chain: [ 'The card gives repeat accounts up to 6 percent on the estimator’s own call. You took four.', 'Below the band it would not ship: the sheet escalates to the owner instead. That rule is in the fence, not in your inbox.' ], srcs: [SRC.card, SRC.won] };
+
+  var prev = {};
+  lines.forEach(function (l) { prev[l.id] = l.amount; });
+  S.prevAmounts = prev;
+
+  var tn = $('#totalNum');
+  if (tn.textContent !== money(totals.total)) {
+    tn.textContent = money(totals.total);
+    tn.classList.remove('bump');
+    void tn.offsetWidth;
+    tn.classList.add('bump');
+  }
+  $('#qHotVal').textContent = money(totals.total);
+  renderNotes();
+  renderFacts();
+  return totals;
+}
+
+function renderNotes() {
+  var rows = [];
+  rows.push({ t: '<b>Estimate lines:</b> mixed C&amp;D hauls are billed per haul used; five are budgeted from the teardown table.', x: false });
+  rows.push({ t: '<b>Locates:</b> requested through the provincial one-call service before any excavation. Free of charge, allow five business days. The trench cannot open without them.', x: false });
+  rows.push({ t: '<b>Demolition permit:</b> Aldermere requires the pest-control clearance letter before it issues one. Halloway arranges; flagged here because it stalls more permits than anything else on the checklist.', x: false });
+  rows.push({ t: '<b>Damage waiver:</b> removed from this quote on receipt of a certificate of insurance naming Ridgepole as additional insured.', x: false });
+  if (S.weeksMode === 'overrun') {
+    rows.push({ t: '<b>Duration:</b> priced at 8 weeks. Week 9 onward holds at ' + money(weeklyRun()) + ' per week, same rates, no re-mobilization. "Give or take" is on the paper instead of inside the price.', x: false });
+  }
+  if (S.hoarding === 'gc') {
+    rows.push({ t: '<b>Excluded at customer’s instruction:</b> solid hoarding on the Brindle and Quarry frontages. Aldermere Bylaw 44-2018 s. 6 requires it during demolition; Halloway &amp; Sons supplies its own. Compliance for the excluded scope rests with the constructor.', x: true });
+  }
+  var h = '';
+  rows.forEach(function (r) { h += '<div class="nrow' + (r.x ? ' excl' : '') + '">' + r.t + '</div>'; });
+  $('#notes').innerHTML = h;
+  $('#notesbox').hidden = false;
+}
+
+function weeklyRun() {
+  var lines = computeLines();
+  var run = 0;
+  lines.forEach(function (l) {
+    if (l.id === 'hoardR') { run += (SITE.frontA + SITE.frontB) * RATE.hoardWk; }
+    if (l.id === 'meshR') { run += SITE.meshRun * RATE.meshWk; }
+    if (l.id === 'gateV') { run += RATE.gateVehWk; }
+    if (l.id === 'gateP') { run += RATE.gatePedWk; }
+    if (l.id === 'toilets') { run += toilets(S.crew) * RATE.toiletWk; }
+    if (l.id === 'wash') { run += Math.ceil(toilets(S.crew) / 2) * RATE.washWk; }
+    if (l.id === 'svc2') { run += toilets(S.crew) * RATE.svc2Wk; }
+  });
+  return run;
+}
+
+function renderFacts() {
+  var f = $('#facts');
+  var editable = S.built && !S.sent;
+  var crewCls = 'fact' + (S.asum.crew ? '' : ' assumed') + (editable ? ' editable' : '');
+  var weekCls = 'fact' + (S.asum.weeks ? '' : ' assumed') + (editable ? ' editable' : '');
+  var h = '';
+  h += '<span class="' + crewCls + '" id="factCrew"><span class="fk">peak crew</span>' + (editable ? '<button class="stepbtn" data-step="crew-1" aria-label="Fewer workers">&#8722;</button>' : '') + '<b>' + S.crew + '</b>' + (editable ? '<button class="stepbtn" data-step="crew+1" aria-label="More workers">+</button>' : '') + '</span>';
+  h += '<span class="' + weekCls + '" id="factWeeks"><span class="fk">weeks</span>' + (editable ? '<button class="stepbtn" data-step="weeks-1" aria-label="Fewer weeks">&#8722;</button>' : '') + '<b>' + S.weeks + '</b>' + (editable ? '<button class="stepbtn" data-step="weeks+1" aria-label="More weeks">+</button>' : '') + '</span>';
+  h += '<span class="fact"><span class="fk">demolition</span><b>yes</b></span>';
+  h += '<span class="fact"><span class="fk">trench</span><b>' + (S.trench ? '18 m &middot; 2.4 m' : 'none stated') + '</b></span>';
+  h += '<span class="fact' + (S.asum.hoard ? '' : ' assumed') + '"><span class="fk">frontages</span><b>' + (S.hoarding === 'bylaw' ? 'hoarded' : 'by GC') + '</b></span>';
+  f.innerHTML = h;
+}
+
+function updateLock() {
+  var open = 0;
+  ['crew', 'weeks', 'hoard'].forEach(function (k) { if (!S.asum[k]) { open += 1; } });
+  var lock = $('#lockline');
+  var btn = $('#sendBtn');
+  $('#assumeCnt').textContent = open + ' open';
+  if (open === 0 && S.built) {
+    lock.classList.add('ok');
+    $('#lockTxt').textContent = S.sent ? 'Sent at ' + clockStr() + '. The trail below holds the whole build.' : 'Every assumption on this sheet is yours. It is ready for your name.';
+    btn.disabled = false;
+    btn.classList.add('ready');
+  } else {
+    lock.classList.remove('ok');
+    $('#lockTxt').textContent = 'The sheet ships when its assumptions are yours: ' + open + ' open.';
+    btn.disabled = true;
+    btn.classList.remove('ready');
+  }
+}
+
+/* ---------------- assumptions rail ---------------- */
+var ASUM_META = {
+  crew: { n: 'Peak crew', sub: function () { return S.asum.crew ? (S.crewMode === 'asked' ? 'asked Mike: 24 with subs' : 'priced at 20, top of range') : '"15 to 20": the clerk sized to 20'; } },
+  weeks: { n: 'Duration', sub: function () { return S.asum.weeks ? (S.weeksMode === 'flat10' ? 'quoted 10 weeks flat' : '8 weeks, week-9 rate printed') : '"8 weeks give or take"'; } },
+  hoard: { n: 'Frontage hoarding', sub: function () { return S.asum.hoard ? (S.hoarding === 'gc' ? 'excluded, GC supplies, printed' : 'included per bylaw') : 'email said fence; bylaw says hoarding'; } }
+};
+function renderAssumes() {
+  var el = $('#assumeList');
+  var h = '';
+  ['crew', 'weeks', 'hoard'].forEach(function (k) {
+    h += '<button class="arow' + (S.asum[k] ? ' done' : '') + '" data-fork="' + k + '"><span class="ad" aria-hidden="true"></span><span class="at"><b>' + ASUM_META[k].n + '</b><span class="sub">' + ASUM_META[k].sub() + '</span></span></button>';
+  });
+  el.innerHTML = h;
+  el.hidden = false;
+  $('#assumeCap').hidden = false;
+  updateLock();
+}
+
+/* ---------------- why overlay ---------------- */
+function openWhy(id) {
+  var w = WHY_STORE[id];
+  if (!w) { return; }
+  $('#whyKick').innerHTML = 'Why this line &middot; ' + w.kick;
+  $('#whyHead').innerHTML = w.head;
+  var h = '<div class="whychain">';
+  w.chain.forEach(function (step, i) {
+    h += '<div class="wstep"><span class="wn">' + (i + 1) + '</span><div>' + step + '</div></div>';
+  });
+  h += '</div>';
+  w.srcs.forEach(function (s) { h += srcBox(s); });
+  h += '<p class="fine">Every line on the sheet carries this card. When a customer disputes a number in August, this is what answers.</p>';
+  $('#whyBody').innerHTML = h;
+  openOvl('why');
+  if (S.phase !== 'sent') { spend(0.002); }
+  log('why opened on ' + id + ' &middot; the citation card assembled from the trail, not re-thought');
+}
+
+/* ---------------- forks ---------------- */
+function openFork(k) {
+  if (S.asum[k]) { toast('Already yours: <b>' + ASUM_META[k].n + '</b>. The trail remembers the call.'); return; }
+  var head = '', lead = '', a = {}, b = {};
+  if (k === 'crew') {
+    head = 'Mike wrote "15 to 20". The table turns at 21.';
+    lead = 'Sanitation is sized to the peak crew, not the average, and the reg table steps at every tenth worker. The clerk priced the top of Mike’s range and flagged it, because a crew number in a GC’s first email is a mood, not a count.';
+    a = { tag: 'Price the range', t: 'Keep 20, the top of what he said', s: 'Two units holds anywhere from 11 to 20. If the real number creeps past that, the sheet is wrong by a toilet.' };
+    b = { tag: 'Ask him', t: 'Send the clerk’s one-line question', s: 'Drafted already: "Will the framing subs push you past 20 on peak days?" Costs Mike ten seconds and you a minute of waiting.' };
+  } else if (k === 'weeks') {
+    head = '"Give or take" is a duration and a risk, both.';
+    lead = 'Eight weeks is what Mike said. Overruns on a first-build lot are the norm, and there are two honest ways to price that. Padding the quote silently is the third way, and the clerk does not have it.';
+    a = { tag: 'Price his words', t: 'Quote 8 weeks, print the week-9 rate', s: 'The face shows exactly what week 9 costs if the job runs long: ' + money(weeklyRun()) + ' a week, no re-mobilization. "Give or take", priced in the open.' };
+    b = { tag: 'Price the risk', t: 'Quote 10 weeks flat', s: 'Two weeks of headroom inside the number. Bigger quote today, no surprise later. Some GCs prefer swallowing it up front.' };
+  } else if (k === 'hoard') {
+    head = 'The email says fence. The bylaw says hoarding.';
+    lead = 'Corner lot, demolition, two public frontages: Aldermere Bylaw 44-2018 wants solid hoarding at 1.8 m along both for the duration of the demo. "Fence the lot" was cheaper in Mike’s head. The clerk will not silently swap a code line either direction: this call is yours, and the paper prints whichever you make.';
+    a = { tag: 'Per the bylaw', t: 'Keep hoarding on both frontages', s: 'The sheet stays compliant as drawn and the why chip carries the bylaw text for when Mike asks about the number.' };
+    b = { tag: 'His iron', t: 'Mike supplies his own hoarding', s: 'The lines come off, mesh stays on the lane and south side, and an exclusion prints on the face with the bylaw cited. Compliance for that scope moves to him, in writing.' };
+  }
+  $('#forkKick').innerHTML = 'Assumption &middot; ' + ASUM_META[k].n;
+  $('#forkHead').innerHTML = head;
+  var h = '<p class="olead">' + lead + '</p><div class="forkrow">';
+  h += '<button class="forkbtn" data-choice="' + k + ':a"><span class="fbtag">' + a.tag + '</span><span class="fbt">' + a.t + '</span><span class="fbs">' + a.s + '</span></button>';
+  h += '<button class="forkbtn" data-choice="' + k + ':b"><span class="fbtag">' + b.tag + '</span><span class="fbt">' + b.t + '</span><span class="fbs">' + b.s + '</span></button>';
+  h += '</div>';
+  $('#forkBody').innerHTML = h;
+  openOvl('fork');
+}
+
+function disposeFork(k, choice) {
+  closeOvl('fork');
+  S.asum[k] = true;
+  if (k === 'crew') {
+    S.crewMode = choice === 'b' ? 'asked' : 'kept';
+    S.calls.push({ t: clockStr(), txt: choice === 'b' ? '<b>Peak crew:</b> sent the clerk’s one-line question instead of guessing. Mike’s answer resized three lines before the quote ever shipped.' : '<b>Peak crew:</b> priced at 20, the top of the stated range, on your call.' });
+    if (choice === 'b') {
+      setState('asked, waiting', 'busy');
+      log('your call &middot; the drafted question sent under your name &middot; "will the framing subs push you past 20?"');
+      later(function () { crewReply(); }, 2600);
+    } else {
+      log('your call &middot; crew priced at 20, the top of the range Mike gave');
+    }
+  }
+  if (k === 'weeks') {
+    S.weeksMode = choice === 'b' ? 'flat10' : 'overrun';
+    if (choice === 'b') { S.weeks = 10; } else { S.weeks = 8; }
+    S.calls.push({ t: clockStr(), txt: choice === 'b' ? '<b>Duration:</b> quoted 10 weeks flat. The headroom lives inside the number.' : '<b>Duration:</b> quoted his 8 weeks and printed the week-9 run rate on the face. "Give or take", priced in the open.' });
+    log('your call &middot; duration ' + (choice === 'b' ? 'padded to 10 weeks, in the open' : 'kept at 8 with the overrun rate printed'));
+  }
+  if (k === 'hoard') {
+    S.hoarding = choice === 'b' ? 'gc' : 'bylaw';
+    S.calls.push({ t: clockStr(), txt: choice === 'b' ? '<b>Hoarding:</b> excluded at the customer’s instruction, exclusion printed with the bylaw cited. Compliance moved to the constructor, in writing.' : '<b>Hoarding:</b> kept on both frontages per Aldermere 44-2018. The why chip carries the bylaw for when Mike asks.' });
+    log('your call &middot; frontage hoarding ' + (choice === 'b' ? 'excluded and printed, bylaw cited' : 'held per the bylaw'));
+  }
+  renderSheet(false);
+  renderAssumes();
+  maybeEvent();
+}
+
+function crewReply() {
+  S.crew = 24;
+  setState('building', 'busy');
+  spend(0.01);
+  tickClock(2);
+  var reply = '<p>Ha. 24 with the framing subs some days, call it that.</p>';
+  var m2 = $('#mail2');
+  $('#mail2Time').textContent = clockStr();
+  $('#mail2Body').innerHTML = reply;
+  m2.hidden = false;
+  ASUM_META.crew.sub = function () { return 'asked Mike: 24 with subs'; };
+  renderSheet(false);
+  renderAssumes();
+  log('Mike replied &middot; 24 &middot; the table turned at 21: third unit, second wash, service resized &middot; four lines repriced themselves');
+  toast('One reply, <b>four lines repriced</b>. 21 workers is where the toilet table turns.');
+  feed('<b>s. 29.1 table</b> re-fired at crew 24: row 21 to 30', true);
+  setState('watching', 'on');
+  later(function () { maybeEvent(); }, 1200);
+}
+
+/* ---------------- the event ---------------- */
+function maybeEvent() {
+  var done = S.asum.crew && S.asum.weeks && S.asum.hoard;
+  if (!done || S.eventDone) { return; }
+  if (S.crewMode === 'asked' && S.crew !== 24) { return; }
+  S.eventDone = true;
+  later(function () { fireEvent(); }, 2200);
+}
+
+function fireEvent() {
+  tickClock(S.crewMode === 'kept' ? 2 : 1);
+  setState('reading', 'busy');
+  var add = '<p>Forgot one thing. Service trench for the new water line, about <mark class="lit">18 m, call it 2.4 deep</mark>. We dig it Thursday of week 3, protection is yours.</p>';
+  var m2 = $('#mail2');
+  if (m2.hidden) {
+    $('#mail2Time').textContent = clockStr();
+    $('#mail2Body').innerHTML = (S.crewMode === 'kept' ? '<p>Also, count on <mark class="lit">24 some days</mark> once the framing subs stack up.</p>' : '') + add;
+    m2.hidden = false;
+  } else {
+    $('#mail2Body').innerHTML += add;
+  }
+  if (S.crewMode === 'kept' && S.crew !== 24) {
+    S.crew = 24;
+    ASUM_META.crew.sub = function () { return 'Mike volunteered 24; sheet resized'; };
+    log('the fact you priced around arrived on its own &middot; crew 24 &middot; sanitation resized before send, which is the cheap version of that news');
+  }
+  later(function () {
+    S.trench = true;
+    spend(0.02);
+    tickClock(1);
+    renderSheet(true);
+    renderAssumes();
+    feed('<b>Part III excavations</b>: 2.4 m &gt; 1.2 m threshold &rarr; box', true);
+    feed('<b>apron rule</b>: trench crosses the drive &rarr; 2 road plates', true);
+    log('one sentence in an email, ' + (S.crewMode === 'kept' ? 'seven' : 'three') + ' new lines on the sheet &middot; box, plates, ladder, locates note &middot; total re-ran');
+    toast('One sentence, <b>a new group on the sheet</b>. 2.4 m is past the 1.2 m line: box, plates, ladder, and the locates note.');
+    setState('watching', 'on');
+    var el = $('[data-grp="trench"]');
+    if (el && el.scrollIntoView) { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  }, 2000);
+}
+
+/* ---------------- beats: start, parse, build ---------------- */
+function startMorning() {
+  if (S.phase !== 'quiet') { return; }
+  S.phase = 'mail';
+  S.clockMin = 472; /* 07:52 */
+  $('#clock').textContent = clockStr();
+  $('#quietView').hidden = true;
+  $('#mailView').hidden = false;
+  $('#qHot').hidden = false;
+  setState('reading', 'busy');
+  log('07:52 &middot; a request landed from Halloway &amp; Sons &middot; the clerk is reading');
+  later(function () { setState('waiting on you', 'on'); log('the clerk read the email &middot; nine cents of model time &middot; it waits for your hand-off'); spend(0.09); }, 1600);
+}
+
+var PARSE_STEPS = [
+  { f: 'site', k: 'site', v: '214 Brindle St &middot; corner lot', cls: 'src-lookup', feed: '<b>parcel register</b> roll 0421-118: 15.2 &#215; 39.6 m, corner, 139 m²' },
+  { f: 'demo', k: 'work', v: 'demolition + build prep', cls: '', feed: '<b>job type</b>: teardown rules in scope' },
+  { f: 'weeks', k: 'duration', v: '8 wk "give or take"', cls: 'src-assume', feed: '<b>duration</b>: stated with slack &rarr; flagged' },
+  { f: 'crew', k: 'peak crew', v: '15 to 20 &rarr; sized to 20', cls: 'src-assume', feed: '<b>crew</b>: a range &rarr; priced at top, flagged' },
+  { f: 'fence', k: 'perimeter', v: '109.6 m &middot; 2 public frontages', cls: 'src-lookup', feed: '<b>bylaw 44-2018</b>: demo + public way &rarr; hoarding, not mesh' },
+  { f: 'san', k: 'sanitation', v: '"couple of cans" &rarr; the table decides', cls: '', feed: '<b>s. 29.1</b>: crew 20 &rarr; 2 toilets, 1 wash' },
+  { f: 'waste', k: 'waste', v: '139 m² &rarr; 5 mixed hauls', cls: '', feed: '<b>teardown factor</b>: 139 / 28 &rarr; 5 hauls; concrete excluded per email' }
+];
+
+function handToClerk() {
+  if (S.phase !== 'mail') { return; }
+  S.phase = 'parsing';
+  $('#handRow').hidden = true;
+  setState('parsing', 'busy');
+  $('#parsed').hidden = false;
+  log('hand-off &middot; the clerk labels every fact stated, looked up, assumed or missing &middot; nothing on this sheet will be a silent guess');
+  var i = 0;
+  function step() {
+    if (i >= PARSE_STEPS.length) { later(buildSheet, 700); return; }
+    var p = PARSE_STEPS[i];
+    $$('#mail1 mark').forEach(function (m) { m.classList.remove('lit'); });
+    var mk = document.querySelector('#mail1 mark[data-f="' + p.f + '"]');
+    if (mk) { mk.classList.add('lit'); }
+    var chip = document.createElement('span');
+    chip.className = 'pchip ' + p.cls;
+    chip.innerHTML = '<span class="pk">' + p.k + '</span><b>' + p.v + '</b>';
+    $('#parsed').appendChild(chip);
+    void chip.offsetWidth;
+    chip.classList.add('in');
+    feed(p.feed, p.cls === 'src-lookup');
+    spend(0.004);
+    i += 1;
+    later(step, 620);
+  }
+  step();
+}
+
+function buildSheet() {
+  S.phase = 'building';
+  setState('building', 'busy');
+  tickClock(1);
+  $('#sheetbar').hidden = false;
+  $('#qHotSub').textContent = 'landed 07:52 · takeoff running';
+  log('takeoff running &middot; rules first: the tables and the arithmetic cost nothing &middot; the model already did its only expensive job, reading Mike');
+
+  var lines = computeLines();
+  var sheet = $('#sheet');
+  sheet.classList.add('on');
+  $('#groups').innerHTML = '';
+  $('#totals').innerHTML = '';
+
+  var i = 0;
+  function reveal() {
+    if (i >= lines.length) {
+      renderSheet(false);
+      finishBuild();
+      return;
+    }
+    i += 1;
+    renderPartial(lines.slice(0, i));
+    later(reveal, 340);
+  }
+  reveal();
+}
+
+function renderPartial(partial) {
+  var byGrp = {};
+  partial.forEach(function (l) {
+    WHY_STORE[l.id] = l.why;
+    if (!byGrp[l.grp]) { byGrp[l.grp] = []; }
+    byGrp[l.grp].push(l);
+  });
+  var html = '';
+  GRP_ORDER.forEach(function (g) {
+    if (!byGrp[g]) { return; }
+    var gsub = 0, rows = '';
+    byGrp[g].forEach(function (l, idx) {
+      gsub += l.amount;
+      var isLast = (idx === byGrp[g].length - 1) && (l === partial[partial.length - 1]);
+      rows += '<div class="line' + (isLast ? ' entering' : '') + '" data-line="' + l.id + '">' + lineHtml(l) + '</div>';
+    });
+    html += '<div class="grp" data-grp="' + g + '"><div class="ghead">' + GRP[g].icon + '<span>' + GRP[g].name + '</span><span class="gsub">' + money(gsub) + '</span></div>' + rows + '</div>';
+  });
+  $('#groups').innerHTML = html;
+  var sub = 0;
+  partial.forEach(function (l) { sub += l.amount; });
+  $('#totalNum').textContent = money(sub);
+  var last = partial[partial.length - 1];
+  if (last) { feed('<b>' + money(last.amount) + '</b> &middot; ' + last.label.replace(/&#215;/g, 'x'), false); }
+}
+
+function finishBuild() {
+  S.built = true;
+  S.phase = 'assum';
+  spend(0.01);
+  renderSheet(false);
+  renderAssumes();
+  updateLock();
+  setState('waiting on you', 'on');
+  $('#qHotSub').textContent = 'built in 2 min · 3 assumptions yours';
+  log('the sheet is built &middot; ' + computeLines().length + ' lines, every one cited &middot; three of its numbers are assumptions, and assumptions are yours: the send button stays dim until each one carries your call');
+  toast('Built. Now the part that is <b>yours</b>: three amber assumptions before Send unlocks.');
+}
+
+/* ---------------- send + sign ---------------- */
+function openSign() {
+  if ($('#sendBtn').disabled) { return; }
+  renderPaper();
+  openOvl('sign');
+}
+function chooseSharpen(v) {
+  S.sharpen = v;
+  if (v > 0) {
+    S.calls.push({ t: clockStr(), txt: '<b>Price:</b> sharpened 4 percent inside your discretion band for a 31-job account. Below the band, the sheet escalates to the owner instead of shipping.' });
+    log('your call &middot; relationship rate applied, 4 percent, inside the band the card gives you');
+  } else {
+    S.calls.push({ t: clockStr(), txt: '<b>Price:</b> sent at book. Nothing to explain on Friday.' });
+    log('your call &middot; priced at the card');
+  }
+  renderSheet(false);
+  renderPaper();
+}
+function renderPaper() {
+  var lines = computeLines();
+  var totals = computeTotals(lines);
+  var byGrp = {};
+  lines.forEach(function (l) { if (!byGrp[l.grp]) { byGrp[l.grp] = []; } byGrp[l.grp].push(l); });
+  var h = '';
+  h += '<div class="php"><div><div class="plogo">Ridgepole <span>Site Services</span></div><div style="font-size:10px; color:var(--ink-soft); margin-top:3px">Fence &middot; sanitation &middot; waste &middot; trench protection &middot; Aldermere and district</div></div>';
+  h += '<div class="pmeta">Quote Q-2619 &middot; ' + clockStr() + ', Tuesday<br>Valid 14 days &middot; rates held<br>Site: 214 Brindle Street, Aldermere</div></div>';
+  h += '<div class="paddr"><div><b>To:</b> Mike Halloway, Halloway &amp; Sons Contracting</div><div><b>Scope:</b> full site setup, teardown through build prep, ' + S.weeks + ' weeks</div></div>';
+  h += '<table><thead><tr><th style="width:62%">Item</th><th>Basis</th><th>Amount</th></tr></thead><tbody>';
+  GRP_ORDER.forEach(function (g) {
+    if (!byGrp[g]) { return; }
+    h += '<tr class="pg"><td colspan="3">' + GRP[g].name + '</td></tr>';
+    byGrp[g].forEach(function (l) {
+      h += '<tr><td>' + l.label + '</td><td><span class="pcalc">' + l.calc + '</span></td><td>' + money(l.amount) + '</td></tr>';
+    });
+  });
+  h += '<tr><td colspan="2">Subtotal</td><td>' + money(totals.sub) + '</td></tr>';
+  if (totals.sharp < 0) { h += '<tr><td colspan="2">Relationship rate</td><td>' + money(totals.sharp) + '</td></tr>'; }
+  h += '<tr><td colspan="2">Damage waiver, 8% of rental lines <span class="pcalc">(waived with COI naming Ridgepole)</span></td><td>' + money(totals.waiver) + '</td></tr>';
+  h += '<tr><td colspan="2">Environmental and fuel recovery, 4.5%</td><td>' + money(totals.enviro) + '</td></tr>';
+  h += '<tr class="pt"><td colspan="2">Total, before HST</td><td>' + money(totals.total) + '</td></tr>';
+  h += '</tbody></table>';
+  h += '<div class="pnotes">';
+  h += '<b>Printed with the price, not behind it:</b> Mixed C&amp;D hauls are estimated at five and billed as used. Locates through the provincial one-call service before the week-3 trench: free, allow five business days. Aldermere issues no demolition permit without the pest-control clearance letter: Halloway arranges. ';
+  if (S.weeksMode === 'overrun') { h += 'Week 9 onward, if the job runs long: ' + money(weeklyRun()) + ' per week, same rates, no re-mobilization. '; }
+  if (S.hoarding === 'gc') { h += '<span class="px">Excluded at customer’s instruction: solid hoarding on both street frontages, required during demolition by Aldermere Bylaw 44-2018 s. 6. Halloway &amp; Sons supplies its own; compliance for that scope rests with the constructor.</span> '; }
+  h += 'Deposit 25% on acceptance. Damage waiver removed on receipt of COI.</div>';
+  h += '<div class="psig"><div><div class="signame">J. Mercer</div><div class="sigrole">Estimator &middot; Ridgepole Site Services</div></div><div class="pvalid">Every line on this sheet carries its rule and its arithmetic.<br>Ask us why about any of them: the answer is one click deep, not in a filing cabinet.</div></div>';
+  $('#paper').innerHTML = h;
+}
+function sendFinal() {
+  closeOvl('sign');
+  S.sent = true;
+  S.phase = 'sent';
+  tickClock(1);
+  var mins = S.clockMin - 472;
+  var totals = computeTotals(computeLines());
+  S.calls.push({ t: clockStr(), txt: '<b>Send:</b> ' + money(totals.total) + ' to Mike under your name, ' + mins + ' minutes after his email landed. The clerk starts its quiet job now: chasing at cadence until the quote answers.' });
+  setState('chasing at cadence', 'on');
+  $('#qHotSub').textContent = 'sent ' + clockStr() + ' · ' + mins + ' min door to door';
+  $('#stQuotes').textContent = '3';
+  $('#stMins').textContent = '4m';
+  updateLock();
+  renderFacts();
+  log('sent under your name at ' + clockStr() + ' &middot; ' + mins + ' minutes door to door &middot; the clerk chases from here: day 2 nudge, day 5 call prompt, day 9 last touch, replies logged');
+  toast('<b>Sent, ' + clockStr() + '.</b> ' + mins + ' minutes door to door. The old desk owed Mike a callback on Thursday.');
+  $('#digestBtn').hidden = false;
+  $('#digestBtn').classList.add('glow');
+  later(function () { openDigest(); }, 2600);
+}
+
+/* ---------------- digest ---------------- */
+function openDigest() {
+  $('#digestBtn').classList.remove('glow');
+  var totals = computeTotals(computeLines());
+  var mins = Math.max(1, S.clockMin - 472);
+  var g = '';
+  g += '<div class="dstat"><div class="n">3</div><div class="l">quotes out before 08:00</div></div>';
+  g += '<div class="dstat"><div class="n">' + mins + ' <em>min</em></div><div class="l">Halloway, email to sent</div></div>';
+  g += '<div class="dstat"><div class="n">' + money(totals.total) + '</div><div class="l">priced, cited, before tax</div></div>';
+  g += '<div class="dstat"><div class="n">' + computeLines().length + '</div><div class="l">lines, each carrying its rule</div></div>';
+  g += '<div class="dstat"><div class="n">' + money(S.spend) + '</div><div class="l">model spend, of a ' + money(CAP) + ' cap</div></div>';
+  g += '<div class="dstat"><div class="n">2.6<em>&#215;</em></div><div class="l">close rate of same-morning quotes, per the won-jobs history</div></div>';
+  $('#dgrid').innerHTML = g;
+  var c = '';
+  S.calls.forEach(function (call) { c += '<div class="crow"><span class="ct">' + call.t + '</span><div>' + call.txt + '</div></div>'; });
+  $('#dcalls').innerHTML = c;
+  $('#dline').innerHTML = 'The clerk counted, cited and drafted. Every judgment on the sheet, the crew call, the duration call, the hoarding call, the price, carries <b>your name</b>, because it was yours. That split is the design, not an accident of it.';
+  openOvl('digest');
+}
+
+/* ---------------- overlays ---------------- */
+function openOvl(id) { $('#' + id).classList.add('on'); }
+function closeOvl(id) { $('#' + id).classList.remove('on'); }
+
+/* ---------------- reset ---------------- */
+function reset() {
+  clearTimers();
+  S.phase = 'quiet'; S.crew = 20; S.weeks = 8; S.trench = false; S.hoarding = 'bylaw';
+  S.weeksMode = null; S.crewMode = null; S.sharpen = 0;
+  S.asum = { crew: false, weeks: false, hoard: false };
+  S.spend = 0; S.trail = 0; S.clockMin = 469;
+  S.built = false; S.sent = false; S.eventDone = false; S.prevAmounts = {}; S.calls = [];
+  ASUM_META.crew.sub = function () { return S.asum.crew ? (S.crewMode === 'asked' ? 'asked Mike: 24 with subs' : 'priced at 20, top of range') : '"15 to 20": the clerk sized to 20'; };
+  ['why', 'fork', 'sign', 'digest', 'hood'].forEach(closeOvl);
+  $('#clock').textContent = clockStr();
+  $('#spendChip').textContent = money(0); $('#spendNum').textContent = money(0);
+  $('#spendBar').style.width = '0%';
+  $('#stQuotes').textContent = '2'; $('#stMins').textContent = '4m'; $('#stSpend').textContent = '$0.27';
+  $('#quietView').hidden = false;
+  $('#mailView').hidden = true; $('#handRow').hidden = false; $('#parsed').hidden = true; $('#parsed').innerHTML = '';
+  $('#mail2').hidden = true; $('#mail2Body').innerHTML = '';
+  $$('#mail1 mark').forEach(function (m) { m.classList.remove('lit'); });
+  $('#sheet').classList.remove('on'); $('#groups').innerHTML = ''; $('#totals').innerHTML = '';
+  $('#notesbox').hidden = true;
+  $('#sheetbar').hidden = true;
+  $('#assumeCap').hidden = true; $('#assumeList').hidden = true; $('#assumeList').innerHTML = '';
+  $('#feedCap').hidden = true; $('#feed').innerHTML = '';
+  $('#qHot').hidden = true; $('#qHotSub').textContent = 'landed 07:52 · building'; $('#qHotVal').innerHTML = '&middot;&middot;&middot;';
+  $('#digestBtn').hidden = true; $('#digestBtn').classList.remove('glow');
+  var sb = $('#sendBtn'); sb.disabled = true; sb.classList.remove('ready');
+  $('#lockline').classList.remove('ok');
+  $('#lockTxt').textContent = 'The sheet ships when its assumptions are yours: 3 open.';
+  setState('watching', 'on');
+  $('#tick').innerHTML = '<span class="t">07:49</span>watching the quote mailbox &middot; two quotes out since 07:00 &middot; the quiet is the normal state';
+  $('#trailCount').textContent = '0 entries'; $('#trailCount2').textContent = '0 entries';
+}
+
+/* ---------------- wiring ---------------- */
+$('#startBtn').addEventListener('click', startMorning);
+$('#handBtn').addEventListener('click', handToClerk);
+$('#whoBtn').addEventListener('click', function () { openOvl('hood'); });
+$('#hoodBtn').addEventListener('click', function () { openOvl('hood'); });
+$('#digestBtn').addEventListener('click', openDigest);
+$('#resetBtn').addEventListener('click', reset);
+$('#againBtn').addEventListener('click', function () { closeOvl('digest'); reset(); });
+$('#sendBtn').addEventListener('click', openSign);
+$('#sendFinal').addEventListener('click', sendFinal);
+$('#sharpBook').addEventListener('click', function () { chooseSharpen(0); });
+$('#sharpCut').addEventListener('click', function () { chooseSharpen(0.04); });
+
+$$('.tc-app .ovl').forEach(function (ovl) {
+  ovl.addEventListener('click', function (e) { if (e.target === ovl) { ovl.classList.remove('on'); } });
+});
+$$('.tc-app [data-close]').forEach(function (btn) {
+  btn.addEventListener('click', function () { closeOvl(btn.getAttribute('data-close')); });
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { ['why', 'fork', 'sign', 'digest', 'hood'].forEach(closeOvl); }
+});
+
+/* delegated clicks: why chips, assumption tags, steppers, fork rows */
+document.getElementById('tcApp').addEventListener('click', function (e) {
+  var t = e.target;
+  var why = t.closest ? t.closest('[data-why]') : null;
+  if (why) { openWhy(why.getAttribute('data-why')); return; }
+  var asm = t.closest ? t.closest('[data-asum]') : null;
+  if (asm) { openFork(asm.getAttribute('data-asum')); return; }
+  var fork = t.closest ? t.closest('[data-fork]') : null;
+  if (fork) { openFork(fork.getAttribute('data-fork')); return; }
+  var ch = t.closest ? t.closest('[data-choice]') : null;
+  if (ch) { var parts = ch.getAttribute('data-choice').split(':'); disposeFork(parts[0], parts[1]); return; }
+  var st = t.closest ? t.closest('[data-step]') : null;
+  if (st) {
+    var sv = st.getAttribute('data-step');
+    if (sv === 'crew+1') { S.crew = Math.min(60, S.crew + 1); }
+    if (sv === 'crew-1') { S.crew = Math.max(4, S.crew - 1); }
+    if (sv === 'weeks+1') { S.weeks = Math.min(20, S.weeks + 1); }
+    if (sv === 'weeks-1') { S.weeks = Math.max(2, S.weeks - 1); }
+    renderSheet(false);
+    renderAssumes();
+    log('you nudged the facts &middot; crew ' + S.crew + ', ' + S.weeks + ' weeks &middot; the sheet re-ran itself &middot; toilets: ' + toilets(S.crew));
+    return;
+  }
+});
+
+/* debug hook */
+window.__tc = {
+  start: startMorning, hand: handToClerk,
+  fork: openFork, choose: disposeFork,
+  event: fireEvent, sign: openSign, send: sendFinal,
+  digest: openDigest, hood: function () { openOvl('hood'); }, reset: reset,
+  why: openWhy, state: S, lines: computeLines, totals: function () { return computeTotals(computeLines()); },
+  set: function (k, v) { S[k] = v; renderSheet(false); renderAssumes(); }
+};
+
+})();
+</script>
+</body>
+</html>

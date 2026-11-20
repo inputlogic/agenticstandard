@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Deployment Blueprint | Agentic Standard</title>
+<meta name="description" content="Plan your first Azure agent in a 45-minute working session. Explore the architecture, record decisions, and leave with a deployment blueprint and build settings.">
+<meta property="og:title" content="Agent Deployment Blueprint | Agentic Standard">
+<meta property="og:description" content="Forty-five minutes to a blueprint for your first agent. Make the decisions, draw your environment, and take the build settings with you.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Agentic Standard">
+<meta property="og:url" content="https://theagenticstandard.com/agent-deployment-blueprint">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#100D0A">
+<link rel="canonical" href="https://theagenticstandard.com/agent-deployment-blueprint">
+<link rel="icon" href="/favicon.ico" sizes="48x48 32x32 16x16">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Instrument+Sans:wght@400;500;600&amp;display=swap">
+<link rel="stylesheet" href="/assets/agent-deployment-blueprint/blueprint.css">
+<script src="/assets/agent-deployment-blueprint/blueprint.js" defer></script>
+<!-- Privacy-friendly analytics by Plausible. Workshop answers stay in the browser. -->
+<script async src="https://plausible.io/js/pa-G8dLSoHsvMzCZqnnk7Fmv.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="hdr">
+  <div class="wrap hdr-top">
+    <a class="lockup" href="/" aria-label="Agentic Standard home">
+      <svg class="mark" viewBox="0 0 120 120" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-linecap="square" stroke-width="7"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g><circle cx="60" cy="60" r="5.5" fill="#D27A3F"/></svg>
+      <span class="wordmark">Agentic<i>.</i>Standard</span>
+    </a>
+    <span class="where" id="where" aria-live="polite"></span>
+    <div class="hdr-right">
+      <span class="tally" id="tally"></span>
+      <span class="clock" role="group" aria-label="Meeting clock"><span class="dial"><span class="t" id="clock-t">0:00</span><span class="of">/ <span id="clock-total"></span></span></span><span class="pace" id="pace" role="status"></span><button type="button" id="clock-btn"></button><button type="button" id="clock-reset" aria-label="Reset the meeting clock" title="Reset the meeting clock"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 6a3.8 3.8 0 1 0 1.1-2.7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1.6 1.4v2.8h2.8" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span class="rl"></span></button></span>
+      <a class="btn small primary" id="next-btn" href="#shape">Begin</a>
+    </div>
+  </div>
+  <nav class="ruler wrap" aria-label="Meeting stops">
+    <a class="r-end" href="#start" data-step="start">Start</a>
+    <div class="r-scroll"><div class="r-track"><ol id="ruler"></ol><span class="r-cursor" id="r-cursor" hidden aria-hidden="true"></span></div></div>
+    <a class="r-end out" href="#blueprint" data-step="blueprint">Blueprint</a>
+  </nav>
+</header>
+
+<main id="main">
+  <noscript><div class="wrap"><p class="no-script">Enable JavaScript to make decisions and generate your blueprint. You can also <a href="/book">book a working session</a> with us.</p></div></noscript>
+  <section class="view on" id="v-start" data-view="start">
+    <div class="wrap">
+      <div class="hero">
+        <div class="hero-text">
+          <h1>Forty-five minutes to a blueprint for your first <em>agent</em>.</h1>
+          <p class="lead">Microsoft publishes a reference architecture and deployable templates for running agents on Azure. We take you through it from the beginning: a short explanation of each part, then the decisions it needs, with the reasons to pick one option over another. When we finish, this page has drawn your environment and written the settings we deploy it from with Terraform.</p>
+        </div>
+        <figure class="hero-map"><div id="hero-map"></div><figcaption>The picture we fill in together. Dashed boxes are not decided yet.</figcaption></figure>
+      </div>
+
+      <p class="session-note" id="save-status" role="status">Answers save in this browser. Copy them from the Blueprint tab to keep a backup or continue on another device.</p>
+      <div class="setup" role="group" aria-label="About this session">
+        <div class="fld"><label for="m-client">Organisation</label><input type="text" id="m-client" data-meta="client" placeholder="e.g. Prairie Grid Co-op" autocomplete="organization"></div>
+        <div class="fld"><label for="m-workload">The first agent</label><input type="text" id="m-workload" data-meta="workload" placeholder="e.g. Outage triage assistant"></div>
+        <div class="fld"><label for="m-date">Date</label><input type="date" id="m-date" data-meta="date"></div>
+        <div class="fld wide"><label for="m-people">In the room</label><input type="text" id="m-people" data-meta="people" placeholder="Names and roles, comma separated"></div>
+      </div>
+
+      <div class="start-cols">
+        <section aria-labelledby="h-agenda">
+          <div class="sub"><h2 id="h-agenda">The agenda</h2><span class="note"><span data-total-min></span> minutes. Start the clock in the header when the meeting starts.</span></div>
+          <ol class="agenda" id="agenda"></ol>
+        </section>
+        <section aria-labelledby="h-how">
+          <div class="sub"><h2 id="h-how">How a decision works</h2></div>
+          <dl class="how">
+            <div><dt>We propose</dt><dd>Each row shows our starting point for a first production agent. <b>Accept</b> takes it in one click, or one key.</dd></div>
+            <div><dt>Discuss</dt><dd>Open the row to see every option, when to pick it and what it costs you. The reasons are paraphrased from Microsoft's guidance, with links to the page behind each one.</dd></div>
+            <div><dt>Park it</dt><dd>For anything the room can't settle. It goes on the blueprint as an open item with an owner.</dd></div>
+            <div><dt>Assumed</dt><dd><span id="dec-count"></span> decisions are for the room. <span id="det-count"></span> smaller ones are taken at our recommendation and listed as assumptions you can overrule.</dd></div>
+          </dl>
+          <details class="glossary">
+            <summary>Words we will use</summary>
+            <dl>
+              <div><dt>Landing zone</dt><dd>A prepared area of Azure with its network, identities and rules already in place, ready for one workload to move in.</dd></div>
+              <div><dt>Foundry</dt><dd>Microsoft's service for models and agents. The agent, its models and its knowledge live in a Foundry project.</dd></div>
+              <div><dt>Hub and spoke</dt><dd>One shared network (the hub) with firewall and DNS, and a separate network (a spoke) for each workload.</dd></div>
+              <div><dt>Private endpoint</dt><dd>A private address for an Azure service inside your network, so it is not reachable from the internet.</dd></div>
+              <div><dt>Terraform</dt><dd>A tool that builds cloud resources from text files, and keeps a record (state) of what it built.</dd></div>
+              <div><dt>azd</dt><dd>Microsoft's command-line tool that runs the template: it provisions the foundation, then deploys the agent.</dd></div>
+              <div><dt>Managed identity</dt><dd>An identity Azure gives a service so it can call other services without a stored password or key.</dd></div>
+              <div><dt>Token</dt><dd>The unit models count in, roughly three-quarters of a word. Capacity is measured in tokens per minute.</dd></div>
+            </dl>
+          </details>
+        </section>
+      </div>
+
+      <div class="actions">
+        <a class="btn primary" href="#shape">Start at stop 1 <span aria-hidden="true">→</span></a>
+        <button class="btn" type="button" id="load-example">Fill with an example client</button>
+        <span class="note" id="example-note" hidden>Example answers loaded. Clear them from the blueprint page.</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="stop-views"></div>
+
+  <section class="view" id="v-blueprint" data-view="blueprint">
+    <div class="wrap">
+      <div class="bp-bar">
+        <h1>The blueprint</h1>
+        <nav class="sheet-nav" aria-label="Sheets"><a href="#bp-shape" data-jump="bp-shape">1 Shape</a><a href="#bp-decisions" data-jump="bp-decisions">2 Decisions</a><a href="#bp-needs" data-jump="bp-needs">3 Before day one</a><a href="#bp-settings" data-jump="bp-settings">4 Build settings</a></nav>
+        <div class="plan-tools">
+          <button class="btn small primary" type="button" id="copy-plan">Copy blueprint as text</button>
+          <button class="btn small" type="button" id="copy-json">Copy answers</button>
+          <button class="btn small" type="button" id="print-plan">Print / Save PDF</button>
+          <details class="loadbox">
+            <summary class="btn small">Load answers</summary>
+            <div class="loadpop"><label class="note" for="load-text">Paste the answers you copied earlier.</label>
+            <textarea id="load-text" placeholder='{"meta":{...},"a":{...}}'></textarea>
+            <button class="btn small" type="button" id="load-btn">Load</button>
+            <span class="note" id="load-msg" role="status"></span></div>
+          </details>
+          <button class="btn small quiet danger" type="button" id="reset">Clear all answers</button>
+        </div>
+        <span class="toast" id="toast" role="status" aria-live="polite"></span>
+      </div>
+      <textarea id="copy-fallback" aria-label="Text to copy" hidden></textarea>
+      <div class="sheets" id="sheets"></div>
+    </div>
+  </section>
+</main>
+<datalist id="owner-list"></datalist>
+<footer class="workshop-footer">
+  <div class="wrap">
+    <span>Agentic Standard · Agent Deployment Blueprint</span>
+    <nav aria-label="Agentic Standard"><a href="/">Home</a><a href="/foundation">The Foundation</a><a href="/book">Book a working session</a></nav>
+  </div>
+</footer>
+</body>
+</html>

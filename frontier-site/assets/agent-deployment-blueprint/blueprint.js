@@ -1,0 +1,1289 @@
+/* ---------- content: stops 2-4 (deployment, network, identity). Wording is ours; facts from the docs cited per decision. ---------- */
+const DOC='https://azure.github.io/AI-Landing-Zones/';
+const ALZ=p=>DOC+'agent-landing-zone/'+p;
+const STOP_DEPLOY={id:'deploy',name:'How we deploy',mins:4,
+  blurb:'Terraform or Bicep, what we deploy first, where the state lives and who is allowed to run it.',
+  title:'How the deployment <em>runs</em>.',
+  lead:'Before any network or model talk, agree how the environment gets built and who is allowed to change it. These choices are hard to undo after the first run.',
+  lesson:{k:'What to know first',h:'One lifecycle, two infrastructure languages',
+    p:['The Agent Landing Zone is driven by the Azure Developer CLI (azd). It provisions the foundation, configures the services, then deploys the application as a separate step. Bicep is the default; Terraform plugs into the same lifecycle once a single line in <code>azure.yaml</code> changes.',
+       'Your answers become three things: <code>azd env set</code> values, entries in the root <code>main.parameters.json</code>, and that <code>azure.yaml</code> switch. The Terraform variables file is generated from them on every run and is never edited by hand.'],
+    ul:['<b>Terraform keeps state</b> in a storage account you own, outside the workload, that survives teardown.',
+        '<b>No state locking</b> at the azd version Microsoft verified (1.37.1), so one approved runner per environment is the only protection.',
+        '<b>What Microsoft tests</b>: each release is deployed live with Terraform in one standard shape (private, hosted agent, chat, Sweden Central). Anything outside that shape we prove in your dev environment first.']},
+  decs:[
+  {id:'D1',q:'Which infrastructure language do we deploy with?',why:'Pick once, before the first run. The same language must be used for every update and for removal.',
+    refs:[['Deployment choices',ALZ('planning/#choose-an-infrastructure-provider')],['Terraform overview',ALZ('terraform/')]],
+    opts:[
+      {v:'terraform',l:'Terraform',rec:true,when:'your platform team already runs Terraform, or you want plans you can review and a state file you control.',cost:'needs a state store and a single-writer rule; Bicep remains the default path.',
+        cfg:[['yaml','infra.provider','terraform'],['yaml','infra.path','infra/terraform'],['yaml','infra.module','main']],
+        needs:['Terraform 1.13.0 and azd 1.37.1 on the runner (the versions Microsoft verified), with Python 3.12, PowerShell 7, Git and the <code>azure.ai.agents</code> azd extension.']},
+      {v:'bicep',l:'Bicep',ms:true,when:'your team is Azure-native and does not need Terraform state, or you want the most-tested path.',cost:'no plan file to review in the Terraform sense; your Terraform estate would not see these resources.',
+        cfg:[['note','azure.yaml stays on the default Bicep provider']]}]},
+  {id:'D2',q:'What do we deploy first?',why:'The foundation and the application are separate stages. Infra only stops after the Azure resources and their configuration; full stack also publishes the agent.',
+    refs:[['Infra and application',ALZ('#infrastructure-and-application')],['Bring your own app',ALZ('build-your-own-app/')]],
+    opts:[
+      {v:'full',l:'Full stack with Microsoft\'s reference agent',rec:true,ms:true,when:'you want a working, signed-in chat agent to test against in week one, then replace its prompts, tools and knowledge.',cost:'you inherit the reference app\'s components (web UI, orchestrator) until you swap them.',
+        cfg:[['note','azd provision, then azd deploy']]},
+      {v:'infra',l:'Foundation only',when:'your developers bring their own agent code, or security wants to review the foundation before anything runs on it.',cost:'still billable; nothing to show users until an app is deployed.',
+        cfg:[['note','azd provision only; application deployed later']]},
+      {v:'custom',l:'Foundation bound to our own app',when:'you already have an agent or app and want the landing zone to host it.',cost:'one environment hosts one application ID; the reference tools and SQL catalogue do not come with it.',
+        cfg:[['azd','AGENTLZ_APP_DEFINITION','<path to your app definition JSON>']],
+        needs:['An application definition file for the custom app (components, tools, dependencies) before provision.']}]},
+  {id:'D3',q:'Which environments do we stand up?',why:'Each environment is its own azd environment with its own resource groups, identities, configuration store, Key Vault and data. Nothing is shared between them.',
+    refs:[['Environment boundaries',ALZ('configuration/#environment-boundaries')]],
+    opts:[
+      {v:'dev-prod',l:'Dev and prod',rec:true,when:'a first agent with a small team: changes are proven in dev, then promoted.',cost:'two of everything, so roughly twice the always-on cost.',cfg:[['note','two azd environments, e.g. dev and prod']]},
+      {v:'dev-test-prod',l:'Dev, test and prod',when:'release management or audit requires a separate test stage that mirrors prod.',cost:'three sets of resources and quota.',cfg:[['note','three azd environments: dev, test, prod']]},
+      {v:'pilot',l:'One pilot environment',when:'a time-boxed proof with non-sensitive data, to be rebuilt properly afterwards.',cost:'no safe place to test changes once people use it.',cfg:[['note','one azd environment']]}]},
+  {id:'D4',q:'How are subscriptions laid out?',why:'All of an environment\'s resource groups must sit in one subscription. Separate subscriptions give stronger walls for admin rights and quota.',
+    refs:[['Environment boundaries',ALZ('configuration/#environment-boundaries')]],
+    opts:[
+      {v:'per-env',l:'One subscription per environment',rec:true,when:'you follow the Cloud Adoption Framework landing zone model, or prod admins must differ from dev admins.',cost:'more subscriptions to request and govern; quota requested per subscription.'},
+      {v:'shared',l:'One subscription, separated by resource group',when:'subscription requests are slow and the team is small.',cost:'weaker separation; dev and prod compete for the same model quota.'}]},
+  {id:'D5',type:'inputs',q:'Which subscription and region?',why:'The region must offer every service and model you choose. Pick an alternate now: if capacity runs out on a first deployment, the fix is a new environment in another region, not a move.',
+    refs:[['Values you set',ALZ('configuration/#values-set-by-azd-or-by-you')],['Regional considerations',DOC+'bicep/regional-considerations/']],who:'Azure admin',
+    fields:[{k:'sub',label:'Subscription ID',ph:'subscription ID',check:'guid',cfg:['azd','AZURE_SUBSCRIPTION_ID']},{k:'region',label:'Primary region',ph:'canadacentral',req:true,check:'region',cfg:['azd','AZURE_LOCATION']},{k:'alt',label:'Alternate region',ph:'eastus2',check:'region'},{k:'env',label:'First environment name',ph:'dev',cfg:['note','azd init --environment']}],
+    needs:['Azure admin confirms resource providers are registered, Responsible AI terms are accepted and model quota exists in the primary region.']},
+  {id:'D6',q:'Who is allowed to run Terraform against shared environments?',why:'At the verified azd version, plan and apply run without state locking. Two people applying at once can corrupt state, so access control is the lock.',
+    refs:[['State protection',ALZ('deploy-terraform-infra-only/#state-protection')]],show:()=>HAS('D1','terraform'),
+    opts:[
+      {v:'pipeline',l:'One pipeline, queued runs',rec:true,when:'any shared, test or production environment. Runs queue per state file and are never cancelled mid-run.',cost:'someone has to build the pipeline (Azure DevOps or GitHub) with a self-hosted agent that can reach the private network.',
+        needs:['A pipeline with a non-cancelling queue per state file, running on an agent that can reach the private network and the state store.']},
+      {v:'local',l:'Named engineers from their machines',when:'an individual dev environment only.',cost:'nothing stops two people applying at once; not acceptable for prod.'}]},
+  {id:'D7',type:'inputs',q:'Where does Terraform state live?',why:'An existing storage account and container you own, outside every workload resource group, so <code>azd down</code> never deletes it. The binding is recorded on first use and cannot be changed later.',
+    refs:[['Terraform backend settings',ALZ('configuration/#terraform-backend-settings')],['Prepare remote state',ALZ('deploy-terraform-infra-only/#step-3-prepare-remote-state-outside-the-workload')]],show:()=>HAS('D1','terraform'),who:'Platform team',
+    fields:[{k:'rg',label:'State resource group',ph:'rg-tfstate',req:true,cfg:['azd','TF_STATE_RESOURCE_GROUP']},{k:'sa',label:'Storage account',ph:'sttfstateagents001',req:true,check:'storage',cfg:['azd','TF_STATE_STORAGE_ACCOUNT']},{k:'ct',label:'Container',ph:'tfstate',req:true,cfg:['azd','TF_STATE_CONTAINER']},{k:'sub',label:'State subscription (if different)',ph:'same as workload',check:'guid',cfg:['azd','TF_STATE_SUBSCRIPTION_ID'],opt:true}],
+    needs:['A state storage account and container outside the workload, with Entra sign-in only, backups and network access from the runner. The runner needs Reader on the account and Storage Blob Data Contributor on the container.']},
+  {id:'D8',q:'How many resource groups, and who creates them?',why:'The template uses three destinations: Foundry and knowledge, the application, and networking. They can map to one, two or three groups. Pre-created groups suit teams where the deploying identity may not create groups.',
+    refs:[['Resource group destinations',ALZ('configuration/#resource-group-destinations')],['Permissions',ALZ('configuration/#resource-group-permissions')]],
+    opts:[
+      {v:'three-pre',l:'Three groups, created by the platform team',rec:true,when:'your deploy identity should hold Contributor on named groups and nothing at subscription scope.',cost:'groups must exist and be granted before the first run.',
+        cfg:[['azd','CREATE_RESOURCE_GROUPS','false'],['azd','AZURE_RESOURCE_GROUP','rg-<workload>-<env>'],['azd','AZURE_APP_RESOURCE_GROUP','rg-<workload>-<env>-app'],['azd','AZURE_NETWORK_RESOURCE_GROUP','rg-<workload>-<env>-network']],
+        needs:['Three resource groups per environment, with Contributor and Role Based Access Control Administrator (or equivalent role-assignment rights) granted to the deploy identity on each.']},
+      {v:'three-auto',l:'Three groups, created by the deployment',ms:true,when:'the deploy identity may create resource groups in the subscription.',cost:'needs group-create rights at subscription scope.',
+        cfg:[['azd','CREATE_RESOURCE_GROUPS','true']],needs:['The deploy identity can create resource groups in the subscription and assign roles in them.']},
+      {v:'one',l:'One group for everything',when:'a pilot where simple cleanup matters more than separated ownership.',cost:'network and application owners share one permission boundary.',
+        cfg:[['azd','AZURE_RESOURCE_GROUP','rg-<workload>-<env>'],['azd','AZURE_APP_RESOURCE_GROUP','rg-<workload>-<env>'],['azd','AZURE_NETWORK_RESOURCE_GROUP','rg-<workload>-<env>']]}]},
+  {id:'D9',detail:true,q:'How are resources named?',why:'Names are fixed at the first run. Changing a naming token later creates new resources next to the old ones, with the data left behind.',
+    refs:[['Resource naming',ALZ('resource-naming/')]],
+    opts:[
+      {v:'caf-tokens',l:'Microsoft\'s pattern with our tokens',rec:true,when:'you want readable names like <code>kv-triage-prod-cc-001</code> without listing every resource.',cost:'agree the workload token and short region code now.',
+        cfg:[['azd','RESOURCE_NAMING_MODE','caf'],['azd','CAF_WORKLOAD_NAME','<short workload token>']]},
+      {v:'caf-default',l:'Microsoft\'s pattern, generated token',ms:true,when:'nobody cares what the names look like.',cost:'a random six-character workload token in every name.',cfg:[['azd','RESOURCE_NAMING_MODE','caf']]},
+      {v:'explicit',l:'Our own names per resource',when:'policy mandates exact names.',cost:'every name must already satisfy that service\'s rules; the template does not fix them.',
+        cfg:[['param','keyVaultName','<name>'],['param','searchServiceName','<name>'],['param','aiFoundryAccountName','<name>']]}]},
+  {id:'D10',detail:true,q:'Where are container images built?',why:'A private registry cannot be reached from a laptop. Azure can build the images inside the network with a small agent pool, which is what Microsoft\'s release test does.',
+    refs:[['Private image builds',ALZ('configuration/#private-image-builds')]],show:()=>!HAS('D2','infra'),
+    opts:[
+      {v:'acr-task',l:'In Azure, by the registry',rec:true,when:'the environment is private, or build machines have no Docker.',cost:'the build pool bills while it is allocated.',cfg:[['azd','BUILD_MODE','acr-task'],['azd','DEPLOY_ACR_TASK_AGENT_POOL','true']]},
+      {v:'local',l:'On the deployment machine with Docker',when:'a public dev environment, or a network-connected build host with Docker.',cost:'the jumpbox has no Docker; hosted agent images still build in Azure.',cfg:[['azd','BUILD_MODE','local']]}]},
+  {id:'D11',detail:true,q:'Which pipeline tool runs deployments?',why:'Microsoft\'s pipeline examples are Azure DevOps with Bicep, and they say to rewrite them before use. For Terraform we build the pipeline, on whichever tool you already run.',
+    refs:[['Azure DevOps guide',ALZ('azure-devops/')]],show:()=>!HAS('D6','local'),
+    opts:[
+      {v:'ado',l:'Azure DevOps',rec:true,when:'your teams already use Azure DevOps environments and approvals.',cost:'self-hosted Linux agents inside each network; a federated service connection per environment.',needs:['Azure DevOps project, environments with approvals, and a self-hosted Linux agent pool that can reach each private network.']},
+      {v:'github',l:'GitHub Actions',when:'your code and approvals live in GitHub.',cost:'self-hosted runners inside each network; federated credentials per environment.',needs:['GitHub environments with required reviewers, and self-hosted runners that can reach each private network.']},
+      {v:'none',l:'Decide after the dev environment',when:'the first dev deployment is done by hand to learn the template.',cost:'production still waits for a pipeline.'}]},
+  {id:'D12',detail:true,type:'inputs',q:'Which tags go on every resource?',why:'Tags are how finance and operations find these resources later. They are set once in the root parameters.',
+    refs:[['Tags',DOC+'bicep/parameterization/#tags']],who:'FinOps or platform lead',
+    fields:[{k:'cc',label:'Cost centre',ph:'e.g. 4410'},{k:'owner',label:'Owner',ph:'team or person'},{k:'app',label:'Application name',ph:'e.g. outage-triage'}]},
+  {id:'D13',detail:true,type:'inputs',q:'Does any service need a different region?',why:'Everything defaults to the primary region. Model quota or search capacity sometimes forces one service elsewhere. Leave blank to keep one region.',
+    refs:[['Search region and quota',ALZ('configuration/#search-region-and-quota')]],who:'Azure admin',
+    fields:[{k:'foundry',label:'Foundry and models region',ph:'same as primary',cfg:['azd','AZURE_AI_FOUNDRY_LOCATION'],opt:true},{k:'search',label:'Search region',ph:'same as primary',cfg:['azd','AZURE_SEARCH_LOCATION'],opt:true}]}
+]};
+
+const STOP_NET={id:'network',name:'Network',mins:7,
+  blurb:'Private or public, who owns the network, address space, DNS, outbound traffic and how your people get in.',
+  title:'The <em>network</em> the agent lives in.',
+  lead:'This is where most first deployments fail. The decisions are mostly about ownership: which team runs the hub, DNS, firewall and the way operators reach a private environment.',
+  lesson:{k:'What to know first',h:'Private is a setting you turn on',
+    p:['The template\'s isolation setting is off by default. For production, or any sensitive data, Microsoft says to turn it on: every service then sits behind a private endpoint in your virtual network, and only a connected machine can deploy or manage it.',
+       'Who owns the network is a separate question from private versus public. Standalone means your workload team runs its own network; integrated means it is a spoke peered to a hub your platform team already runs.'],
+    ul:['<b>Standalone</b> deploys its own firewall, Bastion, jumpbox and NAT gateway.','<b>Hub-integrated</b> turns those off and points routes, DNS and peering at the hub. The label alone connects nothing.','<b>Address ranges</b> must not overlap anything the agent has to reach: peered networks, VPN clients, on-premises.'],
+    fig:{src:'/assets/agent-deployment-blueprint/ms-standalone.webp',alt:'Microsoft\'s standalone Agent Landing Zone diagram: Foundry, networking and application resource groups in one subscription, with private endpoints, a firewall, Bastion, jumpbox and Application Gateway.',cap:'Standalone Agent Landing Zone',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/docs/architecture/media/AI-Landing-Zone-without-platform.png',w:2600,h:1603}},
+  decs:[
+  {id:'N1',q:'Are the services private or public?',why:'Private needs working DNS, routes and a connected machine to deploy from. Microsoft reserves public endpoints for short, approved evaluations with no sensitive data, and says never to switch a private environment to public to get past a failure.',
+    refs:[['Public and private access',ALZ('network-isolation/#public-and-private-access')],['Deployment choices',ALZ('planning/#decide-how-services-are-reached')]],
+    opts:[
+      {v:'private',l:'Private',rec:true,when:'production, or any real company data.',cost:'every deploy and admin task runs from inside the network: a jumpbox, VPN or connected pipeline agent.',
+        cfg:[['azd','NETWORK_ISOLATION','true']],needs:['A machine or pipeline agent that can reach the private network and resolve its private DNS before the first run.']},
+      {v:'public',l:'Public endpoints',ms:true,when:'a short evaluation with dummy data, signed off as such.',cost:'sign-in still applies, but nothing is network-private; not a path to production.',
+        cfg:[['azd','NETWORK_ISOLATION','false']]}]},
+  {id:'N2',q:'Who owns the network?',why:'Standalone puts networking in the workload team\'s hands. Hub-integrated reuses your platform team\'s connectivity, so peering, routes, DNS and change responsibility must be agreed with them first.',
+    refs:[['Decide who owns the network',ALZ('planning/#decide-who-owns-the-network')],['Hub integration settings',ALZ('configuration/#hub-integration')]],
+    opts:[
+      {v:'standalone',l:'Standalone: we run our own',ms:true,when:'there is no platform hub yet, or the agent must not depend on one.',cost:'you deploy and pay for your own firewall, Bastion and NAT gateway.',
+        cfg:[['azd','DEPLOYMENT_MODE','standalone']]},
+      {v:'hub',l:'Spoke of our existing hub',when:'a platform landing zone already provides DNS, firewall, Bastion and on-premises connectivity.',cost:'a dependency on the hub team for reverse peering, DNS links and firewall rules, often on day one.',
+        cfg:[['azd','DEPLOYMENT_MODE','ailz-integrated'],['azd','HUB_INTEGRATION_HUB_VNET_RESOURCE_ID','<hub VNet resource ID>'],['azd','HUB_INTEGRATION_CREATE_HUB_PEERING','true'],['azd','HUB_INTEGRATION_EGRESS_NEXT_HOP_IP','<hub firewall private IP>'],['azd','DEPLOY_AZURE_FIREWALL','false'],['azd','DEPLOY_BASTION','false'],['azd','DEPLOY_NAT_GATEWAY','false']],
+        needs:['Hub team agrees the reverse peering, route to the hub firewall, DNS links and the firewall rules for the agent\'s outbound traffic, and has permissions ready at the hub.']}]},
+  {id:'N3',q:'New virtual network or one we already have?',why:'A new network gets the template\'s address plan. An existing one keeps its real address space; the template either adds its subnets or expects them pre-built with the exact names, sizes and delegations.',
+    refs:[['Network selection',ALZ('configuration/#network-selection-examples')]],show:()=>HAS('N1','private'),
+    opts:[
+      {v:'new',l:'New virtual network',rec:true,ms:true,when:'the network team can give you a free range.',cost:'none beyond agreeing the range.',cfg:[['azd','USE_EXISTING_VNET','false']]},
+      {v:'existing-managed',l:'Existing network, template adds subnets',when:'the network team issues a VNet but lets automation create subnets.',cost:'subnet writes need network security groups enabled; check the plan carefully.',
+        cfg:[['azd','USE_EXISTING_VNET','true'],['azd','EXISTING_VNET_RESOURCE_ID','<VNet resource ID>'],['azd','DEPLOY_SUBNETS','true']]},
+      {v:'existing-prebuilt',l:'Existing network, subnets pre-built',when:'only the network team may create subnets.',cost:'they must build all of them first with the required names, ranges and delegations.',
+        cfg:[['azd','USE_EXISTING_VNET','true'],['azd','EXISTING_VNET_RESOURCE_ID','<VNet resource ID>'],['azd','DEPLOY_SUBNETS','false']],needs:['Network team pre-builds every subnet the template expects (names, ranges, delegations, NSGs).']}]},
+  {id:'N4',type:'inputs',q:'What address range does it get?',why:'The default is <code>192.168.0.0/21</code> carved into about a dozen subnets. Keep it unless it overlaps a network the agent must reach. Ranges are set before the first run.',
+    refs:[['Subnet creation and addressing',ALZ('configuration/#subnet-creation-and-addressing')],['Default subnets',ALZ('configuration/#default-subnets')]],show:()=>HAS('N1','private')&&!HAS('N3','existing-prebuilt'),who:'Network team',
+    fields:[{k:'vnet',label:'VNet range',ph:'192.168.0.0/21',req:true,check:'cidr',cfg:['param','vnetAddressPrefixes']},{k:'avoid',label:'Ranges it must not overlap',ph:'10.0.0.0/8, VPN pool 172.16.0.0/24'}],
+    needs:['Network team assigns a /21 (or confirms the default) that overlaps nothing the agent must reach, including VPN client pools.']},
+  {id:'N5',q:'Who owns private DNS?',why:'Private endpoints only work if names resolve to private addresses. Peering does not carry DNS across; a central DNS team must link or forward the zones.',
+    refs:[['Existing resources',ALZ('configuration/#existing-resources')],['Network design',ALZ('network-isolation/')]],show:()=>HAS('N1','private'),
+    opts:[
+      {v:'template',l:'The template creates the zones',ms:true,rec:()=>!HAS('N2','hub'),when:'standalone, or the hub team is happy for the workload to hold its own zones.',cost:'zones live with the workload; other networks will not resolve them without links.'},
+      {v:'byo',l:'Use the hub\'s existing zones',rec:()=>HAS('N2','hub'),when:'a central team owns every <code>privatelink</code> zone.',cost:'about fifteen zone IDs to collect, and the DNS team links or forwards them.',
+        cfg:[['azd','EXISTING_PRIVATE_DNS_ZONE_COGSVCS_RESOURCE_ID','<cogsvcs zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_OPENAI_RESOURCE_ID','<openai zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_AISERVICES_RESOURCE_ID','<aiservices zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_SEARCH_RESOURCE_ID','<search zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_COSMOS_RESOURCE_ID','<cosmos zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_BLOB_RESOURCE_ID','<blob zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_KEYVAULT_RESOURCE_ID','<keyvault zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_APPCONFIG_RESOURCE_ID','<appconfig zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_CONTAINERAPPS_RESOURCE_ID','<containerapps zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_ACR_RESOURCE_ID','<acr zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_AZUREMONITOR_RESOURCE_ID','<azuremonitor zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_OMSOPSINSIGHTS_RESOURCE_ID','<omsopsinsights zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_ODSOPSINSIGHTS_RESOURCE_ID','<odsopsinsights zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_AZUREAUTOMATION_RESOURCE_ID','<azureautomation zone resource ID>'],['azd','EXISTING_PRIVATE_DNS_ZONE_APPINSIGHTS_RESOURCE_ID','<appinsights zone resource ID>']],needs:['DNS team supplies the resource ID of each private DNS zone and links it to the spoke or sets up forwarding.']},
+      {v:'policy',l:'Azure Policy writes the records',when:'your platform already uses policy to register private endpoints in central DNS.',cost:'records appear only if the policy covers every service in this design.',
+        cfg:[['azd','POLICY_MANAGED_PRIVATE_DNS','true']],needs:['Platform team confirms the DNS policy covers every private endpoint type in this design.']}]},
+  {id:'N6',q:'How is outbound traffic controlled?',why:'The agent calls models, tools and package feeds. A template-managed firewall gets the right rules written automatically; a hub firewall only gets a report of what to allow.',
+    refs:[['Firewall SKU',ALZ('configuration/#firewall-sku-and-management-networking')],['Outbound access',ALZ('configuration/#outbound-access')]],show:()=>HAS('N1','private'),
+    opts:[
+      {v:'basic',l:'Our own Azure Firewall Basic',ms:true,rec:()=>!HAS('N2','hub'),when:'standalone, modest traffic, website and IP rules are enough.',cost:'no DNS proxy; needs an extra management subnet and public IP.',show:()=>!HAS('N2','hub'),
+        cfg:[['azd','DEPLOY_AZURE_FIREWALL','true'],['azd','AZURE_FIREWALL_SKU','Basic']]},
+      {v:'standard',l:'Our own Azure Firewall Standard',when:'you need DNS proxy, name-based network rules or more throughput.',cost:'several times the monthly cost of Basic.',
+        cfg:[['azd','DEPLOY_AZURE_FIREWALL','true'],['azd','AZURE_FIREWALL_SKU','Standard']]},
+      {v:'hub',l:'The hub firewall',rec:()=>HAS('N2','hub'),when:'hub-integrated: all egress already goes through a central firewall.',cost:'the hub team adds the rules by hand from the template\'s egress report.',
+        cfg:[['azd','DEPLOY_AZURE_FIREWALL','false']],needs:['Hub team adds the outbound rules from the egress plan (<code>python -m config.deployment.egress --plan</code>) before the agent can reach its dependencies.']}]},
+  {id:'N7',q:'How do your people reach the private environment?',why:'Every deploy and admin task needs a machine on the network. The template can build one; a VPN or a connected pipeline agent can replace it.',
+    refs:[['Private access with VPN',ALZ('private-access/')],['Network and security settings',ALZ('configuration/#network-and-security')]],show:()=>HAS('N1','private'),
+    opts:[
+      {v:'bastion',l:'Bastion and a jumpbox VM',ms:true,rec:()=>!HAS('N2','hub'),when:'there is no VPN into this network yet; it works on day one.',cost:'a VM and Bastion running all month; engineers work through a browser session. Microsoft\'s own release test uses a peered runner, not a jumpbox.',
+        cfg:[['azd','DEPLOY_JUMPBOX','true'],['azd','DEPLOY_BASTION','true'],['azd','BASTION_SKU_NAME','Standard']]},
+      {v:'hub-bastion',l:'The hub\'s Bastion, our jumpbox',rec:()=>HAS('N2','hub'),when:'hub-integrated and the hub already runs Bastion.',cost:'depends on the hub team for access.',
+        cfg:[['azd','DEPLOY_JUMPBOX','true'],['azd','DEPLOY_BASTION','false'],['azd','EXISTING_BASTION_RESOURCE_ID','<hub Bastion resource ID>']]},
+      {v:'vpn',l:'Point-to-site VPN',when:'engineers already use a VPN and the DNS path exists.',cost:'the VPN gateway, certificates and DNS resolver are built outside the template.',
+        cfg:[['azd','DEPLOY_JUMPBOX','false'],['azd','DEPLOY_BASTION','false'],['azd','DEPLOY_GATEWAY_SUBNET','true']],needs:['VPN gateway, client certificates, a non-overlapping client pool and a DNS resolver for the private zones, built before the first deploy.']},
+      {v:'runner',l:'A pipeline agent inside the network',when:'all changes go through the pipeline and nobody needs interactive access.',cost:'break-glass access still needs a plan.',
+        cfg:[['azd','DEPLOY_JUMPBOX','false'],['azd','DEPLOY_BASTION','false']],needs:['A self-hosted pipeline agent on (or peered to) the network, plus a written break-glass access route.']}]},
+  {id:'N8',q:'Can anyone reach the agent from the internet?',why:'By default the web front end is private. Microsoft\'s optional Application Gateway with a web application firewall opens HTTPS from the address ranges you list.',
+    refs:[['Application Gateway',ALZ('application-gateway/')]],show:()=>HAS('N1','private'),
+    opts:[
+      {v:'closed',l:'No: internal users on the network only',ms:true,rec:true,when:'users are on the corporate network or VPN, or reach it through Teams.',cost:'remote users without a VPN cannot open the web chat.',cfg:[['param','publicIngress.enabled','false']]},
+      {v:'waf',l:'Yes, through Application Gateway with WAF',when:'staff or partners off the network must reach the web chat.',cost:'a certificate owner, a public DNS name, allowed source ranges and a WAF policy to run.',
+        cfg:[['param','publicIngress.enabled','true'],['param','publicIngress.frontendHostName','<agent.example.com>'],['param','publicIngress.sslCertSecretId','<Key Vault secret URI>'],['param','publicIngress.wafMode','Prevention']],
+        needs:['A public DNS name, a TLS certificate in Key Vault and the list of source ranges allowed to reach the agent.']}]},
+  {id:'N9',detail:true,q:'Will Power Platform or Copilot Studio call into this network?',why:'The template reserves a /24 delegated to Power Platform. If nothing on Power Platform needs private access, turning it off returns the space.',
+    refs:[['Subnet addressing',ALZ('configuration/#subnet-creation-and-addressing')]],show:()=>HAS('N1','private'),
+    opts:[
+      {v:'no',l:'No',rec:true,when:'no Copilot Studio agents or flows need to reach private resources here.',cost:'adding it later needs a provision run.',cfg:[['azd','DEPLOY_POWER_PLATFORM_SUBNET','false']]},
+      {v:'yes',l:'Yes, keep the Power Platform subnet',ms:true,when:'Copilot Studio or Power Automate will call the agent or its data privately.',cost:'a /24 of your range; a Power Platform admin sets up the enterprise policy.',cfg:[['azd','DEPLOY_POWER_PLATFORM_SUBNET','true']],needs:['Power Platform admin creates the VNet enterprise policy for the managed environment.']}]}
+]};
+
+const STOP_ID={id:'identity',name:'Identity and access',mins:4,
+  blurb:'Who deploys, which identities the services use, whose rights the agent acts with, and who may use it.',
+  title:'Who can do <em>what</em>.',
+  lead:'Four separate controls decide access: who may deploy, who may sign in, what the agent may call on a user\'s behalf, and what each knowledge source lets that user see.',
+  lesson:{k:'What to know first',h:'Signing in is not the same as being allowed',
+    p:['The web front end signs users in with Microsoft Entra ID. By default the agent then calls Foundry and search with the user\'s own identity (on-behalf-of), so a document the user cannot open stays out of the answer.','Contributor on a resource group is not enough to deploy: the template also assigns roles, which needs role-assignment rights at each scope. Microsoft lists the minimum roles; we turn them into one request to your admins.'],
+    ul:['<b>Admission</b>: which users may open the app at all.','<b>Agent access</b>: a separate Foundry role on the published agent.','<b>Source permissions</b>: what each user may read in SharePoint, Blob or SQL, tested with an allowed and a denied user.']},
+  decs:[
+  {id:'I1',q:'Which identity runs the deployment?',why:'The deploy identity creates resources and assigns roles. Certificate, workload-federation (OIDC) and custom managed identities must state their object ID explicitly.',
+    refs:[['Authenticate and select the target',ALZ('deploy-terraform-infra-only/#step-2-authenticate-and-select-the-target')]],
+    opts:[
+      {v:'oidc',l:'A pipeline identity with workload federation',rec:true,when:'shared and prod environments deployed from a pipeline; no stored secrets.',cost:'set up the federated credential and its roles before the first run.',
+        cfg:[['azd','AZURE_PRINCIPAL_ID','<service principal object ID>'],['azd','AZURE_PRINCIPAL_TYPE','ServicePrincipal']],needs:['An Entra app or managed identity for the pipeline with federated credentials, Contributor plus role-assignment rights on the target groups.']},
+      {v:'user',l:'A named engineer\'s account',ms:true,when:'an individual dev environment.',cost:'roles tied to a person; does not suit prod.',cfg:[['azd','AZURE_PRINCIPAL_TYPE','User']]}]},
+  {id:'I2',detail:true,q:'System-assigned or user-assigned managed identities?',why:'Services authenticate to each other with managed identities, not keys. User-assigned identities exist before the services, so their access can be approved in advance.',
+    refs:[['Shared template defaults',ALZ('configuration/#shared-template-defaults')]],
+    opts:[
+      {v:'system',l:'System-assigned',ms:true,rec:true,when:'the deployment may grant roles as it goes.',cost:'identities appear only when the service does, so access cannot be pre-approved.',cfg:[['azd','USE_UAI','false']]},
+      {v:'uai',l:'User-assigned',when:'security must approve every identity and role before anything runs.',cost:'more objects to manage and rotate ownership of.',cfg:[['azd','USE_UAI','true']]}]},
+  {id:'I3',q:'Whose rights does the agent use when it reads data?',why:'With user delegation the agent sees what the signed-in person can see. A service identity sees what the agent has been granted, for everyone.',
+    refs:[['Native execution selection',ALZ('configuration/#native-execution-selection')],['Sign-in and access',ALZ('application-auth/')]],
+    opts:[
+      {v:'user_delegated',l:'The signed-in user\'s rights',ms:true,rec:true,when:'documents have per-person permissions that must hold in answers.',cost:'tenant consent for the Foundry audience; each source must support on-behalf-of.',
+        cfg:[['azd','HOSTED_AGENT_AUTH_MODE','user_delegated'],['azd','HOSTED_AGENT_RESOURCE_SCOPE','https://ai.azure.com/.default']],needs:['Entra admin grants consent for the Foundry (<code>https://ai.azure.com</code>) scope used on behalf of users.']},
+      {v:'service_identity',l:'The agent\'s own identity',when:'the data is the same for everyone who may use the agent, or the source cannot take user tokens.',cost:'anyone admitted sees everything the agent can read; changing later needs a coordinated update.',
+        cfg:[['azd','HOSTED_AGENT_AUTH_MODE','service_identity']]}]},
+  {id:'I4',q:'Who may use the agent at first?',why:'Admission lists decide who gets past sign-in. An empty list admits everyone in your tenant. Users also need the Foundry agent role on the published agent, usually through a group.',
+    refs:[['Sign-in and access',ALZ('application-auth/')],['Get started: grant access',ALZ('get-started/#grant-agent-access')]],
+    opts:[
+      {v:'pilot',l:'A named pilot group',rec:true,when:'a first release with feedback from a known set of people.',cost:'someone owns the group membership.',
+        cfg:[['app','ALLOWED_USER_PRINCIPALS','<tenant-id:object-id, ...>']],needs:['An Entra group of pilot users (and one test user who must be denied), with the Foundry Agent Consumer role on the published agent.']},
+      {v:'tenant',l:'Everyone in the tenant',when:'a general internal assistant over data everyone may read.',cost:'harder to roll back; load and cost arrive at once.',cfg:[['app','ALLOWED_USER_PRINCIPALS','(empty)']]}]},
+  {id:'I5',type:'inputs',q:'Who signs off the Entra app registration?',why:'The web front end needs a single-tenant app registration with a delegated scope, a callback URL and a client secret in Key Vault. Part of it happens before provision, the rest after the front end has an address.',
+    refs:[['Register sign-in',ALZ('get-started/#register-login')],['Configure sign-in',ALZ('get-started/#configure-login')]],who:'Entra admin',
+    fields:[{k:'admin',label:'Entra application administrator',ph:'Name or role',req:true},{k:'tenant',label:'Tenant ID',ph:'tenant ID',check:'guid',cfg:['app','OAUTH_AZURE_AD_TENANT_ID']}],
+    needs:['An Entra application administrator available on deployment day for the app registration, consent and callback URL.']}
+]};
+
+/* ---------- content: stop 1 (shape), models, gateway, run ---------- */
+const GW=p=>DOC+'ai-gateway-landing-zone/'+p;
+const STOP_SHAPE={id:'shape',name:'The big picture',mins:4,
+  blurb:'Two landing zones, how they fit together, and which ones you need now.',
+  title:'Two landing zones, and which ones you need <em>now</em>.',
+  lead:'Microsoft\'s AI Landing Zones come in two parts that work alone or together. Most of this session is about the first one, where your agent lives. The second decides how every agent reaches its models.',
+  lesson:{k:'What to know first',h:'A hub for models, spokes for agents',
+    p:['The <b>Agent Landing Zone</b> is the place an agent runs: Microsoft Foundry, the agent service, its knowledge, a web front end, all inside a network you control. You can deploy one per business unit or use case.',
+       'The <b>AI Gateway Landing Zone</b> is a shared front door to models, built on API Management. Every team gets its own key, quota and usage report, and safety and privacy rules are applied in one place. Microsoft calls the pairing a strong place to start, but neither needs the other.'],
+    ul:['<b>Layer 1</b>, the gateway hub, and <b>layer 2</b>, the agent landing zone, are infrastructure we deploy.','<b>Layers 3 and 4</b> (Agent 365, Defender, Purview, Entra) are licences and settings you switch on. We cover them in the last stop.'],
+    fig:{src:'/assets/agent-deployment-blueprint/ms-two-landing-zones.webp',alt:'Microsoft slide: AI Gateway Landing Zone deployed as a hub for models, Agent Landing Zone deployed as a spoke for agents, joined by access and publish contracts.',cap:'Hub for models, spokes for agents',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/media/AI-Landing-Zone.png',w:1321,h:743}},
+  decs:[
+  {id:'S1',type:'many',q:'Which of these are true for you today?',why:'These are the signals Microsoft\'s gateway guidance points to. If two or more are true, a shared gateway usually pays for itself; if none are, start without it.',
+    refs:[['Gateway benefits',GW('plan/governance-hub-benefits/')],['Where to start',GW('blueprint/activation-paths/')]],
+    opts:[
+      {v:'keys',l:'Teams hold raw model keys',when:'nobody can say which team spent what on models.'},
+      {v:'teams',l:'More than one team will build agents',when:'several groups will call models in the next year.'},
+      {v:'chargeback',l:'We need cost per team or use case',when:'finance wants showback or chargeback for AI spend.'},
+      {v:'central',l:'Security wants one place for safety and PII rules',when:'privacy or content rules must apply to every model call, not app by app.'},
+      {v:'providers',l:'We use or expect several model providers',when:'Foundry plus others (Azure OpenAI elsewhere, open models, other clouds).'},
+      {v:'none',only:true,l:'None of these yet',when:'one team, one agent, one Foundry account for now.'}]},
+  {id:'S2',q:'Which landing zones do we build?',why:'The gateway is deployed and connected separately: the Agent Landing Zone does not create it for you. If it comes later, we reserve its subnet now so nothing needs re-addressing.',
+    refs:[['How they connect',DOC+'#choose-your-path'],['AI Gateway overview',GW('')]],
+    opts:[
+      {v:'agent-only',l:'Agent Landing Zone only',ms:true,rec:()=>{const s=V('S1')||[];return !s.length||s.includes('none')||s.length<2;},when:'one team and one agent; models are called directly from Foundry.',cost:'per-team quotas and chargeback come later, and each spoke holds its own model deployments.'},
+      {v:'gateway-later',l:'Agent zone now, gateway within the year',when:'more teams are coming, but the first agent should not wait for a platform build.',cost:'the first agent may need re-pointing at the gateway when it arrives.',cfg:[['note','reserve the AI Gateway subnet (on by default)']]},
+      {v:'gateway-now',l:'Both, together',rec:()=>{const s=(V('S1')||[]).filter(x=>x!=='none');return s.length>=2;},when:'two or more of the signals above are true, or a platform team is ready to run the gateway.',cost:'about 35 more resources (API Management, Cosmos DB, Event Hub, Logic App, Key Vault) and an owner for them.',
+        needs:['A platform team that will own the AI Gateway: API Management, access contracts per team, and the usage reports.']}]},
+  {id:'S3',detail:true,q:'How many agent landing zones over time?',why:'Each landing zone hosts one application. Microsoft suggests one per business unit or use case, so each gets its own boundary, cost line and owners.',
+    refs:[['Hub and spoke for scale',GW('blueprint/activation-paths/#deployment-approach-hub-and-spoke-for-scale')]],
+    opts:[
+      {v:'per-usecase',l:'One per use case',rec:true,when:'each agent has a different owner, data set or risk level.',cost:'more environments to run; a shared gateway becomes more valuable.'},
+      {v:'per-bu',l:'One per business unit',when:'a business unit runs several related agents under one owner.',cost:'agents in one unit share a network and permission boundary.'},
+      {v:'single',l:'Just this one for now',when:'it is too early to say.',cost:'none today; revisit when the second agent is proposed.'}]}
+]};
+
+const STOP_MODELS={id:'models',name:'Models and capacity',mins:4,
+  blurb:'Which models, where they process data, how much capacity, and pay-as-you-go or reserved.',
+  title:'Models, <em>capacity</em> and where data is processed.',
+  lead:'Model capacity is quota measured in tokens per minute, not a number of users. We size it from how people will use the agent, then check the region has it.',
+  lesson:{k:'What to know first',h:'Size for the busiest minute, not the month',
+    p:['The template deploys a chat model and an embedding model. Their capacity is a per-minute token allowance. If the busiest minute needs more than you have, users see errors; a big monthly total does not help.','Global deployments can process a request in any Azure region. If data must stay in one geography, choose regional deployments and check the region has the model and quota.'],
+    ul:['<b>Default models</b>: <code>gpt-5-nano</code> for chat and <code>text-embedding-3-large</code> for search, both Global Standard.','<b>Default capacity</b> is 100 for each in the template itself, although one Microsoft page still says 40. We set it from your numbers.','<b>More app replicas do not add model capacity.</b> Quota is the ceiling.']},
+  decs:[
+  {id:'M1',q:'Which models do we deploy in the landing zone?',why:'The model list lives in the root parameters file. Changing the embedding model later means rebuilding the search index.',
+    refs:[['Model deployments',ALZ('configuration/#model-deployments-and-external-ai-gateway')],['Models and quota',ALZ('sizing-cost-planner/#models-and-quota')]],
+    opts:[
+      {v:'reference',l:'Microsoft\'s defaults',ms:true,rec:()=>!HAS('S2','gateway-now'),when:'a first agent where cost and speed matter more than the strongest reasoning.',cost:'a small model; harder tasks may need a larger one after testing.',
+        cfg:[['param','modelDeploymentList','[gpt-5-nano 2025-08-07 GlobalStandard, text-embedding-3-large 1 GlobalStandard]']]},
+      {v:'custom',l:'Our own model choices',when:'testing already showed which model the task needs, or policy names specific models.',cost:'quota must be confirmed for each model in the chosen region.',
+        cfg:[['param','modelDeploymentList','<your chat and embedding entries>']]},
+      {v:'gateway',l:'None here: all models through the AI Gateway',rec:()=>HAS('S2','gateway-now'),when:'the gateway is in scope and should own every model call.',cost:'features that need a local embedding model (SQL tools, some Foundry IQ planning) still need one.',show:()=>!HAS('S2','agent-only'),
+        cfg:[['azd','DEPLOY_MODEL_DEPLOYMENTS','false']]}]},
+  {id:'M2',q:'Where may model requests be processed?',why:'Global Standard routes each request to wherever capacity is free. Regional (Standard) keeps processing in the deployment\'s region but has less capacity.',
+    refs:[['Model deployments',DOC+'bicep/parameterization/#model-deployments']],show:()=>!HAS('M1','gateway'),
+    opts:[
+      {v:'global',l:'Anywhere Azure has capacity (Global)',ms:true,rec:true,when:'no residency rule applies to prompts and answers.',cost:'data in transit may be processed outside your region.',cfg:[['param','modelDeploymentList[].sku.name','GlobalStandard']]},
+      {v:'regional',l:'Only in our region (Standard)',when:'contracts or regulation require processing in-country.',cost:'lower capacity and fewer models per region; confirm availability first.',cfg:[['param','modelDeploymentList[].sku.name','Standard']]}]},
+  {id:'M3',type:'inputs',q:'How will people use it at the busiest time?',why:'These are the numbers Microsoft\'s sizing planner asks for. The page turns them into the per-minute capacity to request.',
+    refs:[['Sizing and cost planner',ALZ('sizing-cost-planner/')]],who:'Business owner',
+    fields:[{k:'users',label:'Active users per business day',ph:'100',check:'num'},{k:'turns',label:'Questions per user per day',ph:'10',check:'num'},{k:'conc',label:'Questions at the same moment, at peak',ph:'5',check:'num'},{k:'tin',label:'Input tokens per model call',ph:'3000',check:'num'},{k:'tout',label:'Output tokens per model call',ph:'500',check:'num'}],
+    calc:()=>{const n=k=>{const x=parseFloat(F('M3',k));return isNaN(x)?null:x;};
+      const users=n('users')??100,turns=n('turns')??10,conc=n('conc')??5,tin=n('tin')??3000,tout=n('tout')??500,calls=2,secs=30,days=22;
+      const rpm=conc/secs*60*calls,tpm=rpm*(tin+tout),month=users*turns*days*calls;
+      const fmt=x=>x>=1e6?(x/1e6).toFixed(1)+' million':x>=1e3?Math.round(x/1e3)+' thousand':String(Math.round(x));
+      return `Peak need: about <b>${fmt(tpm)} tokens per minute</b> (${Math.round(rpm)} model calls a minute), or capacity <b>${Math.max(1,Math.ceil(tpm/1000))}</b> in deployment units. Monthly: about ${fmt(month*tin)} input and ${fmt(month*tout)} output tokens. Assumes Microsoft's planner defaults of 2 model calls per question and 30 seconds per question.`;}},
+  {id:'M4',detail:true,q:'Pay as you go, or reserved capacity?',why:'Reserved capacity (provisioned throughput, PTU) buys steady speed and no throttling, but unused capacity is wasted. Microsoft\'s guidance: reserve when traffic is steady and above roughly a third of the reservation.',
+    refs:[['PTU estimation',GW('plan/ptu-estimation/')]],
+    opts:[
+      {v:'payg',l:'Pay as you go',ms:true,rec:true,when:'a new agent with unknown or bursty traffic.',cost:'possible throttling (HTTP 429) at peaks; ask for more quota as usage grows.'},
+      {v:'ptu',l:'Reserved throughput',when:'traffic is steady, latency is strict, and throttling is not acceptable.',cost:'paid whether used or not; Microsoft\'s Terraform docs show no PTU deployment example, so it is onboarded as an existing endpoint.',needs:['A PTU estimate from measured traffic (requests per second times tokens per request, plus 30 to 40 percent headroom) and the reservation purchased.']},
+      {v:'both',l:'Both: reserved base, pay as you go for spikes',when:'a known steady load with occasional peaks; works best behind the AI Gateway.',cost:'routing between them needs the gateway or custom code.'}]},
+  {id:'M5',detail:true,q:'How available must search be?',why:'One search replica is not highly available. Microsoft\'s planner asks for two replicas to keep queries running through maintenance and three to keep indexing running too. Replica counts are fixed in the template source, so more of them is a reviewed source change.',
+    refs:[['Search capacity',ALZ('sizing-cost-planner/#search-capacity')]],
+    opts:[
+      {v:'evaluation',l:'One replica',ms:true,rec:true,when:'a pilot, where a short search outage is tolerable.',cost:'no availability promise.',cfg:[['note','search: 1 replica, 1 partition (template literal)']]},
+      {v:'queries',l:'Two replicas: queries stay up',when:'people rely on the agent during working hours.',cost:'twice the search cost; a change in the template source.',cfg:[['note','search: 2 replicas, set in the reviewed template source']]},
+      {v:'query-index',l:'Three replicas: queries and indexing stay up',when:'content changes constantly and must be searchable at once.',cost:'three times the search cost.',cfg:[['note','search: 3 replicas, set in the reviewed template source']]}]}
+]};
+
+const STOP_RUN={id:'run',name:'Running it',mins:5,
+  blurb:'Monitoring, recording conversations, cost, security layers, releases, updates and teardown.',
+  title:'Running it after <em>go-live</em>.',
+  lead:'Last stop: who watches it, what gets recorded, how it is kept current, and what happens when it is retired.',
+  lesson:{k:'What to know first',h:'Nothing rolls back by itself',
+    p:['Updates are new runs of the same reviewed source and settings. Reverting code does not restore data, and a rerun can rebuild images that differ from before, so every release is pinned and recorded.','Microsoft live-tests one scenario per release (private network, hosted agent, chat mode, cloud image builds, Sweden Central) with both Bicep and Terraform. Anything else is supported, but proven by us in your dev environment.'],
+    ul:['<b>Budgets and alerts</b> tell you about spend; they do not stop it.','<b>Always-on costs</b> come from the private network: firewall, Bastion, jumpbox, Premium registry and two search services.','<b>Terraform teardown</b> works from recorded state; the state store stays.']},
+  decs:[
+  {id:'R1',q:'Where do logs and traces go?',why:'A new workspace keeps the agent self-contained. A central one suits a platform team that already watches everything, but needs compatible settings and a private path.',
+    refs:[['Monitoring and audit',ALZ('application-monitoring/')],['Existing resources',ALZ('configuration/#existing-resources')]],
+    opts:[
+      {v:'new',l:'A new workspace for this agent',ms:true,rec:true,when:'no central monitoring team, or the agent\'s traces need their own access rules.',cost:'one more workspace to watch.',cfg:[['azd','DEPLOY_LOG_ANALYTICS','true']]},
+      {v:'central',l:'Our central workspace',when:'the platform team runs Log Analytics and Sentinel centrally.',cost:'trace content lands where many people can read it unless access is scoped.',
+        cfg:[['azd','EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID','<workspace resource ID>'],['azd','EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID','<App Insights resource ID>']],needs:['Monitoring team supplies the workspace and Application Insights IDs and agrees retention and reader access.']}]},
+  {id:'R2',q:'Do we record what people ask and what the agent answers?',why:'Recording message content helps debugging and evaluation, but it creates a store of sensitive text. Microsoft keeps it off until privacy and retention are approved.',
+    refs:[['Hosted agent inputs',ALZ('configuration/#hosted-foundation-and-publication-inputs')],['AgentOps',ALZ('agentops/')]],
+    opts:[
+      {v:'off',l:'Off: record timings and errors only',ms:true,rec:true,when:'privacy has not approved storing conversations.',cost:'harder to diagnose a bad answer.',cfg:[['azd','HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT','false']]},
+      {v:'on',l:'On, with retention and restricted readers',when:'evaluation and quality review are planned and approved.',cost:'readers need a privileged role; set retention before collecting.',cfg:[['azd','HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT','true'],['azd','GRANT_PROJECT_TRACE_EVALUATION_READER','true']],needs:['Privacy sign-off on storing conversation text, with a retention period and the list of people allowed to read it.']}]},
+  {id:'R3',q:'How much resilience in the first release?',why:'Zone redundancy and customer-managed keys are off by default. Turning them on later can replace resources, so decide now.',
+    refs:[['Feature toggles',DOC+'bicep/parameterization/#feature-toggles']],
+    opts:[
+      {v:'default',l:'Single zone, Microsoft-managed keys',ms:true,rec:true,when:'an internal agent where hours of downtime are tolerable.',cost:'a zone outage takes the agent down.',cfg:[['param','useZoneRedundancy','false']]},
+      {v:'zones',l:'Zone redundant',when:'the agent supports an operational process that must keep running.',cost:'higher cost on several services.',cfg:[['param','useZoneRedundancy','true']]},
+      {v:'zones-cmk',l:'Zone redundant with our own keys',when:'policy requires customer-managed encryption keys.',cost:'the key setting exists only in the Bicep template today, so on the Terraform path we add it ourselves or raise it with Microsoft.',cfg:[['param','useZoneRedundancy','true'],['note','customer-managed keys: not in the Terraform composition (Bicep-only setting useCMK)']],needs:['Key Vault keys and an owner for customer-managed encryption, plus a decision on how it is added outside the template.']}]},
+  {id:'R4',q:'Which security layers do you switch on?',why:'Microsoft\'s layers 3 and 4: Agent 365 gives every agent an identity and an owner; Defender for AI watches for attacks; Purview applies labels and data loss rules. All are licences or settings, not landing zones.',
+    refs:[['Layer 3: Agent Management',GW('blueprint/layer-3-agent-management/')],['Layer 4: Security Foundation',GW('blueprint/layer-4-security-foundation/')]],type:'many',
+    opts:[
+      {v:'defender',l:'Defender for AI',rec:true,when:'your security team uses Defender for Cloud.',cost:'priced on estimated tokens.',needs:['Security team enables Defender for AI services on the subscription.']},
+      {v:'purview',l:'Purview labels and data loss rules',rec:true,when:'documents carry sensitivity labels that answers must respect.',cost:'label policy work if none exists.'},
+      {v:'agent365',l:'Agent 365 and Entra Agent ID',when:'several agents will exist and each needs a named owner.',cost:'per-user licence.'},
+      {v:'none',only:true,l:'None for now',when:'a pilot with test data.',cost:'security reviews will ask for them before production.'}]},
+  {id:'R5',detail:true,q:'Which release do we deploy, and how do updates run?',why:'Microsoft marks a release Latest only after it passes the live test. Pinning one and promoting the same commit through each environment makes every change reviewable.',
+    refs:[['Validated releases',ALZ('validated-releases/')],['Updates and recovery',ALZ('deployment-operations/')]],
+    opts:[
+      {v:'latest-pinned',l:'Latest validated release, pinned; same commit promoted dev to prod',rec:true,when:'always, for anything beyond a pilot.',cost:'upgrades are deliberate projects, a few times a year.',cfg:[['note','azd init --template Azure/agent-landing-zone --branch <latest release tag>']]},
+      {v:'main',l:'Track the main branch',when:'a lab that should always show the newest features.',cost:'pre-release code has passed offline checks only.'}]},
+  {id:'R6',detail:true,q:'What does a cheaper idle environment look like?',why:'Dev environments sit idle most of the day. Microsoft\'s levers keep the security design and cut always-on cost.',
+    refs:[['Cost guide',DOC+'architecture/cost-guide/'],['Workload profiles',ALZ('configuration/#container-apps-workload-profiles')]],type:'many',
+    opts:[
+      {v:'consumption',l:'Container Apps on consumption only (dev)',rec:true,when:'dev and test, where scale-to-zero is fine.',cost:'cold starts.',cfg:[['azd','WORKLOAD_PROFILES','[{"name":"Consumption","workloadProfileType":"Consumption"}]']]},
+      {v:'budget',l:'Budgets and alerts per environment',rec:true,when:'always.',cost:'alerts only; they do not stop spend.',needs:['A budget owner and alert recipients per environment.']},
+      {v:'stop-jumpbox',l:'Jumpbox stopped when not in use',when:'Bastion and a jumpbox are in the design.',cost:'a stopped VM still bills its disk.'}]},
+  {id:'R7',detail:true,q:'Do we score the agent\'s answers on a schedule?',why:'Foundry can evaluate recorded traces on a schedule. It needs two reader roles granted before provisioning; Microsoft\'s AgentOps guides cover release gates on top.',
+    refs:[['Scheduled trace evaluations',ALZ('operations/')],['AgentOps',ALZ('agentops/')]],
+    opts:[
+      {v:'on',l:'Yes, scheduled evaluations',rec:true,when:'the agent will keep changing and quality must be tracked.',cost:'someone reads the scores; test questions and expected answers to maintain.',cfg:[['azd','GRANT_PROJECT_TRACE_EVALUATION_READER','true']]},
+      {v:'off',l:'Not in the first release',ms:true,when:'a short pilot reviewed by hand.',cost:'adding it later needs a provision run.',cfg:[['azd','GRANT_PROJECT_TRACE_EVALUATION_READER','false']]}]},
+  {id:'R8',detail:true,q:'Do we keep an audit trail of tool use?',why:'The orchestrator can emit a signed event for each tool call. It is evidence for reviews, delivered on a best-effort basis; it is not an immutable ledger.',
+    refs:[['Monitoring and audit',ALZ('application-monitoring/')]],
+    opts:[
+      {v:'off',l:'Not yet',ms:true,rec:()=>!HAS('A4','approve'),when:'a read-only agent.',cost:'no per-tool evidence beyond traces.'},
+      {v:'on',l:'Yes',rec:()=>HAS('A4','approve'),when:'the agent takes actions, or audit asks which tool ran for whom.',cost:'a signing key in Key Vault and its rotation.',cfg:[['app','AUDIT_EVENTS_ENABLED','true']],needs:['A signing key for audit events stored in Key Vault, with an owner for its rotation.']}]},
+  {id:'R9',detail:true,q:'Who may remove an environment?',why:'Terraform removal works from recorded state and deletes what it owns, including data. At the tested tool version a plain removal only previews; the destructive form is explicit.',
+    refs:[['Remove the foundation',ALZ('deploy-terraform-infra-only/#remove-the-foundation')]],
+    opts:[
+      {v:'pipeline-approval',l:'The pipeline, after a named approval',rec:true,when:'any environment holding client data.',cost:'a written approval step and a check that backups are not needed.',needs:['A named approver for environment removal, and agreement on what is kept (state store, shared hub, logs).']},
+      {v:'engineer',l:'The engineer who built it',when:'a personal dev environment.',cost:'no second pair of eyes before data is deleted.'}]}
+]};
+
+/* ---------- content: AI Gateway stop. Variable names checked against Azure/terraform-ai-gateway-landing-zone (commit dabecf2, 17 Nov 2026): stacks + per-stack tfvars, run with Task. ---------- */
+const GWREPO='https://github.com/Azure/terraform-ai-gateway-landing-zone/';
+const gwIn=()=>HAS('S2','gateway-now');
+const STOP_GATEWAY={id:'gateway',name:'AI Gateway',mins:4,
+  emptyNote:'The gateway is not in scope from stop 1, so there is nothing to decide here. Skip ahead, or change that answer to open these decisions.',
+  blurb:'Only if the gateway is in scope: starting point, size, how callers prove who they are, privacy and safety rules.',
+  title:'The shared <em>gateway</em> to your models.',
+  lead:'Skip this stop if the gateway is not in scope today. If it is, these choices set up the hub every agent will call.',
+  lesson:{k:'What to know first',h:'One front door, a contract per consumer',
+    p:['The gateway is Azure API Management in front of your Foundry models and any other provider. Each team or use case gets an <b>access contract</b>: its own key, the models it may call, a per-minute limit and a monthly token quota, and optional privacy and safety rules.',
+       'Microsoft\'s Terraform version is built from separate stacks (network, platform, gateway configuration, model back ends, one contract per use case), each with its own state. You start by copying the example folder that matches your network, then change its values.'],
+    ul:['<b>Usage reporting</b> flows through Event Hub and a Logic App into Cosmos DB, so cost can be shown per team.','<b>A key is always required.</b> An Entra ID token can be required on top of it, per contract.','<b>Docs and repository differ.</b> Microsoft\'s gateway doc pages describe an older single-file layout. We follow the repository, which is what gets deployed.'],
+    fig:{src:'/assets/agent-deployment-blueprint/ms-gateway-hub.webp',alt:'Microsoft reference architecture: a connectivity hub, an AI agent production subscription with Foundry Agent Service, and a separate AI hub subscription with API Management, Logic Apps, Event Hub, Cosmos DB and safety services, all peered.',cap:'AI Gateway hub beside an agent spoke',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/docs/ai-gateway-landing-zone/media/citadel-governance-hub-architecture-v1.1.png',w:2435,h:2262}},
+  decs:[
+  {id:'G1',q:'How many gateway hubs?',why:'One hub can serve production and non-production, or each gets its own so a policy change is tested before it reaches production. Each hub is one environment folder in the repository.',
+    refs:[['Environment sizing',GW('plan/sizing-guide/')],['Deployment guide',GWREPO+'blob/main/docs/DEPLOYMENT_GUIDE.md']],show:gwIn,
+    opts:[
+      {v:'two',l:'Two: production and non-production',rec:true,when:'policy and quota changes must be tested before production.',cost:'two sets of gateway resources.',cfg:[['gw','common.environment','prod'],['note','a second folder, environments/nonprod, with the same files']]},
+      {v:'one',l:'One for everything',when:'cost matters more than isolating production from tests.',cost:'a bad policy change reaches production immediately.',cfg:[['gw','common.environment','shared']]}]},
+  {id:'G2',q:'Which starting point matches your network?',why:'The repository ships an example folder per situation. The choice sets who builds the gateway\'s network: the template, your platform team\'s landing-zone process, or your network team by hand.',
+    refs:[['Deployment scenarios',GWREPO+'blob/main/docs/DEPLOYMENT_SCENARIOS.md'],['Network approach',GW('plan/network-approach/')]],show:gwIn,
+    opts:[
+      {v:'alz-corp',l:'A spoke our platform team vends',rec:()=>HAS('N2','hub'),when:'you run Azure landing zones: the platform team issues the spoke, hub DNS and identities.',cost:'those requests come first; in a Corp landing zone the v2 API Management tiers need a policy exemption.',
+        cfg:[['gwrun','scenario','alz-corp'],['gw','common.network_mode','alz_spoke']],needs:['Platform team vends the gateway\'s spoke network, hub DNS zone links and deployment identities before the first run.']},
+      {v:'dev-greenfield-private',l:'Its own private network, built by the template',rec:()=>!HAS('N2','hub'),when:'there is no platform team yet, and the gateway must still be private.',cost:'not connected to a hub; you peer it and fix DNS and routes yourself afterwards.',
+        cfg:[['gwrun','scenario','dev-greenfield-private'],['gw','common.network_mode','greenfield'],['gw','network.address_space','<a /22, e.g. 10.170.0.0/22>']]},
+      {v:'byo-hub-spoke-network',l:'An existing hub and spoke our network team owns',when:'the network team builds every subnet itself and hands over the IDs.',cost:'every subnet and DNS zone ID is passed in by hand; no network stack runs.',
+        cfg:[['gwrun','scenario','byo-hub-spoke-network'],['gw','common.network_mode','byo']],needs:['Network team supplies the subnet and private DNS zone resource IDs the gateway needs.']},
+      {v:'quickstart',l:'A demo from a laptop',when:'a first look with no client data.',cost:'public endpoints; not a path to production.',
+        cfg:[['gwrun','scenario','quickstart'],['gw','common.network_mode','greenfield']]}]},
+  {id:'G3',q:'Which API Management tier?',why:'Tier sets throughput, the service-level agreement and the network pattern. The v2 tiers exist only in some regions; check before fixing the region.',
+    refs:[['T-shirt sizing',GW('plan/sizing-guide/#t-shirt-sizing-categories')],['API Management network modes',GWREPO+'blob/main/docs/operations/apim-network-modes.md']],show:gwIn,
+    opts:[
+      {v:'StandardV2',l:'Standard v2, private endpoint in',ms:true,rec:()=>!HAS('G2','alz-corp'),when:'a first production gateway; add units to scale.',cost:'limited regions; created public, then closed on the second run.',
+        cfg:[['gw','platform.apim.sku','StandardV2'],['gw','platform.apim.vnet_mode','integration'],['gw','platform.apim.private_endpoint','true'],['gw','platform.apim.public_network_access','true']]},
+      {v:'Premium',l:'Premium (classic), internal',rec:()=>HAS('G2','alz-corp'),when:'a Corp landing zone, where Microsoft\'s example uses three zone-spread units with a private address.',cost:'the highest fixed cost; classic network injection.',
+        cfg:[['gw','platform.apim.sku','Premium'],['gw','platform.apim.capacity','3'],['gw','platform.apim.vnet_mode','internal'],['gw','platform.apim.zone_redundant','true']]},
+      {v:'PremiumV2',l:'Premium v2, injected',when:'large production that wants the v2 platform with a private address.',cost:'limited regions; needs the Corp policy exemption.',
+        cfg:[['gw','platform.apim.sku','PremiumV2'],['gw','platform.apim.vnet_mode','injection']]},
+      {v:'Developer',l:'Developer',when:'experiments only.',cost:'no service-level agreement; not for production.',
+        cfg:[['gw','platform.apim.sku','Developer'],['gw','platform.apim.vnet_mode','internal']]}]},
+  {id:'G4',q:'How do callers prove who they are?',why:'Every call carries a gateway key. Requiring an Entra ID token as well proves which application is calling, and lets a contract demand a specific role.',
+    refs:[['Entra ID setup',GW('security/entra-id-setup/')],['Access contracts guide',GWREPO+'blob/main/docs/ACCESS_CONTRACTS_GUIDE.md']],show:gwIn,
+    opts:[
+      {v:'jwt',l:'Key plus Entra ID token',rec:true,when:'regulated data, or you need to know which identity made each call.',cost:'the identity stack creates an app registration; each caller gets an app role.',
+        cfg:[['gw','gateway-config.entra_auth.enabled','true'],['gwc','jwt_required','true'],['note','keep identity.tfvars in the folder so the identity stack runs; then task entra-setup']],needs:['An Entra admin who can create the gateway\'s app registration and assign its app roles (a Privileged Role Administrator for Graph permissions).']},
+      {v:'key',l:'Key only',ms:true,when:'an internal pilot with low-risk data.',cost:'anyone holding the key can call; rotate it with care.',
+        cfg:[['gw','gateway-config.entra_auth.enabled','false']]}]},
+  {id:'G5',q:'What happens to personal information in prompts?',why:'The gateway can find personal data, swap it for placeholders before the model sees it, and restore it in the answer. It checks up to about 125,000 characters per request.',
+    refs:[['PII masking',GW('security/pii-masking/')]],show:gwIn,
+    opts:[
+      {v:'anonymise',l:'Mask it, then restore it',ms:true,rec:true,when:'prompts may contain customer or staff details that must not reach the model.',cost:'extra latency; very long documents are only partly checked.',
+        cfg:[['gw','gateway-config.features.pii_redaction','true'],['gw','gateway-config.features.pii_anonymization','true']]},
+      {v:'block',l:'Block the request',when:'no personal data may reach any model.',cost:'the Terraform contracts have no switch for this; it needs a custom product policy we write and test.',
+        cfg:[['gw','gateway-config.features.pii_redaction','true'],['note','blocking needs a custom policy_xml on each contract']]},
+      {v:'off',l:'Off',when:'the data carries no personal information.',cost:'privacy relies on each agent.',
+        cfg:[['gw','gateway-config.features.pii_redaction','false'],['gw','gateway-config.features.pii_anonymization','false']]}]},
+  {id:'G6',detail:true,q:'Where is content safety enforced?',why:'Safety can be checked at the gateway, in Foundry\'s guardrails, or both. Pick the primary control so alerts and false positives have one owner.',
+    refs:[['Content safety policy',GW('contracts/access-contracts-policies/#content-safety-policy')]],show:gwIn,
+    opts:[
+      {v:'gateway',l:'At the gateway, for every model',ms:true,rec:true,when:'one rule set must cover every provider, including non-Foundry ones.',cost:'checks the first 10,000 characters.',cfg:[['gw','gateway-config.features.content_safety','true']]},
+      {v:'foundry',l:'In Foundry guardrails only',when:'all models are in Foundry and its guardrails are already approved.',cost:'non-Foundry providers go unchecked.',cfg:[['gw','gateway-config.features.content_safety','false']]}]},
+  {id:'G7',q:'Do we report usage and cost per team?',why:'With usage events on, each call writes a record that ends up in Cosmos DB for reporting. Storing the text of prompts and answers is a separate privacy choice.',
+    refs:[['Platform observability',GW('observability/platform-observability/')],['Power BI dashboard',GW('observability/power-bi-dashboard/')]],show:gwIn,
+    opts:[
+      {v:'metadata',l:'Yes, token counts only',rec:true,when:'finance needs chargeback; prompts and answers must not be stored centrally.',cost:'someone loads model prices and owns the report.',
+        cfg:[['gwc','usage_events','true'],['gw','platform.apim_logging.body_bytes','0']],needs:['A FinOps owner for the usage report, and model prices loaded into the usage database after deployment.']},
+      {v:'bodies',l:'Yes, with prompts and answers',when:'audit requires the text of each exchange.',cost:'stored prompts become sensitive data with their own retention and access rules.',
+        cfg:[['gwc','usage_events','true'],['gw','platform.apim_logging.body_bytes','8192']]},
+      {v:'no',l:'Not yet',when:'one team pays for everything.',cost:'retrofitting chargeback later means backfilling data.',cfg:[['gwc','usage_events','false']]}]},
+  {id:'G8',detail:true,q:'How is the usage pipeline hosted?',why:'The Logic App that moves usage records can run on a dedicated App Service Environment with no storage keys, or on a standard workflow plan that is quicker to create but needs shared-key storage.',
+    refs:[['Deployment scenarios',GWREPO+'blob/main/docs/DEPLOYMENT_SCENARIOS.md']],show:()=>gwIn()&&!HAS('G7','no'),
+    opts:[
+      {v:'ase_v3',l:'App Service Environment, keyless',rec:true,when:'production, or policy forbids storage account keys.',cost:'takes hours to create and bills while it exists.',cfg:[['gw','platform.usage_pipeline.logic_app.hosting','ase_v3'],['gw','platform.usage_pipeline.logic_app.code_deploy','true']]},
+      {v:'workflow_standard',l:'Workflow Standard',ms:true,when:'development, where speed matters more than the key-free rule.',cost:'needs a shared-key storage exception.',cfg:[['gw','platform.usage_pipeline.logic_app.hosting','workflow_standard'],['gw','platform.usage_pipeline.logic_app.code_deploy','true']]}]},
+  {id:'G9',q:'How do agents in the landing zone reach the gateway?',why:'A contract can create a gateway connection inside the agent\'s Foundry project, so agents call models through it. Other code reads the gateway address and key from Key Vault.',
+    refs:[['Foundry integration',GW('operate/foundry-integration/')],['Access contracts guide',GWREPO+'blob/main/docs/ACCESS_CONTRACTS_GUIDE.md']],show:gwIn,
+    opts:[
+      {v:'foundry-conn',l:'A connection in the agent\'s Foundry project',rec:true,when:'agents are Foundry agents.',cost:'Microsoft marks the Foundry gateway connection as preview.',
+        cfg:[['gwc','foundry.enabled','true'],['gwc','foundry.project_id','<spoke Foundry project resource ID>']]},
+      {v:'keyvault',l:'Address and key from Key Vault',when:'agents run outside Foundry, or preview features are not allowed.',cost:'your code handles the gateway address.',
+        cfg:[['gwc','key_vault.enabled','true']]}]},
+  {id:'G10',type:'inputs',q:'What does the first access contract allow?',why:'One contract per use case. These four numbers and names become the first contract file; every later team gets its own.',
+    refs:[['Access contracts guide',GWREPO+'blob/main/docs/ACCESS_CONTRACTS_GUIDE.md']],show:gwIn,who:'Platform lead and the use-case owner',
+    fields:[{k:'bu',label:'Business unit',ph:'Operations',req:true},{k:'uc',label:'Use case name',ph:'Triage',req:true},{k:'tpm',label:'Tokens per minute',ph:'50000',check:'num'},{k:'quota',label:'Monthly token quota',ph:'5000000',check:'num'}]}
+]};
+
+/* ---------- content: agent, knowledge, channels ---------- */
+const STOP_AGENT={id:'agent',name:'The agent',mins:5,
+  blurb:'Chat, a process with human sign-off, or both; where it runs; what it may do.',
+  title:'What the agent <em>does</em>, and where it runs.',
+  lead:'The reference application is a working agent you change, not a blank page. These choices decide its shape before the first deployment; most need a new provision to change later.',
+  lesson:{k:'What to know first',h:'An experience, a host, and capabilities',
+    p:['The <b>experience</b> is a chat, a named process that pauses for a person to approve, or both. The <b>host</b> is where the agent code runs: Foundry\'s hosted agents, or your own Container Apps worker. <b>Capabilities</b> such as search, knowledge bases and SQL tools are separate switches; none of them is a different kind of agent.','The agent\'s instructions live in a file in the orchestrator\'s source (<code>src/native/prompts/main.txt</code>). Editing a prompt in the Foundry portal does not change the deployed agent; a reviewed build does.'],
+    ul:['<b>Defaults</b>: chat mode, Foundry hosted, every tool off until its source, identity and network are ready.','<b>Approval is not permission</b>: a human approving a draft does not let the agent write to a business system. Writes need their own tool, authorisation and recovery plan.'],
+    fig:{src:'/assets/agent-deployment-blueprint/ms-with-platform.webp',alt:'Microsoft\'s Agent Landing Zone connected to a platform hub: the hosted agent inside the Foundry project, the web front end in Container Apps, DNS, egress and Bastion provided by the hub.',cap:'Agent Landing Zone on a platform hub',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/docs/architecture/media/AI-Landing-Zone-with-platform.png',w:2600,h:1553}},
+  decs:[
+  {id:'A1',q:'What experience do users get?',why:'Set before the first provision. Process mode (workflow) adds a database for tracking who owns each run.',
+    refs:[['Agents and prompts',ALZ('agent-strategies/')],['Workflows and human input',ALZ('workflows/')]],
+    opts:[
+      {v:'conversational',l:'A chat',ms:true,rec:true,when:'people ask questions and get grounded answers.',cost:'no built-in sign-off step.',cfg:[['azd','APPLICATION_MODE','conversational']]},
+      {v:'workflow',l:'A process with human sign-off',when:'the agent drafts something and an authorised person approves or rejects it before it is done.',cost:'needs application Cosmos DB; the reference process writes to no business system.',cfg:[['azd','APPLICATION_MODE','workflow']]},
+      {v:'both',l:'Both, in one interface',when:'users need open questions and a tracked process.',cost:'on Foundry hosting these are two separate publications to manage.',cfg:[['azd','APPLICATION_MODE','both']]}]},
+  {id:'A2',q:'Where does the agent code run?',why:'Foundry hosting is the default and the path Microsoft tests each release. Container Apps gives you the runtime and its durable scheduler to operate yourselves.',
+    refs:[['Hosting',ALZ('hosted-agents/')],['Execution host',ALZ('planning/#choose-application-behavior-and-execution-host')]],
+    opts:[
+      {v:'hosted',l:'Foundry hosted agent',ms:true,rec:true,when:'you want the simplest path, streaming answers and traces in the Foundry portal.',cost:'less control over the runtime; each publication gets its own identity on first deploy.',cfg:[['azd','ORCHESTRATION_HOST','hosted']]},
+      {v:'container_apps',l:'Our Container Apps worker',when:'long-running processes must survive restarts under your own operations, or Foundry hosting is not approved.',cost:'you run the worker and the Durable Task Scheduler; no token streaming parity.',cfg:[['azd','ORCHESTRATION_HOST','container_apps']]}]},
+  {id:'A3',type:'many',q:'Which capabilities does the first release need?',why:'Each is off until its source, identity and network path exist. Adding one later means a provision and a deploy.',
+    refs:[['Tools and MCP',ALZ('agent-tools/')],['Agent App MCP Server',ALZ('agent-app-mcp/')],['Inline visuals',ALZ('inline-visuals/')]],
+    opts:[
+      {v:'sql',l:'Answer questions from SQL data',when:'people ask about figures in Azure SQL or SQL Server.',cost:'everyone admitted shares one read-only dataset: no per-user row security. Needs a separate MCP server app.',
+        cfg:[['azd','DEPLOY_AGENT_APP_MCP','true'],['azd','MCP_TOOLSETS','["nl2sql"]']],needs:['A SQL owner approves the views or tables and creates a read-only login; an Entra admin can create the MCP server\'s app registration and its <code>MCP.Invoke</code> role.']},
+      {v:'search',l:'Search an index we already have',when:'another pipeline already fills an Azure AI Search index.',cost:'you own that index\'s schema, embeddings and permissions metadata.',cfg:[['appset','SEARCH_RETRIEVAL_ENABLED','true']]},
+      {v:'visuals',l:'Tables and charts in answers',when:'answers compare numbers that read better as a table or chart.',cost:'web chat only, not Teams or Copilot.',cfg:[['appset','AGENT_PRESENTATION_SETTINGS','{"schemaVersion":1,"agents":{"agent-lz-conversation":{"enabled":true}}}']]},
+      {v:'foundry-tool',l:'Another Foundry tool (web search, code)',when:'the task needs a tool outside the reference set.',cost:'a code change in the orchestrator, tested on your host, plus its connection and grants.',cfg:[['note','add the tool in the orchestrator source (compose_tools) and rebuild']]},
+      {v:'bing',l:'Search the public web',when:'answers need current public information.',cost:'questions leave your tenant for Bing and are billed per query; check this against your data rules.',cfg:[['azd','DEPLOY_GROUNDING_WITH_BING','true']]},
+      {v:'none',only:true,l:'Knowledge only, no tools',rec:true,when:'the first release answers questions from documents.',cost:'none.'}]},
+  {id:'A4',q:'May the agent change anything in your systems?',why:'Reading and writing carry different risk. Microsoft\'s reference process drafts and asks for approval but writes nothing; production writes need their own design.',
+    refs:[['Workflows: human review',ALZ('workflows/')],['Authorize and connect MCP safely',ALZ('agent-tools/')]],
+    opts:[
+      {v:'read',l:'Read only',rec:true,when:'the first release, and any agent where a wrong action is costly.',cost:'people act on the answer themselves.'},
+      {v:'approve',l:'Writes, each one approved by a person',when:'the value is in the action (raising a ticket, updating a record) and someone can review each one.',cost:'a write tool with its own authorisation, protection against duplicate actions, and a recovery plan.',needs:['An owner for each system the agent writes to, who approves the tool, its permissions and how a wrong write is undone.']}]},
+  {id:'A5',detail:true,q:'Does our own application need PostgreSQL?',why:'The template can add a PostgreSQL server for a custom application. It can only be chosen on a fresh deployment and cannot be removed or switched afterwards.',
+    refs:[['PostgreSQL',ALZ('postgresql/')]],show:()=>HAS('D2','custom'),
+    opts:[
+      {v:'no',l:'No',ms:true,rec:true,when:'the application keeps its data elsewhere.',cost:'cannot be added to this environment later.',cfg:[['azd','DEPLOY_POSTGRESQL','false']]},
+      {v:'yes',l:'Yes, private',when:'the application needs a relational database of its own.',cost:'Entra sign-in only; a delete lock; SQL grants set up by hand.',cfg:[['azd','DEPLOY_POSTGRESQL','true']],needs:['An Entra group or identity to be the PostgreSQL administrator, and someone to run the first SQL grants.']}]}
+]};
+
+const STOP_KNOW={id:'knowledge',name:'What it knows',mins:5,
+  blurb:'Documents, SharePoint, Microsoft 365, Fabric; who processes them and who may see what.',
+  title:'What the agent <em>knows</em>, and who may see it.',
+  lead:'Answers are only as safe as the permissions on the sources. Each source needs three things proven separately: it is loaded, the agent can use it, and a user who should not see a document does not.',
+  lesson:{k:'What to know first',h:'Indexed sources copy; remote sources ask',
+    p:['<b>Foundry IQ</b> is the knowledge layer. Indexed sources (a Blob container, SharePoint indexed) are copied into Azure AI Search with their permissions. Remote sources (SharePoint remote, Work IQ, Fabric) are queried live under the user\'s identity; nothing is copied, but the retrieved text still reaches the model.','The default is documents you place in a Blob container, processed by Search, with per-user permissions kept. Several richer sources are in preview with no SLA, and Microsoft notes the reference app does not yet pass the user\'s identity through to Work IQ, Fabric or remote SharePoint.'],
+    ul:['<b>Test with two people</b>: one allowed, one denied. The denied answer must contain no document name, excerpt or citation.','<b>Known gap</b>: the supplied Blob clean-up job fails today, so deleted files stay searchable until removed by hand.']},
+  decs:[
+  {id:'K1',type:'many',q:'Which sources does the first release use?',why:'Start with what is approved and owned. Each extra source brings an owner, a permission model and, for some, a licence.',
+    refs:[['Foundry IQ',ALZ('foundry-iq/')],['SharePoint',ALZ('sharepoint/')],['Work IQ',ALZ('work-iq/')],['Fabric IQ',ALZ('fabric-iq/')]],
+    opts:[
+      {v:'blob',l:'Documents we load into a Blob container',ms:true,rec:true,when:'a defined set of policies, manuals or procedures is approved for the agent.',cost:'someone owns what goes in the container.',cfg:[['appset','FOUNDRY_IQ_ENABLED','true'],['azd','FOUNDRY_IQ_PATTERN','azureBlob']],needs:['A content owner who supplies the first approved documents and decides who may read each one.']},
+      {v:'sharepoint',l:'SharePoint sites',when:'the knowledge already lives in SharePoint with the right permissions.',cost:'native routes are preview; the production route is app-managed ingestion with Graph access to named sites.'},
+      {v:'workiq',l:'Each person\'s Microsoft 365 (Work IQ)',when:'answers should use the user\'s own mail, meetings and files.',cost:'preview, usage billing, and custom code to pass the user\'s identity through. Not for production yet.',needs:['Work IQ usage billing enabled in the tenant, pilot users assigned, and custom work to forward the user\'s identity.']},
+      {v:'fabric',l:'Microsoft Fabric (data agent or ontology)',when:'analytical questions over a lakehouse, warehouse or semantic model.',cost:'preview; one Fabric source per pilot; custom code for per-user access.',needs:['A Fabric admin approves capacity and tenant settings; a published Fabric data agent or ontology item and its IDs.']},
+      {v:'index',l:'An existing search index',when:'another team already maintains an index with permissions metadata.',cost:'you confirm its schema, embeddings and security fields first.',cfg:[['azd','FOUNDRY_IQ_SEARCH_INDEX_NAME','<existing index name>']]}]},
+  {id:'K2',q:'Which SharePoint route?',why:'Four ways in, and they differ in what is copied, whose identity is used and what is licensed. The three native ones are preview.',
+    refs:[['SharePoint options',ALZ('sharepoint/')]],show:()=>HAS('K1','sharepoint'),
+    opts:[
+      {v:'app-ingest',l:'Our ingestion service with Graph access to named sites',rec:true,when:'production, or you need control over which lists and libraries are loaded.',cost:'an app registration with <code>Sites.Selected</code>, a grant per site, and schedules to run. Deleted items can linger.',
+        cfg:[['azd','DEPLOY_INGESTION_CONTAINER_APP','true']],needs:['A Global or Privileged Role Administrator consents to <code>Sites.Selected</code>; each SharePoint site owner approves a read grant for the named site.']},
+      {v:'indexed',l:'Foundry IQ indexed SharePoint (preview)',when:'a pilot that wants managed indexing without running ingestion.',cost:'preview; the reference app does not carry the user\'s identity end to end.',cfg:[['appset','SHAREPOINT_INDEXED_ENABLED','true'],['azd','FOUNDRY_IQ_API_VERSION','2026-08-01-preview']]},
+      {v:'remote',l:'Foundry IQ remote SharePoint (preview)',when:'nothing may be copied out of Microsoft 365.',cost:'each user needs a Microsoft 365 Copilot licence or pay-as-you-go retrieval; text only.',needs:['Microsoft 365 Copilot licences or Retrieval API pay-as-you-go billing for each user who queries.']},
+      {v:'tool',l:'Foundry Agent Service SharePoint tool (preview)',when:'a Foundry agent should call SharePoint as a tool with the user\'s identity.',cost:'preview; configured in Foundry, outside the knowledge base.'}]},
+  {id:'K3',q:'Who processes the documents?',why:'Search can extract, chunk and embed Blob documents itself. A separate ingestion service gives you control over formats, chunking and figures, at the price of running it.',
+    refs:[['Ingestion overview',ALZ('ingestion/')],['Document formats',ALZ('multimodality/')]],show:()=>!HAS('K2','app-ingest'),
+    opts:[
+      {v:'native',l:'Azure AI Search, built in',ms:true,rec:true,when:'PDFs and Office documents in a Blob container.',cost:'less control over chunking and figure handling.',cfg:[['azd','DEPLOY_INGESTION_CONTAINER_APP','false']]},
+      {v:'custom',l:'Our ingestion service',when:'spreadsheets by row, transcripts, figure captions or custom chunking matter.',cost:'one more app to run; its jobs can delete index content, so schedules are reviewed first.',cfg:[['azd','DEPLOY_INGESTION_CONTAINER_APP','true']]}]},
+  {id:'K4',q:'Do answers respect each person\'s document permissions?',why:'By default each document keeps its access list and answers are trimmed per user. Turning that off makes the whole corpus readable by everyone admitted.',
+    refs:[['Retrieval settings',ALZ('configuration/#retrieval')],['Shared-source permissions',ALZ('configuration/#explicit-shared-source-permission-options')]],show:()=>HAS('K1','blob')||HAS('K1','index'),
+    opts:[
+      {v:'per-user',l:'Yes, per person',ms:true,rec:true,when:'any document set where not everyone may read everything.',cost:'permissions must be right at the source; test with an allowed and a denied user.',cfg:[['azd','FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS','["rbacScope"]']]},
+      {v:'shared',l:'No, one shared library',when:'every document is meant for everyone who can use the agent.',cost:'turning per-person permissions back on later means re-checking every ingested document.',cfg:[['azd','FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS','[]']]}]},
+  {id:'K5',detail:true,q:'Do diagrams and images inside documents matter?',why:'Search can turn figures into text the model reads, but only with a supported model. The default chat model is not on that list; <code>gpt-4.1</code> is.',
+    refs:[['Document image grounding',ALZ('multimodality/')]],show:()=>HAS('K1','blob'),
+    opts:[
+      {v:'text',l:'Text is enough',ms:true,rec:true,when:'the documents are mostly written procedures.',cost:'answers ignore what is only shown in a diagram.'},
+      {v:'images',l:'Yes, read the figures too',when:'drawings, schematics or charts carry the answer.',cost:'a supported chat model such as gpt-4.1 in the model list, at higher cost.',cfg:[['param','modelDeploymentList (chat entry)','gpt-4.1']]}]}
+]};
+
+const STOP_CHAN={id:'channels',name:'Where people use it',mins:3,
+  blurb:'Web chat, your portal, Teams and Microsoft 365 Copilot, Copilot Studio; history and feedback.',
+  title:'Where people <em>meet</em> the agent.',
+  lead:'Every channel has its own identity and network path. Only the web chat carries the user\'s identity all the way to the documents by default.',
+  lesson:{k:'What to know first',h:'Same agent, different doors',
+    p:['The web chat is the default and keeps per-user permissions. Teams and Microsoft 365 Copilot reach the agent through a public endpoint that only Microsoft\'s channel addresses may call; it is not private end to end. The Copilot Studio route uses one shared connection identity, so Foundry sees that account, not the person chatting.'],
+    ul:['<b>Teams and Copilot</b>: no streaming or citations; start with the Shared scope for a pilot.','<b>History, feedback and private file uploads</b> are off by default and must be chosen before provisioning, because they add a database.']},
+  decs:[
+  {id:'C1',type:'many',q:'Where will people use it?',why:'Pick the doors for the first release. Each extra one is a separate setup after the agent works in web chat.',
+    refs:[['Embed chat',ALZ('embed-chat/')],['Teams and Microsoft 365',ALZ('publish-to-teams/')],['Copilot Studio',ALZ('connect-copilot-studio/')]],
+    opts:[
+      {v:'web',l:'Web chat',ms:true,rec:true,when:'always first: it is where sign-in and permissions are proven.',cost:'users need network access to it (or Application Gateway).'},
+      {v:'teams',l:'Teams and Microsoft 365 Copilot',when:'people live in Teams and the agent\'s data may flow through a public, IP-filtered endpoint.',cost:'not private end to end; no streaming or citations; per-user document trimming must be re-tested.',needs:['Organisational approval for the public Microsoft 365 activity endpoint, and a Microsoft 365 admin to approve tenant-wide publishing.']},
+      {v:'embed',l:'Inside our own portal',when:'an existing intranet or app should host the chat.',cost:'portal work (sign-in tokens, content policy) and the chat front end limited to one replica.',needs:['Portal developers acquire tokens for the agent\'s API and allow its origin in the portal\'s content security policy.']},
+      {v:'studio',l:'Copilot Studio',when:'a Copilot Studio agent should hand questions to this one privately.',cost:'one shared identity, no history between messages, 100-second limit per call.',needs:['A Power Platform admin with a managed environment and the network enterprise policy; Copilot Studio capacity and premium connectors.']}]},
+  {id:'C2',detail:true,q:'Who can find it in Teams and Copilot?',why:'Shared scope lists it only for people granted access to the agent. Tenant scope makes it callable by every member and needs Microsoft 365 admin approval.',
+    refs:[['Publish to Teams',ALZ('publish-to-teams/')]],show:()=>HAS('C1','teams'),
+    opts:[
+      {v:'Shared',l:'Shared: granted people only',rec:true,when:'the pilot.',cost:'each tester needs the Foundry agent role.'},
+      {v:'Tenant',l:'Tenant: everyone',when:'general release after the pilot.',cost:'every member can call it; protected-data limits must be tested again.'}]},
+  {id:'C3',type:'many',q:'Which chat features are on?',why:'All three add the application database and must be chosen before provisioning. Each stores something about users, so retention needs an owner.',
+    refs:[['Conversations and files',ALZ('conversations/')],['User feedback',ALZ('user-feedback/')]],
+    opts:[
+      {v:'history',l:'Saved conversations',rec:true,when:'people come back to earlier threads.',cost:'conversation metadata stored per user; retention to agree.',cfg:[['azd','ENABLE_CHAT_HISTORY','true']]},
+      {v:'feedback',l:'Thumbs up and down on answers',rec:true,when:'the pilot should show which answers fail.',cost:'no feedback report is supplied; someone reads it from the database or builds one.',cfg:[['azd','ENABLE_USER_FEEDBACK','true']]},
+      {v:'attach',l:'Attach small files to a chat',when:'users paste in a short document to ask about.',cost:'three files of 64 KiB each per turn; check the model understands PDFs and images.',cfg:[['azd','ENABLE_PRIVATE_ATTACHMENTS','true']]}]},
+  {id:'C4',detail:true,q:'How do portal users sign in to the embedded chat?',why:'The embedded chat can require the portal\'s Entra sign-in, or run anonymously. Anonymous chats cannot use per-user documents, history, uploads or feedback.',
+    refs:[['Embed chat',ALZ('embed-chat/')]],show:()=>HAS('C1','embed'),
+    opts:[
+      {v:'entra',l:'With their Entra sign-in',rec:true,when:'the portal is for staff or signed-in partners.',cost:'the portal acquires a token for the agent\'s API.',cfg:[['app','CHAINLIT_COPILOT_ENABLED','true'],['app','CHAINLIT_COPILOT_AUTH_MODE','entra']]},
+      {v:'anonymous',l:'Anonymously',when:'a deliberately public assistant over public content.',cost:'no per-user permissions, history or feedback.',cfg:[['app','CHAINLIT_COPILOT_ENABLED','true'],['app','CHAINLIT_COPILOT_AUTH_MODE','anonymous']]}]}
+]};
+
+const STOPS=[STOP_SHAPE,STOP_DEPLOY,STOP_NET,STOP_ID,STOP_MODELS,STOP_GATEWAY,STOP_AGENT,STOP_KNOW,STOP_CHAN,STOP_RUN];
+
+/* ---------- blueprint output: summary sentence, drawing, settings blocks, example ---------- */
+const MODELS_REF=[
+  {name:'chat',model:{format:'OpenAI',name:'gpt-5-nano',version:'2025-08-07'},sku:{name:'GlobalStandard',capacity:100},canonical_name:'CHAT_DEPLOYMENT_NAME',apiVersion:'2025-12-01-preview'},
+  {name:'text-embedding',model:{format:'OpenAI',name:'text-embedding-3-large',version:'1'},sku:{name:'GlobalStandard',capacity:100},canonical_name:'EMBEDDING_DEPLOYMENT_NAME',apiVersion:'2025-01-01-preview'}];
+const list=a=>a.length<=1?(a[0]||''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+const BP={
+  kindLabel:{azd:'azd env',param:'main.parameters.json',appset:'main.parameters.json · app setting',yaml:'azure.yaml',app:'App Configuration, after provision',gw:'gateway',gwc:'gateway · access contract',gwrun:'gateway · start from'},
+  alwaysNeeds:['Named owners for this blueprint\'s open decisions, with dates, before the build starts.','A first set of test questions with known good answers, written by the business owner, to accept the agent against.'],
+  configIntro:'Your choices, in the order the deployment uses them. Placeholders in angle brackets are filled before the run. The Terraform variables file itself is generated from these on every run and is never edited by hand. Settings marked as Microsoft defaults are left out unless you chose otherwise.',
+  sources:'Microsoft AI Landing Zones documentation and reference architecture (<a href="https://azure.github.io/AI-Landing-Zones/">azure.github.io/AI-Landing-Zones</a>, MIT licence), read on 17 November 2026. Every setting name on this sheet was checked the same day against the two templates that get deployed: <a href="https://github.com/Azure/agent-landing-zone">Azure/agent-landing-zone</a> release v7.5.12 and <a href="https://github.com/Azure/terraform-ai-gateway-landing-zone">Azure/terraform-ai-gateway-landing-zone</a> (routing 1.0.1). Guidance is paraphrased; option reasons and recommendations are ours. Where a doc page and a template disagree, the sheet follows the template.',
+  /* choices that fall outside the one scenario Microsoft deploys live for every release */
+  outside(){
+    const o=[];const region=F('D5','region').trim().toLowerCase();
+    if(region&&region!=='swedencentral')o.push(`Region ${esc(region)} (Microsoft tests in swedencentral): confirm model and search quota first.`);
+    if(E('N1','public'))o.push('Public endpoints: the tested shape is private.');
+    if(E('N7','bastion')||E('N7','hub-bastion'))o.push('Bastion and a jumpbox: the test uses a peered runner with neither.');
+    if(E('N7','vpn'))o.push('Point-to-site VPN access: the test uses a peered runner.');
+    if(E('N3','existing-managed')||E('N3','existing-prebuilt'))o.push('An existing virtual network: the test creates a new one.');
+    if(E('N5','byo')||E('N5','policy'))o.push('Central or policy-managed private DNS: the test lets the template create its zones.');
+    if(E('N6','standard')||E('N6','hub'))o.push('Egress through a Standard or hub firewall: the test uses the template'+"'"+'s Basic firewall.');
+    if(E('N8','waf'))o.push('Public ingress through Application Gateway.');
+    if(E('A2','container_apps'))o.push('Agent on your own Container Apps worker: the test runs the Foundry hosted agent.');
+    if(E('A1','workflow')||E('A1','both'))o.push('Process (workflow) mode: the test runs chat mode.');
+    if(E('K3','custom')||E('K2','app-ingest'))o.push('The separate ingestion service: off in the test.');
+    if(E('A3','sql'))o.push('SQL tools through the MCP server.');
+    if(E('D2','custom'))o.push('A custom application definition.');
+    if(E('D10','local'))o.push('Local Docker image builds: the test builds in Azure.');
+    if(E('D8','three-pre')||E('D8','one'))o.push('Pre-created or single resource groups: the test lets the deployment create three.');
+    (V('K1')||[]).filter(x=>['workiq','fabric'].includes(x)).forEach(x=>o.push({workiq:'Work IQ',fabric:'Fabric'}[x]+' as a knowledge source: preview, and needs custom identity pass-through.'));
+    if(E('K2','indexed')||E('K2','remote')||E('K2','tool'))o.push('A preview SharePoint route.');
+    if(E('C1','teams'))o.push('Teams and Microsoft 365 Copilot publishing: a manual step after deployment.');
+    if(E('C1','studio'))o.push('The Copilot Studio relay: a manual runbook after deployment.');
+    if(E('S2','gateway-now'))o.push('Models through the AI Gateway: a separate deployment the agent template does not test.');
+    return o;
+  },
+  nextSteps(){
+    const tf=!E('D1','bicep'),gw=E('S2','gateway-now');
+    return [
+      ['Close the open decisions','Each open item on this sheet gets an owner and a date. Nothing is built on a guess.'],
+      ['Clear the before-day-one list','Access, quota, network ranges and sign-offs. We track it with you weekly.'],
+      [tf?'Dry run in a sandbox':'Trial run in a sandbox','We deploy this exact blueprint in a throwaway subscription first, tear it down, and fix what we find.'],
+      ['Build your dev environment','The first real deployment, through the pipeline, with the acceptance questions run against it.'],
+      gw?['Stand up the gateway','Its own deployment, then the first access contract for this agent.']:null,
+      ['Design review','The 44-item Microsoft design checklist, area by area, before production.'],
+      ['Promote to production','The same pinned release and settings, with the pilot group.']
+    ].filter(Boolean);
+  },
+  chatCapacity(){const a=S.a.M3;if(!a||!a.f||!Object.values(a.f).some(x=>String(x).trim()))return 0;const n=k=>{const x=parseFloat(F('M3',k));return isNaN(x)?null:x;};const conc=n('conc')??5,tin=n('tin')??3000,tout=n('tout')??500;return Math.max(10,Math.ceil(conc/30*60*2*(tin+tout)/1000));},
+  refFig(){if(E('S2','gateway-now'))return {src:'/assets/agent-deployment-blueprint/ms-with-gateway.webp',cap:'Agent Landing Zone with a platform hub and the AI Gateway Landing Zone',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/docs/architecture/media/AI-Landing-Zones-APIM.png',w:2600,h:2383};
+    if(E('N2','hub'))return {src:'/assets/agent-deployment-blueprint/ms-with-platform.webp',cap:'Agent Landing Zone on a platform hub',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/docs/architecture/media/AI-Landing-Zone-with-platform.png',w:2600,h:1553};
+    return {src:'/assets/agent-deployment-blueprint/ms-standalone.webp',cap:'Standalone Agent Landing Zone',orig:'https://github.com/Azure/AI-Landing-Zones/blob/main/docs/architecture/media/AI-Landing-Zone-without-platform.png',w:2600,h:1603};},
+  blocks:[
+    {id:'run',title:'Run order',note:'Each environment, from a machine or pipeline agent that can reach the private network. This is the sequence Microsoft'+"'"+'s own release test follows.',render(cfg){
+      const tf=!E('D1','bicep'),env=F('D5','env')||'dev',priv=!E('N1','public');
+      return [`# 1. New, empty folder; pin the latest validated release (v7.5.12 on 17 Nov 2026)`,`azd init --template Azure/agent-landing-zone --branch <latest release tag> --environment ${env} .`,
+        `python -m venv .venv   # then activate it`,`pip install -r config/requirements.txt`,`azd extension install azure.ai.agents`,
+        tf?`# 2. Switch to Terraform once: edit azure.yaml (block below)`:`# 2. Bicep is the default; azure.yaml stays as it is`,
+        `# 3. Set this environment's choices (azd block below) and edit the root main.parameters.json`,
+        `# 4. Check the application binding and review the egress plan`,`azd hooks run preup`,`python -m config.deployment.egress --plan --environment ${env}`,
+        priv?`# 5. Build the foundation; private endpoints are not reachable yet, so data-plane setup waits`:`# 5. Build the foundation`,
+        priv?`azd env set RUN_FROM_JUMPBOX false`:null,`azd provision`,
+        priv?`# 6. Connect the runner to the new network (peering, DNS links), then finish the setup`:null,
+        priv?`azd env set RUN_FROM_JUMPBOX true`:null,priv?`azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING false`:null,priv?`azd hooks run postprovision`:null,
+        `# ${priv?7:6}. Sign-in settings (App Configuration block), then publish the agent`,`azd deploy`,
+        `# ${priv?8:7}. Check the environment's records`,`python -m config.deployment.metadata --check --environment ${env}`].filter(x=>x!==null).join('\n');}},
+    {id:'yaml',title:'azure.yaml',note:'Change only the infra section; keep the services and hooks as shipped.',render(cfg){
+      if(!cfg.yaml)return '';return 'infra:\n'+cfg.yaml.map(x=>`  ${x.k.replace('infra.','')}: ${x.v}`).join('\n');}},
+    {id:'azd',title:'azd environment settings',note:'Run in the project folder with the environment selected. Settings for state, region and resource groups must be set before the first provision.',render(cfg){
+      if(!cfg.azd)return '';let last='',out=[];
+      const seen=new Set();cfg.azd.forEach(x=>{if(seen.has(x.k))return;seen.add(x.k);if(x.src!==last){last=x.src;out.push(`# ${x.src} ${BYID[x.src].q}`);}const v=String(x.v);out.push(`azd env set ${x.k} ${/^[\[{]/.test(v)?`'${v}'`:`"${v}"`}`);});
+      return out.join('\n');}},
+    {id:'params',title:'main.parameters.json (root)',note:'Merge into the root parameters file. These values have no azd variable.',render(cfg){
+      const p={};const ps=(cfg.param||[]);const apps=(cfg.appset||[]);if(!ps.length&&!apps.length)return '';
+      ps.forEach(x=>{
+        if(x.k==='modelDeploymentList'){p.modelDeploymentList={value:E('M1','reference')?JSON.parse(JSON.stringify(MODELS_REF)):'<your chat and embedding entries>'};return;}
+        if(x.k==='vnetAddressPrefixes'){p.vnetAddressPrefixes={value:String(x.v).split(',').map(s=>s.trim()).filter(Boolean)};return;}
+        if(x.k.includes('[]')||x.k.includes(' '))return;
+        const [root,...rest]=x.k.split('.');const val=x.v==='true'?true:x.v==='false'?false:x.v;
+        if(!rest.length){p[root]={value:val};}else{(p[root]||(p[root]={value:{}})).value[rest.join('.')]=val;}
+      });
+      if(p.modelDeploymentList&&Array.isArray(p.modelDeploymentList.value)){
+        if(E('M2','regional'))p.modelDeploymentList.value.forEach(m=>m.sku.name='Standard');
+        const cap=BP.chatCapacity();if(cap)p.modelDeploymentList.value[0].sku.capacity=cap;
+        if(E('K5','images'))p.modelDeploymentList.value[0].model={format:'OpenAI',name:'gpt-4.1',version:'<version>'};
+      }
+      if(apps.length)p.additionalAppConfigurationSettings={value:apps.map(x=>({name:x.k,value:String(x.v),label:'agent-lz'}))};
+      return JSON.stringify({parameters:p},null,2);}},
+    {id:'app',title:'App Configuration, after provision',note:'Sign-in and admission settings need the front end\'s address, so they are written after provision and before deploy.',render(cfg){
+      const rows=(cfg.app||[]).filter(x=>x.v!=='(empty)');if(!rows.length&&!F('I5','tenant'))return '';
+      return ['# endpoint: azd env get-value APP_CONFIG_ENDPOINT','az appconfig kv set --endpoint <endpoint> --auth-mode login --label agent-lz --key OAUTH_AZURE_AD_CLIENT_ID --value <app registration client ID> --yes','az appconfig kv set --endpoint <endpoint> --auth-mode login --label agent-lz --key OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT --value true --yes']
+        .concat(rows.map(x=>`az appconfig kv set --endpoint <endpoint> --auth-mode login --label agent-lz --key ${x.k} --value "${x.v}" --yes`)).join('\n');}},
+    {id:'gw',title:'AI Gateway: environment folder',note:'For the separate gateway repository (Azure/terraform-ai-gateway-landing-zone), which needs Terraform 1.16.5 and Task. Copy the example folder, then set these values in its files. Names checked against the repository on 17 November 2026.',render(cfg){
+      if(!E('S2','gateway-now'))return '';
+      const env=((cfg.gw||[]).find(x=>x.k==='common.environment')||{}).v||'prod';
+      const scen=((cfg.gwrun||[])[0]||{}).v||'<example folder>';
+      const files={common:{workload:'aigw',environment:env,location:F('D5','region')||'<region with the chosen tier>',subscription_id:'<gateway subscription ID>'}};
+      const typed=v=>v==='true'?true:v==='false'?false:/^\d+$/.test(v)?Number(v):v;
+      (cfg.gw||[]).forEach(x=>{const [file,...path]=x.k.split('.');let o=files[file]||(files[file]={});path.slice(0,-1).forEach(k=>{o=o[k]||(o[k]={});});o[path[path.length-1]]=typed(String(x.v));});
+      const hcl=(o,ind)=>Object.entries(o).map(([k,v])=>v&&typeof v==='object'?`${ind}${k} = {\n${hcl(v,ind+'  ')}\n${ind}}`:`${ind}${k} = ${typeof v==='string'?JSON.stringify(v):v}`).join('\n');
+      let out=[`# start from the matching example`,`cp -r examples/${scen} environments/${env}`,''];
+      ['common','network','platform','gateway-config'].forEach(f=>{if(files[f])out.push(`# environments/${env}/${f}.tfvars`,hcl(files[f],''),'');});
+      const bu=F('G10','bu')||'<BusinessUnit>',uc=F('G10','uc')||'<UseCase>',tpm=F('G10','tpm')||'50000',quota=F('G10','quota')||'5000000';
+      const c={};(cfg.gwc||[]).forEach(x=>{c[x.k]=typed(String(x.v));});
+      const have=F('G10','bu')&&F('G10','uc'),slug=have?(bu+'-'+uc).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):'<use-case>',SEC=have?slug.toUpperCase():'<USE-CASE>';
+      out.push(`# environments/${env}/access-contracts/${slug}.tfvars`,
+        `use_case = {\n  business_unit = ${JSON.stringify(bu)}\n  use_case_name = ${JSON.stringify(uc)}\n  environment   = ${JSON.stringify(env.toUpperCase())}\n}`,
+        `api_name_mapping = {\n  LLM = ["universal-llm-api"]\n}`,
+        `services = [\n  {\n    code                 = "LLM"\n    endpoint_secret_name = "${SEC}-LLM-ENDPOINT"\n    api_key_secret_name  = "${SEC}-LLM-KEY"\n    token_limit          = { tokens_per_minute = ${tpm}, token_quota = ${quota}, token_quota_period = "Monthly" }${c.jwt_required?'\n    jwt_required         = true':''}${c.usage_events?'\n    usage_events         = true':''}\n  },\n]`,
+        `key_vault = { enabled = true }`);
+      if(c['foundry.enabled'])out.push(`foundry   = { enabled = true, project_id = ${JSON.stringify(c['foundry.project_id']||'<spoke Foundry project resource ID>')} }`);
+      out.push('',`# run`,`task bootstrap ENV=${env}`,`task plan-all ENV=${env}`,`task up ENV=${env}`,`task validate ENV=${env}`);
+      if(E('G3','StandardV2'))out.push(`# second run, once it works: set apim.public_network_access = false in platform.tfvars`);
+      return out.join('\n');}},
+    {id:'state',title:'State store, created once by the platform team',note:'Our suggested commands, not part of Microsoft\'s template: the template expects this to exist already, outside every workload resource group.',render(cfg){
+      if(E('D1','bicep'))return '';const rg=F('D7','rg')||'rg-tfstate',sa=F('D7','sa')||'<storage account>',ct=F('D7','ct')||'tfstate',loc=F('D5','region')||'<region>';
+      return [`az group create --name ${rg} --location ${loc}`,`az storage account create --name ${sa} --resource-group ${rg} --location ${loc} --sku Standard_GRS --min-tls-version TLS1_2 --allow-shared-key-access false --allow-blob-public-access false`,`az storage container create --name ${ct} --account-name ${sa} --auth-mode login`,`# grant the pipeline identity: Reader on the account, Storage Blob Data Contributor on the container`,`az role assignment create --assignee <pipeline object ID> --role "Storage Blob Data Contributor" --scope <container resource ID>`].join('\n');}}
+  ]
+};
+
+const EXAMPLE={meta:{client:'Prairie Grid Co-op',workload:'Outage triage assistant',date:'2026-11-17',people:'Dana (IT director), Sam (platform lead), Priya (security), Lee (operations manager)'},
+  a:{S1:{v:['teams','central']},S2:{v:'gateway-later'},S3:{v:'per-usecase'},
+     D1:{v:'terraform'},D2:{v:'full'},D3:{v:'dev-prod'},D4:{v:'per-env'},D5:{f:{sub:'',region:'canadacentral',alt:'eastus2',env:'dev'},owner:'Sam'},D6:{v:'pipeline',owner:'Sam'},D7:{f:{rg:'rg-pgc-tfstate',sa:'stpgctfstate001',ct:'tfstate'},owner:'Sam'},D8:{v:'three-pre'},D9:{v:'caf-tokens',note:'Workload token: triage'},
+     N1:{v:'private'},N2:{v:'hub',owner:'Sam'},N3:{v:'new'},N4:{f:{vnet:'10.42.8.0/21',avoid:'10.0.0.0/8 on-premises, VPN pool 172.16.0.0/22'},owner:'Network team'},N5:{v:'byo',owner:'Network team'},N6:{v:'hub'},N7:{v:'vpn',note:'Engineers already on the corporate VPN'},N8:{v:'closed'},N9:{v:'no'},
+     I1:{v:'oidc'},I2:{v:'system'},I3:{v:'user_delegated'},I4:{v:'pilot',owner:'Lee'},I5:{f:{admin:'Priya',tenant:''}},
+     M1:{v:'reference'},M2:{v:'regional',note:'Grid data must be processed in Canada'},M3:{f:{users:'60',turns:'8',conc:'4',tin:'3000',tout:'500'}},M4:{v:'payg'},
+     A1:{v:'conversational'},A2:{v:'hosted'},A3:{v:['none']},A4:{v:'read'},
+     K1:{v:['blob','sharepoint']},K2:{v:'app-ingest',owner:'Lee'},K4:{v:'per-user'},K5:{v:'images',note:'Single-line diagrams carry the switching steps'},
+     C1:{v:['web','teams']},C2:{v:'Shared'},C3:{v:['history','feedback']},
+     R1:{v:'central',owner:'Sam'},R2:{later:true,owner:'Priya',note:'Privacy review in December'},R3:{v:'default'},R4:{v:['defender','purview']},R5:{v:'latest-pinned'},R6:{v:['consumption','budget']},D11:{v:'ado'},D12:{f:{cc:'4410',owner:'Grid operations',app:'outage-triage'}}}};
+
+/* ---------- the house drawing (one picture, lit stop by stop) and the summary sentence. Both only state what was decided or assumed. ---------- */
+const EV=id=>{const d=BYID[id];return d&&shown(d)?effOpts(d).map(o=>o.v):[];};
+const E=(id,v)=>EV(id).includes(v);
+const KNOWN=id=>{const d=BYID[id];if(!d||!shown(d))return false;return d.type==='inputs'?isChosen(d):effOpts(d).length>0;};
+
+/* per-stop presentation: short ruler name, which regions of the drawing the stop is about */
+const STOP_UI={
+  shape:{short:'Picture',focus:['sub','gw']},deploy:{short:'Deploy',focus:['eng','state','sub']},network:{short:'Network',focus:['net','netrg','hub']},
+  identity:{short:'Identity',focus:['people','eng']},models:{short:'Models',focus:['foundry','gw']},gateway:{short:'Gateway',focus:['gw'],scope:'S2'},
+  agent:{short:'Agent',focus:['app','foundry']},knowledge:{short:'Knowledge',focus:['know','foundry']},channels:{short:'Channels',focus:['people']},run:{short:'Running',focus:['mon']}
+};
+
+BP.summary=function(){
+  const any=['N1','N2','D1','D2','A1','A2','K1','C1','I4','S2'].some(KNOWN);
+  if(!any)return 'Nothing is decided yet. Work through the stops and this sheet writes itself.';
+  const net=[E('N1','private')?'private':E('N1','public')?'public-endpoint':'',E('N2','hub')?'hub-connected':E('N2','standalone')?'standalone':''].filter(Boolean).join(', ');
+  const region=F('D5','region');
+  let s=`${net?(/^[aeiou]/i.test(net)?'An ':'A ')+net+' ':'An '}Agent Landing Zone${region?' in '+esc(region):''}`;
+  if(E('S2','gateway-now'))s+=' beside a shared AI Gateway';
+  const tool=E('D1','terraform')?'Terraform':E('D1','bicep')?'Bicep':'';
+  if(tool)s+=`, deployed with ${tool}${E('D6','pipeline')?' from one pipeline':''}`;
+  s+='.';
+  const app=E('D2','custom')?'your own application':E('D2','infra')?'':E('D2','full')?'Microsoft\'s reference agent':'';
+  const host=E('A2','hosted')?' as a Foundry hosted agent':E('A2','container_apps')?' on your own Container Apps worker':'';
+  const mode=E('A1','conversational')?' in chat mode':E('A1','workflow')?' as a process with human sign-off':E('A1','both')?' as chat plus a signed-off process':'';
+  const kn={blob:'approved documents',sharepoint:'SharePoint',workiq:'each person\'s Microsoft 365',fabric:'Fabric data',index:'an existing search index'};
+  const ks=EV('K1').map(x=>kn[x]).filter(Boolean);if(E('A3','sql'))ks.push('SQL data');
+  const who=E('I4','pilot')?'a pilot group':E('I4','tenant')?'everyone in the tenant':'';
+  const ch={web:'web chat',teams:'Teams',embed:'your portal',studio:'Copilot Studio'};const cs=EV('C1').map(x=>ch[x]).filter(Boolean);
+  const parts=[];
+  if(app||host||mode)parts.push(`It runs ${app||'the agent'}${host}${mode}`);
+  else if(E('D2','infra'))parts.push('The foundation is built first, with the application to follow');
+  if(ks.length)parts.push(`${parts.length?'':'It is '}grounded on ${list(ks)}`);
+  if(who||cs.length)parts.push(`${parts.length?'and ':'It '}reaches ${who||'its users'}${cs.length?' through '+list(cs):''}`);
+  if(parts.length)s+=' '+parts.join(', ').replace(', and ',' and ')+'.';
+  return s;
+};
+
+/* draw({theme:'paper'|'dark', focus:[regions], mini:true}) */
+BP.draw=function(o){
+  o=o||{};const dark=o.theme==='dark',mini=!!o.mini,focus=o.focus||[];
+  const C=dark?{ink:'#E8E1D4',dim:'#918A80',line:'#635C52',fill:'#15110D',acc:'#D27A3F',wash:'rgba(210,122,63,.14)',soft:'rgba(232,225,212,.03)'}
+              :{ink:'#2A241C',dim:'#685E50',line:'#8B8170',fill:'#F2ECDF',acc:'#B45F26',wash:'rgba(180,95,38,.10)',soft:'rgba(42,36,28,.03)'};
+  const FS=mini?25:12.5,HS=mini?25:10.5;
+  const T=(x,y,t,p={})=>`<text x="${x}" y="${y}" font-family="Instrument Sans, system-ui, sans-serif" font-size="${p.s||FS}" font-weight="${p.w||400}" fill="${p.c||C.ink}"${p.a?` text-anchor="${p.a}"`:''}${p.ls?` letter-spacing="${p.ls}"`:''}>${esc(t)}</text>`;
+  const lit=r=>focus.includes(r);
+  /* a region box: solid when something in it is known, dashed when nothing is */
+  function box(r,x,y,w,h,title,items,p={}){
+    const known=items.length>0||p.known,on=lit(r);
+    let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${on?C.wash:(known&&!p.frame?C.fill:(p.frame?'none':C.soft))}" stroke="${on?C.acc:(known?C.line:C.dim)}" stroke-width="${on?1.8:(p.frame&&known?1.4:1)}"${known&&!p.later?'':' stroke-dasharray="5 4"'}/>`;
+    if(mini){s+=T(x+w/2,y+h/2+(p.frame?-h/2+26:7),title,{s:p.frame?21:HS,w:600,c:on?C.acc:(known?C.ink:C.dim),a:'middle'});return s;}
+    s+=T(x+12,y+20,title.toUpperCase(),{s:HS,w:600,c:on?C.acc:C.dim,ls:'1.3'});
+    if(p.frame)return s;
+    if(!items.length)return s+T(x+12,y+42,p.empty||'Not decided yet',{c:C.dim});
+    items.slice(0,Math.floor((h-34)/19)).forEach((t,i)=>{s+=`<rect x="${x+12}" y="${y+35+i*19}" width="6" height="6" fill="${C.acc}"/>`+T(x+26,y+42+i*19,t);});
+    return s;
+  }
+  const arrow=(x1,y,x2,p={})=>`<path d="M${x1} ${y} L${x2} ${y}" stroke="${C.acc}" stroke-width="1.4" fill="none"${p.dash?' stroke-dasharray="4 3"':''} marker-end="url(#ah${dark?'d':'p'}${mini?'m':''})"${p.both?` marker-start="url(#as${dark?'d':'p'}${mini?'m':''})"`:''}/>`;
+  const sfx=(dark?'d':'p')+(mini?'m':'');
+  let s=`<svg viewBox="0 0 1000 ${mini?560:606}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${mini?'Map of the environment with this stop\'s part highlighted':'Drawing of the environment from the session\'s answers. The decision record lists the same content as text.'}"><defs><marker id="ah${sfx}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="${C.acc}"/></marker><marker id="as${sfx}" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10 0 L0 5 L10 10 z" fill="${C.acc}"/></marker></defs>`;
+
+  const priv=E('N1','private'),pub=E('N1','public'),hub=E('N2','hub'),gw=E('S2','gateway-now'),gwLater=E('S2','gateway-later');
+  /* left column */
+  const chan={web:'Web chat',teams:'Teams / M365 Copilot',embed:'Your portal',studio:'Copilot Studio'};
+  const people=EV('C1').map(v=>chan[v]).concat([E('I4','pilot')?'Pilot group':E('I4','tenant')?'Whole tenant':'']).filter(Boolean);
+  s+=box('people',12,16,170,134,'People',people);
+  const acc=E('N7','vpn')?'Point-to-site VPN':E('N7','runner')?'Network pipeline agent':E('N7','hub-bastion')?'Hub Bastion + jumpbox':E('N7','bastion')?'Bastion + jumpbox':'';
+  const eng=[acc,E('D6','pipeline')?'Queued pipeline':E('D6','local')?'Named engineers':'',E('I1','oidc')?'Federated identity':E('I1','user')?'Engineer account':''].filter(Boolean);
+  s+=box('eng',12,166,170,124,'Engineers',eng);
+  if(!E('D1','bicep'))s+=box('state',12,306,170,84,mini?'State':'Terraform state',E('D1','terraform')?[F('D7','sa')||'Storage account','Outside the workload']:[]);
+  /* subscription frame and network zone */
+  const region=F('D5','region');
+  const envs=E('D3','dev-test-prod')?' · dev, test, prod':E('D3','dev-prod')?' · dev and prod':E('D3','pilot')?' · one pilot':'';
+  s+=box('sub',204,16,576,544,mini?'':`Subscription · ${region||'region not set'}${envs}`,[],{frame:true,known:!!region||KNOWN('D3')});
+  if(!mini){
+    s+=`<rect x="218" y="50" width="548" height="402" fill="${lit('net')?C.wash:'none'}" stroke="${lit('net')||priv?C.acc:C.dim}" stroke-width="1" stroke-dasharray="${priv?'none':'5 4'}"/>`;
+    s+=T(230,70,priv?`Private network ${F('N4','vnet')||'192.168.0.0/21 (template default)'}`:pub?'Public service endpoints (no virtual network)':'Network: not decided yet',{s:11.5,w:600,c:priv?C.acc:C.dim});
+  }else s+=`<rect x="218" y="50" width="548" height="402" fill="${lit('net')?C.wash:'none'}" stroke="${lit('net')?C.acc:C.dim}" stroke-width="${lit('net')?1.8:1}" stroke-dasharray="${priv?'none':'5 4'}"/>`+T(492,78,'Network',{s:21,w:600,c:lit('net')?C.acc:C.dim,a:'middle'});
+  /* application group */
+  const app=[];
+  if(KNOWN('D2')&&!E('D2','infra'))app.push(E('D2','custom')?'Your application':'Web chat (Container App)');
+  if(E('A2','container_apps'))app.push('Agent worker + scheduler');
+  if(E('A3','sql'))app.push('MCP server · SQL tools');
+  if(E('K3','custom')||E('K2','app-ingest'))app.push('Ingestion service');
+  if(KNOWN('D2'))app.push('Key Vault · App Config · Registry');
+  if(E('C3','history')||E('C3','feedback')||E('C3','attach')||E('A1','workflow')||E('A1','both')||E('A3','sql'))app.push('Cosmos DB (app data)');
+  if(E('A5','yes'))app.push('PostgreSQL');
+  s+=box('app',232,84,254,202,mini?'Application':'rg · application',app);
+  /* foundry group */
+  const fnd=[];
+  if(KNOWN('A2')||KNOWN('M1'))fnd.push('Foundry project');
+  if(E('A2','hosted'))fnd.push('Hosted agent');else if(E('A2','container_apps'))fnd.push('Agent Service');
+  if(KNOWN('M1'))fnd.push((E('M1','gateway')?'Models through the AI Gateway':E('K5','images')?'gpt-4.1 + embeddings':E('M1','custom')?'Your model list':'gpt-5-nano + embeddings')+(E('M2','regional')&&!E('M1','gateway')?' (regional)':''));
+  if(KNOWN('A2'))fnd.push('Search · Storage · Cosmos (agent)');
+  if(EV('K1').length)fnd.push('Foundry IQ knowledge base');
+  if(E('A3','bing'))fnd.push('Bing grounding');
+  s+=box('foundry',498,84,254,202,mini?'Foundry':'rg · foundry and knowledge',fnd);
+  /* network group */
+  const nr=[];
+  if(priv){nr.push('Private endpoints');
+    if(KNOWN('N5'))nr.push(E('N5','byo')?'Hub DNS zones':E('N5','policy')?'Policy-managed DNS':'Private DNS zones');
+    if(KNOWN('N6'))nr.push(E('N6','hub')?'Hub firewall':E('N6','standard')?'Firewall Standard':'Firewall Basic');
+    if(E('N7','bastion'))nr.push('Bastion + jumpbox');
+    if(E('N7','vpn'))nr.push('VPN gateway subnet');
+    if(E('N8','waf'))nr.push('App Gateway + WAF');
+    if(E('N9','yes'))nr.push('Power Platform subnet');
+    if(gw||gwLater)nr.push('AI Gateway subnet');}
+  else if(pub)nr.push('No virtual network');
+  {const x=232,y=300,w=520,h=138,on=lit('netrg'),known=nr.length>0;
+    s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${on?C.wash:(known?C.fill:C.soft)}" stroke="${on?C.acc:(known?C.line:C.dim)}" stroke-width="${on?1.8:1}"${known?'':' stroke-dasharray="5 4"'}/>`;
+    if(mini)s+=T(x+w/2,y+h/2+7,'Network services',{s:HS,w:600,c:on?C.acc:(known?C.ink:C.dim),a:'middle'});
+    else{s+=T(x+12,y+20,'RG · NETWORK',{s:HS,w:600,c:on?C.acc:C.dim,ls:'1.3'});
+      if(!known)s+=T(x+12,y+42,'Not decided yet',{c:C.dim});
+      nr.forEach((t,i)=>{const col=i%3,row=Math.floor(i/3);s+=`<rect x="${x+12+col*170}" y="${y+35+row*24}" width="6" height="6" fill="${C.acc}"/>`+T(x+26+col*170,y+42+row*24,t);});}}
+  /* monitoring strip */
+  const mon=[];
+  if(KNOWN('R1'))mon.push(E('R1','central')?'Central Log Analytics':'Log Analytics + App Insights');
+  if(KNOWN('R2'))mon.push(E('R2','on')?'Conversation capture on':'Content capture off');
+  EV('R4').filter(x=>x!=='none').forEach(x=>mon.push({defender:'Defender for AI',purview:'Purview',agent365:'Agent 365'}[x]));
+  {const x=218,y=466,w=548,h=80,on=lit('mon'),known=mon.length>0;
+    s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${on?C.wash:(known?C.fill:C.soft)}" stroke="${on?C.acc:(known?C.line:C.dim)}" stroke-width="${on?1.8:1}"${known?'':' stroke-dasharray="5 4"'}/>`;
+    if(mini)s+=T(x+w/2,y+h/2+7,'Monitoring and security',{s:HS,w:600,c:on?C.acc:(known?C.ink:C.dim),a:'middle'});
+    else{s+=T(x+12,y+20,'MONITORING AND SECURITY',{s:HS,w:600,c:on?C.acc:C.dim,ls:'1.3'});
+      if(!known)s+=T(x+12,y+44,'Not decided yet',{c:C.dim});
+      mon.forEach((t,i)=>{const col=i%3,row=Math.floor(i/3);s+=`<rect x="${x+12+col*178}" y="${y+37+row*22}" width="6" height="6" fill="${C.acc}"/>`+T(x+26+col*178,y+44+row*22,t);});}}
+  /* right column */
+  const kn={blob:'Blob documents',sharepoint:'SharePoint',workiq:'Work IQ (M365)',fabric:'Fabric',index:'Existing index'};
+  const ks=EV('K1').map(x=>kn[x]);if(E('A3','sql'))ks.push('SQL database');
+  s+=box('know',802,16,186,150,'Knowledge',ks);
+  if(!E('S2','agent-only')){
+    const gi=gw?[`API Management ${({StandardV2:'Std v2',PremiumV2:'Prem v2',Premium:'Premium',Developer:'Developer'})[EV('G3')[0]]||''}`.trim(),'Access contracts',E('G5','anonymise')?'PII masked':E('G5','block')?'PII blocked':'',E('G6','gateway')?'Content safety':'',E('G7','metadata')||E('G7','bodies')?'Usage per team':''].filter(Boolean):gwLater?['Subnet reserved now','Connect when ready']:[];
+    s+=box('gw',802,186,186,170,mini?'AI Gateway':gw?'AI Gateway hub':gwLater?'AI Gateway (later)':'AI Gateway',gi,{later:gwLater,empty:'Not decided yet'});
+    s+=arrow(782,270,800,{dash:!gw});
+  }
+  if(hub){s+=box('hub',802,372,186,112,'Platform hub',['Peering both ways','DNS · firewall routes',E('N7','hub-bastion')?'Bastion':''].filter(Boolean));s+=arrow(782,428,800,{both:true});}
+  /* flows cross the gutters only, never into text */
+  s+=arrow(184,82,202,{dash:!people.length})+arrow(184,228,202,{dash:true})+arrow(782,90,800,{dash:!ks.length});
+  if(!E('D1','bicep'))s+=arrow(184,348,202,{dash:true});
+  if(!mini){
+    /* legend strip */
+    const ly=584;
+    s+=`<rect x="12" y="${ly-9}" width="22" height="12" fill="${C.fill}" stroke="${C.line}"/>`+T(40,ly+1,'Decided or assumed',{s:11,c:C.dim});
+    s+=`<rect x="176" y="${ly-9}" width="22" height="12" fill="none" stroke="${C.dim}" stroke-dasharray="5 4"/>`+T(204,ly+1,'Not decided, or later',{s:11,c:C.dim});
+    s+=`<path d="M352 ${ly-3} L374 ${ly-3}" stroke="${C.acc}" stroke-width="1.4"/>`+T(380,ly+1,'Who or what connects',{s:11,c:C.dim});
+    if(E('D3','dev-prod')||E('D3','dev-test-prod'))s+=T(988,ly+1,'Each environment repeats the subscription box in its own resource groups.',{s:11,c:C.dim,a:'end'});
+  }
+  return s+'</svg>';
+};
+
+/* ---------- engine: state, ledger rows, time ruler, blueprint sheets. Content is defined above (STOPS, BP, STOP_UI, EXAMPLE). ---------- */
+const KEY='alzbp-v1';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fresh=()=>({meta:{client:'',workload:'',date:'',people:'',example:false},a:{},clock:{acc:0,start:null},ui:{lesson:{}}});
+let S=fresh();
+const save=()=>{
+  try{localStorage.setItem(KEY,JSON.stringify(S));}
+  catch(e){$('#save-status').textContent='This browser could not save your answers. Use Copy answers on the Blueprint tab to keep a backup before leaving.';}
+};
+
+const ALL=[];STOPS.forEach((st,i)=>{st.n=i+1;st.decs.forEach(d=>{d.stop=st;ALL.push(d);});});
+const BYID=Object.fromEntries(ALL.map(d=>[d.id,d]));
+// Validate copied answers before replacing the current session. Only known
+// decisions and plain text fields are retained; malformed imports leave it intact.
+const record=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+function readAnswers(p){
+  if(!record(p)||!record(p.a)||(p.meta!==undefined&&!record(p.meta)))throw new Error('Invalid answers');
+  const next=fresh();
+  for(const key of ['client','workload','date','people']){
+    const value=(p.meta||{})[key];
+    if(value!==undefined&&typeof value!=='string')throw new Error('Invalid session field');
+    if(value!==undefined)next.meta[key]=value;
+  }
+  next.meta.example=p.meta?.example===true;
+  for(const d of ALL){
+    if(!Object.hasOwn(p.a,d.id))continue;
+    const value=p.a[d.id];
+    if(!record(value))throw new Error('Invalid decision');
+    const answer={};
+    if(value.v!==undefined){
+      const values=d.type==='many'?value.v:[value.v];
+      if(!Array.isArray(values)||values.some(v=>typeof v!=='string'||!(d.opts||[]).some(o=>o.v===v)))throw new Error('Invalid option');
+      answer.v=d.type==='many'?[...new Set(values)]:value.v;
+    }
+    if(value.f!==undefined){
+      if(!record(value.f))throw new Error('Invalid fields');
+      answer.f={};
+      for(const field of d.fields||[]){
+        if(!Object.hasOwn(value.f,field.k))continue;
+        if(typeof value.f[field.k]!=='string')throw new Error('Invalid field');
+        answer.f[field.k]=value.f[field.k];
+      }
+    }
+    for(const key of ['owner','note']){
+      if(value[key]!==undefined&&typeof value[key]!=='string')throw new Error('Invalid note');
+      if(value[key]!==undefined)answer[key]=value[key];
+    }
+    answer.later=value.later===true;
+    next.a[d.id]=answer;
+  }
+  return next;
+}
+try{
+  const raw=localStorage.getItem(KEY);
+  if(raw){
+    const p=JSON.parse(raw),next=readAnswers(p);
+    if(record(p.clock)&&Number.isFinite(p.clock.acc)&&p.clock.acc>=0){
+      next.clock={acc:p.clock.acc,start:Number.isFinite(p.clock.start)&&p.clock.start>0&&p.clock.start<=Date.now()?p.clock.start:null};
+    }
+    if(record(p.ui)&&record(p.ui.lesson))STOPS.forEach(st=>{if(typeof p.ui.lesson[st.id]==='boolean')next.ui.lesson[st.id]=p.ui.lesson[st.id];});
+    S=next;
+  }
+}catch(e){$('#save-status').textContent='Saved answers could not be restored. You can start here or load a backup from the Blueprint tab.';}
+const ans=id=>S.a[id]||(S.a[id]={});
+/* value helpers used by the data files' show()/rec() functions */
+const V=id=>{const a=S.a[id];return a?a.v:undefined;};
+const HAS=(id,v)=>{const x=V(id);return Array.isArray(x)?x.includes(v):x===v;};
+const F=(id,k)=>((S.a[id]||{}).f||{})[k]||'';
+const shown=d=>!d.show||!!d.show();
+const filled=(d,f)=>String(F(d.id,f.k)).trim()!=='';
+const isChosen=d=>{const a=S.a[d.id];if(!a)return false;
+  if(d.type==='inputs'){const req=d.fields.filter(f=>f.req);return req.length?req.every(f=>filled(d,f)):d.fields.some(f=>filled(d,f));}
+  if(d.type==='many')return Array.isArray(a.v)&&a.v.length>0;return a.v!==undefined&&a.v!=='';};
+const optOf=(d,v)=>(d.opts||[]).find(o=>o.v===v);
+const isRec=o=>typeof o.rec==='function'?!!o.rec():!!o.rec;
+const optShown=o=>!o.show||!!o.show();
+const recOpts=d=>(d.opts||[]).filter(o=>isRec(o)&&optShown(o));
+const chosenOpts=d=>{const v=V(d.id);if(d.type==='many')return (Array.isArray(v)?v:[]).map(x=>optOf(d,x)).filter(Boolean);const o=optOf(d,v);return o?[o]:[];};
+/* detail decisions are assumed at our recommendation until someone changes them */
+const isLater=d=>!!(S.a[d.id]||{}).later;
+const isAssumed=d=>!!d.detail&&!isChosen(d)&&!isLater(d)&&d.type!=='inputs'&&recOpts(d).length>0;
+const effOpts=d=>isLater(d)?[]:isChosen(d)?chosenOpts(d).filter(optShown):(isAssumed(d)?recOpts(d).slice(0,d.type==='many'?99:1):[]);
+const status=d=>isLater(d)?'later':isChosen(d)?'chosen':isAssumed(d)?'assumed':(d.detail?'optional':'open');
+const STATUS_WORD={chosen:'Decided',later:'Parked',assumed:'Assumed',optional:'Optional',open:'Open'};
+const live=()=>ALL.filter(shown);
+const core=()=>live().filter(d=>!d.detail);
+const OPEN=new Set();
+
+/* ---------- field checks: advice, never a block ---------- */
+const CHECK={
+  guid:[/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,'An Azure ID has this shape: 0000aaaa-11bb-22cc-33dd-444444eeeeee.'],
+  cidr:[/^\s*(\d{1,3}\.){3}\d{1,3}\/\d{1,2}(\s*,\s*(\d{1,3}\.){3}\d{1,3}\/\d{1,2})*\s*$/,'Use a range like 10.42.8.0/21.'],
+  region:[/^[a-z0-9]+$/,'Use the short region name in lowercase, like canadacentral.'],
+  storage:[/^[a-z0-9]{3,24}$/,'Storage account names are 3 to 24 lowercase letters and digits.'],
+  num:[/^\d+(\.\d+)?$/,'Numbers only.']
+};
+const fieldErr=(f,v)=>{v=String(v||'').trim();if(!v||!f.check)return '';const [re,msg]=CHECK[f.check];return re.test(v)?'':msg;};
+
+/* ---------- clock and pace ---------- */
+const TOTAL=STOPS.reduce((s,x)=>s+x.mins,0);
+const stopStart=st=>STOPS.slice(0,st.n-1).reduce((s,x)=>s+x.mins,0);
+const elapsed=()=>S.clock.acc+(S.clock.start?Date.now()-S.clock.start:0);
+const mmss=ms=>{const t=Math.max(0,Math.round(ms/1000));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+let VIEW='start';
+function tick(){
+  const e=elapsed(),t=$('#clock-t');t.textContent=mmss(e);t.classList.toggle('over',e>TOTAL*60000);
+  const lab=S.clock.start?'Pause':e?'Resume':'Start clock';$('#clock-btn').setAttribute('aria-label',lab+' the meeting clock');
+  $('#clock-btn').innerHTML=(S.clock.start?'<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="2.6" height="9" fill="currentColor"/><rect x="7.4" y="1.5" width="2.6" height="9" fill="currentColor"/></svg>':'<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>')+`<span class="cb-l">${lab}</span>`;
+  const pace=$('#pace'),st=STOPS.find(x=>x.id===VIEW);
+  if(!e||!st){pace.textContent='';pace.className='pace';}
+  else{const end=(stopStart(st)+st.mins)*60000,over=e-end;
+    if(over>0){pace.textContent=`${Math.ceil(over/60000)} min over on this stop`;pace.className='pace late';}
+    else{pace.textContent=`${mmss(-over)} left on this stop`;pace.className='pace';}}
+  const cur=$('#r-cursor');cur.hidden=!e;cur.style.left=Math.min(100,100*e/(TOTAL*60000))+'%';
+}
+function toggleClock(){if(S.clock.start){S.clock.acc+=Date.now()-S.clock.start;S.clock.start=null;}else S.clock.start=Date.now();save();tick();}
+setInterval(()=>{if(S.clock.start)tick();},1000);
+
+/* ---------- rows ---------- */
+const kindShow=(kind,k)=>{
+  if(kind==='gw'){const [file,...rest]=k.split('.');return [`gateway · ${file}.tfvars`,rest.join('.')];}
+  return [BP.kindLabel[kind]||kind,k];
+};
+function setsLine(d){
+  const rows=[];
+  effOpts(d).forEach(o=>(o.cfg||[]).forEach(c=>rows.push(c)));
+  if(d.type==='inputs')(d.fields||[]).forEach(f=>{if(f.cfg){const v=F(d.id,f.k);if(v||!f.opt)rows.push([f.cfg[0],f.cfg[1],v||`<${f.ph||'to confirm'}>`]);}});
+  if(!rows.length)return '';
+  const body=rows.map(([kind,k,v])=>{if(kind==='note')return `<span class="c"># ${esc(k)}</span>`;const [lab,key]=kindShow(kind,k);return `<span class="c">${esc(lab)}</span>  <span class="k">${esc(key)}</span> = ${esc(typeof v==='object'?JSON.stringify(v):v)}`;}).join('\n');
+  const n=rows.filter(r=>r[0]!=='note').length;
+  return `<details class="setsd"><summary>${n?`Writes ${n} deployment setting${n===1?'':'s'}`:'Deployment note'}</summary><div class="sets" tabindex="0" role="group" aria-label="Deployment settings this choice writes">${body}</div></details>`;
+}
+const answerText=d=>d.type==='inputs'?d.fields.map(f=>F(d.id,f.k)).filter(Boolean).join(' · '):effOpts(d).map(o=>o.l).join(', ');
+function proposalHTML(d){
+  const s=status(d),a=S.a[d.id]||{};
+  if(s==='later')return `<span class="rp-k">Parked</span> ${a.owner?`with ${esc(a.owner)}`:'with no owner yet'}${a.note?`: ${esc(a.note)}`:''}`;
+  if(s==='chosen')return `<b>${esc(answerText(d))}</b>`;
+  if(s==='assumed')return `<span class="rp-k">Assumed</span> <b>${esc(answerText(d))}</b>`;
+  const r=recOpts(d);
+  if(d.type!=='inputs'&&r.length){const dyn=r.some(o=>typeof o.rec==='function');return `<span class="rp-k">We propose</span> <b>${esc(r.map(o=>o.l).join(', '))}</b>${r.length===1?`<span class="rp-w">: ${r[0].when}</span>`:''}${dyn?'<span class="rp-w"> Based on your earlier answers.</span>':''}`;}
+  if(s==='optional')return `<span class="rp-k">Optional</span> <span class="rp-w">leave blank to keep the default</span>`;
+  return `<span class="rp-k">Needs the room</span>${d.who?` <span class="rp-w">ask: ${esc(d.who)}</span>`:''}`;
+}
+function actHTML(d){
+  const s=status(d);
+  if(s==='open'&&d.type!=='inputs'&&recOpts(d).length)return `<button class="btn accept" type="button" data-accept="${d.id}">Accept</button>`;
+  return `<span class="st st-${s}">${STATUS_WORD[s]}</span>`;
+}
+function bodyHTML(d){
+  const a=S.a[d.id]||{};
+  let main='';
+  if(d.type==='inputs'){
+    main=`<div class="fields">${d.fields.map(f=>{const v=(a.f||{})[f.k]||'',er=fieldErr(f,v);return `<div class="fld"><label for="f-${d.id}-${f.k}">${esc(f.label)}${f.req?'':' <span class="optl">optional</span>'}</label><input type="text" id="f-${d.id}-${f.k}" data-dec="${d.id}" data-field="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" aria-describedby="e-${d.id}-${f.k}"${er?' aria-invalid="true"':''}><span class="ferr" id="e-${d.id}-${f.k}">${er}</span></div>`;}).join('')}</div>`+(d.calc?`<p class="calc" id="calc-${d.id}" aria-live="polite">${d.calc()}</p>`:'');
+  }else{
+    const multi=d.type==='many',tp=multi?'checkbox':'radio';
+    main=`<fieldset class="opts${multi?' multi':''}"><legend class="sr">${esc(d.q)}${multi?' (pick any that apply)':''}</legend>${d.opts.map((o,i)=>{
+      const on=multi?(Array.isArray(a.v)&&a.v.includes(o.v)):a.v===o.v;
+      return `<div class="ow-wrap" id="ow-${d.id}-${o.v}"${optShown(o)?'':' hidden'}><input type="${tp}" name="d-${d.id}" id="o-${d.id}-${o.v}" value="${esc(o.v)}" data-dec="${d.id}"${on?' checked':''}><label class="opt${o.rec?' can-rec':''}" for="o-${d.id}-${o.v}" id="ol-${d.id}-${o.v}"${o.rec&&isRec(o)?' data-rec':''}><span class="oh"><span class="radio"></span><span class="ol">${esc(o.l)}</span></span><span class="tags">${o.rec?`<span class="tag rec">Our recommendation</span>`:''}${o.ms?`<span class="tag ms">Microsoft's default</span>`:''}</span><span class="ow"><span class="ok">When</span><span>${o.when}</span></span>${o.cost?`<span class="oc"><span class="ok">Costs</span><span>${o.cost}</span></span>`:'<span class="oc none"></span>'}</label></div>`;}).join('')}</fieldset>`;
+  }
+  return `<div class="rb-why"><p class="why">${d.why}</p>${d.type==='many'?'<p class="hint">Pick any that apply.</p>':''}${d.who&&d.type!=='inputs'?`<p class="hint">Ask: ${esc(d.who)}</p>`:''}${d.refs?`<p class="refs"><span class="rl">Microsoft's pages</span>${d.refs.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join('')}</p>`:''}</div>
+    <div class="rb-main">${main}
+      <div class="meta-row">
+        <label class="park"><input type="checkbox" data-later="${d.id}"${a.later?' checked':''}><span>Park it for later</span></label>
+        <div class="fld"><label for="w-${d.id}">Owner</label><input type="text" id="w-${d.id}" data-owner="${d.id}" value="${esc(a.owner||'')}" placeholder="Name or role" list="owner-list"></div>
+        <div class="fld grow"><label for="n-${d.id}">Note for the record</label><input type="text" id="n-${d.id}" data-note="${d.id}" value="${esc(a.note||'')}" placeholder="Why this choice, or what we still need to know"></div>
+        <button class="btn small quiet clear-ans" type="button" data-clear="${d.id}"${isChosen(d)?'':' hidden'}>Clear this answer</button>
+      </div>
+      <div class="setsbox" id="sets-${d.id}">${setsLine(d)}</div>
+    </div>`;
+}
+function rowHTML(d){
+  const s=status(d),open=OPEN.has(d.id);
+  return `<article class="row${d.type==='inputs'?' is-inputs':''}" id="dec-${d.id}" data-s="${s}"${open?' data-open':''}${shown(d)?'':' hidden'}>
+    <div class="row-head"><span class="mk" aria-hidden="true"></span>
+      <button class="row-toggle" type="button" aria-expanded="${open}" aria-controls="body-${d.id}" data-toggle="${d.id}"><span class="id">${esc(d.id)}</span><span class="rq">${esc(d.q)}</span><span class="rp" id="rp-${d.id}">${proposalHTML(d)}</span></button>
+      <span class="row-act" id="act-${d.id}">${actHTML(d)}</span><span class="chev" aria-hidden="true"></span></div>
+    <div class="row-body" id="body-${d.id}"${open?'':' hidden'}>${bodyHTML(d)}</div></article>`;
+}
+function figNote(f){return f?`<p class="msref">Microsoft's reference diagram: <a class="lk" href="${esc(f.src)}" target="_blank" rel="noopener">${esc(f.cap)}</a> (<a class="lk" href="${esc(f.orig)}" target="_blank" rel="noopener">original</a>, © Microsoft, MIT licence)</p>`:'';}
+function stopHTML(st,i){
+  const prev=i?STOPS[i-1]:null,next=STOPS[i+1],L=st.lesson,ui=STOP_UI[st.id]||{};
+  const coreD=st.decs.filter(d=>!d.detail),det=st.decs.filter(d=>d.detail);
+  const open=S.ui.lesson[st.id]!==false;
+  return `<section class="view" id="v-${st.id}" data-view="${st.id}"><div class="wrap">
+    <div class="stop-head"><div class="sh-text"><p class="kicker">Stop <b>${st.n}</b> of ${STOPS.length}</p><h1>${st.title}</h1><p class="lead">${st.lead}</p></div>
+      <div class="timebox"><span class="tb-num">${st.mins}</span><span class="tb-lab">minutes<br>minute ${stopStart(st)} to ${stopStart(st)+st.mins}</span><span class="tb-prog" id="prog-${st.id}"></span></div></div>
+    ${L?`<details class="lesson" data-lesson="${st.id}"${open?' open':''}><summary><span class="kicker acc">${esc(L.k||'What to know first')}</span><span class="ls-title">${L.h||''}</span><span class="ls-toggle" aria-hidden="true"></span></summary><div class="lesson-in"><div class="lt">${(L.p||[]).map(p=>`<p>${p}</p>`).join('')}${L.ul?`<ul>${L.ul.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}${figNote(L.fig)}</div><figure class="map" id="map-${st.id}"><div class="map-in">${BP.draw({theme:'dark',mini:true,focus:ui.focus||[]})}</div><figcaption>Your environment. This stop decides the copper parts; boxes turn solid as you decide.</figcaption></figure></div></details>`:''}
+    <p class="empty-stop" id="empty-${st.id}" hidden>${esc(st.emptyNote||'Nothing to decide here with the answers so far.')}</p>
+    <div class="ledger-head" id="dh-${st.id}"><h2>Decide together</h2><span class="keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move · <kbd>A</kbd> accept · <kbd>1</kbd>–<kbd>9</kbd> choose · <kbd>P</kbd> park · <kbd>]</kbd> next stop</span><button class="btn small" type="button" data-recs="${st.id}">Accept all our proposals</button><button class="btn small quiet" type="button" data-undo="${st.id}" hidden>Undo</button><span class="toast" id="toast-${st.id}" role="status" aria-live="polite"></span></div>
+    <div class="ledger">${coreD.map(rowHTML).join('')}</div>
+    ${det.length?`<div class="assume-wrap" id="aw-${st.id}"><div class="ledger-head"><h2>Assumed unless you object</h2><p class="lh-note">Smaller decisions. We take our recommendation and record it on the blueprint as an assumption. Open a row to change it.</p></div><div class="ledger minor">${det.map(rowHTML).join('')}</div></div>`:''}
+    <div class="pager">${prev?`<a class="btn" href="#${prev.id}"><span aria-hidden="true">←</span> ${esc(prev.name)}</a>`:`<a class="btn" href="#start"><span aria-hidden="true">←</span> Start</a>`}${next?`<a class="btn primary" href="#${next.id}">Next: ${esc(next.name)} <span aria-hidden="true">→</span></a>`:`<a class="btn primary" href="#blueprint">Draw the blueprint <span aria-hidden="true">→</span></a>`}</div>
+  </div></section>`;
+}
+function build(){
+  OPEN.clear();ALL.forEach(d=>{if(!d.detail&&shown(d)&&status(d)==='open'&&(d.type==='inputs'||!recOpts(d).length))OPEN.add(d.id);});
+  $('#ruler').innerHTML=STOPS.map(st=>`<li style="flex:${st.mins} 1 0"><a href="#${st.id}" data-step="${st.id}" id="rl-${st.id}" title="${esc(st.name)}, ${st.mins} minutes"><span class="r-line"><span class="r-fill" id="bar-${st.id}"></span></span><span class="r-name"><b>${st.n}</b><span class="r-txt">${esc((STOP_UI[st.id]||{}).short||st.name)}</span></span></a></li>`).join('');
+  $('#agenda').innerHTML=STOPS.map(st=>`<li><a href="#${st.id}"><span class="ag-n">${String(st.n).padStart(2,'0')}</span><span class="ag-t"><span class="ag-name">${esc(st.name)}</span><span class="ag-blurb">${st.blurb}</span></span><span class="ag-m">${st.mins} min</span></a></li>`).join('');
+  $('#stop-views').innerHTML=STOPS.map(stopHTML).join('');
+  $('#hero-map').innerHTML=BP.draw({theme:'dark',mini:true,focus:[]});
+  $$('[data-total-min]').forEach(el=>{el.textContent=TOTAL;});$('#clock-total').textContent=TOTAL+':00';
+  $('#dec-count').textContent=ALL.filter(d=>!d.detail).length;$('#det-count').textContent=ALL.filter(d=>d.detail).length;
+  $$('[data-meta]').forEach(el=>{el.value=S.meta[el.dataset.meta]||'';});
+}
+function refreshOwners(){
+  const set=new Set();Object.values(S.a).forEach(a=>{if(a.owner&&a.owner.trim())set.add(a.owner.trim());});
+  (S.meta.people||'').split(/[,;]/).map(x=>x.trim().replace(/\s*\(.*\)$/,'')).filter(Boolean).forEach(x=>set.add(x));
+  $('#owner-list').innerHTML=[...set].map(x=>`<option value="${esc(x)}">`).join('');
+}
+function refreshRow(d){
+  const el=$('#dec-'+d.id);if(!el)return;const s=status(d);
+  el.hidden=!shown(d);el.dataset.s=s;
+  $('#rp-'+d.id).innerHTML=proposalHTML(d);$('#act-'+d.id).innerHTML=actHTML(d);
+  const sb=$('#sets-'+d.id);if(sb){const was=sb.querySelector('details')?.open;sb.innerHTML=setsLine(d);if(was){const nd=sb.querySelector('details');if(nd)nd.open=true;}}
+  (d.opts||[]).forEach(o=>{const l=$(`#ol-${d.id}-${o.v}`);if(l&&o.rec)l.toggleAttribute('data-rec',isRec(o));const w=$(`#ow-${d.id}-${o.v}`);if(w)w.hidden=!optShown(o);});
+  if(d.calc){const c=$('#calc-'+d.id);if(c)c.innerHTML=d.calc();}
+  const cb=$(`[data-clear="${d.id}"]`);if(cb)cb.hidden=!(isChosen(d)||Object.values((S.a[d.id]||{}).f||{}).some(x=>String(x).trim()));
+}
+function refresh(){
+  ALL.forEach(refreshRow);
+  STOPS.forEach(st=>{
+    const C=st.decs.filter(d=>shown(d)&&!d.detail),D=st.decs.filter(d=>shown(d)&&d.detail),c=C.filter(d=>status(d)==='chosen').length,pk=C.filter(isLater).length,pct=C.length?Math.round(100*c/C.length):0,ui=STOP_UI[st.id]||{},empty0=!C.length&&!D.length,skipped=empty0&&(!ui.scope||KNOWN(ui.scope));
+    const e=$('#empty-'+st.id);if(e){e.hidden=!empty0;e.textContent=skipped?(st.emptyNote||'Nothing to decide here with the answers so far.'):'These decisions open once stop 1 says whether the gateway is in scope.';}
+    const dh=$('#dh-'+st.id);if(dh)dh.hidden=!C.length;const aw=$('#aw-'+st.id);if(aw)aw.hidden=!D.length;
+    const rb=$(`[data-recs="${st.id}"]`);if(rb)rb.hidden=!C.some(d=>status(d)==='open'&&d.type!=='inputs'&&recOpts(d).length);
+    const p=$('#prog-'+st.id);if(p)p.textContent=skipped?'Skipped: not in scope':empty0?'Waiting on stop 1':`${c} of ${C.length} decided${pk?`, ${pk} parked`:''}`;
+    const b=$('#bar-'+st.id);if(b)b.style.width=pct+'%';
+    const rl=$('#rl-'+st.id);if(rl){rl.classList.toggle('skipped',skipped);rl.classList.toggle('parked',pk>0);rl.setAttribute('aria-label',`Stop ${st.n}, ${st.name}, ${st.mins} minutes, ${skipped?'skipped':`${c} of ${C.length} decided${pk?`, ${pk} parked`:''}`}`);}
+    const map=$('#map-'+st.id+' .map-in');if(map)map.innerHTML=BP.draw({theme:'dark',mini:true,focus:(STOP_UI[st.id]||{}).focus||[]});
+  });
+  const C=core(),dn=C.filter(d=>status(d)==='chosen').length,pk=C.filter(isLater).length;
+  $('#tally').innerHTML=`<b>${dn}</b> decided · <b>${pk}</b> parked · <b>${C.length-dn-pk}</b> open`;
+  refreshOwners();
+  if(VIEW==='blueprint')renderBlueprint();
+}
+function setOpen(id,on){const el=$('#dec-'+id);if(!el)return;if(on)OPEN.add(id);else OPEN.delete(id);el.toggleAttribute('data-open',on);$('#body-'+id).hidden=!on;el.querySelector('.row-toggle').setAttribute('aria-expanded',on);}
+function clearAnswer(d){const a=S.a[d.id];if(!a)return;delete a.v;if(a.f)a.f={};
+  $$(`input[name="d-${d.id}"]`).forEach(x=>{x.checked=false;});$$(`input[data-dec="${d.id}"][data-field]`).forEach(x=>{x.value='';x.removeAttribute('aria-invalid');});$$(`[id^="e-${d.id}-"]`).forEach(x=>{x.textContent='';});save();refresh();}
+function choose(d,vals){const a=ans(d.id);a.v=d.type==='many'?vals:vals[0];a.later=false;
+  $$(`input[name="d-${d.id}"]`).forEach(x=>{x.checked=vals.includes(x.value);});const lt=$(`[data-later="${d.id}"]`);if(lt)lt.checked=false;}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.matches&&t.matches('input[type=radio][data-dec]')){const d=BYID[t.dataset.dec];if(V(d.id)===t.value){setTimeout(()=>{t.checked=false;clearAnswer(d);},0);}return;}
+  const c=e.target.closest('[data-clear]');if(c){const d=BYID[c.dataset.clear];clearAnswer(d);const f=$(`#dec-${d.id} .opts input, #dec-${d.id} .fields input`);if(f)f.focus();}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.dec&&!t.dataset.field){
+    const d=BYID[t.dataset.dec],a=ans(d.id);
+    if(d.type==='many'){
+      let vals=$$(`input[name="d-${d.id}"]:checked`).map(x=>x.value);
+      const only=d.opts.filter(o=>o.only).map(o=>o.v);
+      if(only.length&&vals.length>1){vals=only.includes(t.value)&&t.checked?[t.value]:vals.filter(v=>!only.includes(v));$$(`input[name="d-${d.id}"]`).forEach(x=>{x.checked=vals.includes(x.value);});}
+      a.v=vals;
+    }else a.v=t.value;
+    if(isChosen(d))a.later=false;const lt=$(`[data-later="${d.id}"]`);if(lt)lt.checked=!!a.later;
+    save();refresh();
+  }else if(t.dataset.later){const d=BYID[t.dataset.later],a=ans(d.id);a.later=t.checked;save();refresh();if(t.checked){const w=$('#w-'+d.id);if(w&&!w.value)w.focus();}}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.field){const d=BYID[t.dataset.dec],a=ans(d.id);(a.f||(a.f={}))[t.dataset.field]=t.value;const f=d.fields.find(x=>x.k===t.dataset.field),er=fieldErr(f,t.value);t.toggleAttribute('aria-invalid',!!er);$(`#e-${d.id}-${f.k}`).textContent=er;save();refresh();}
+  else if(t.dataset.note){ans(t.dataset.note).note=t.value;save();refreshRow(BYID[t.dataset.note]);}
+  else if(t.dataset.owner){ans(t.dataset.owner).owner=t.value;save();refreshRow(BYID[t.dataset.owner]);refreshOwners();}
+  else if(t.dataset.meta){S.meta[t.dataset.meta]=t.value;save();refreshOwners();}
+});
+document.addEventListener('toggle',e=>{const t=e.target;if(t.dataset&&t.dataset.lesson){S.ui.lesson[t.dataset.lesson]=t.open;save();}},true);
+let UNDO=null;
+document.addEventListener('click',e=>{
+  const tg=e.target.closest('[data-toggle]');
+  if(tg){setOpen(tg.dataset.toggle,!OPEN.has(tg.dataset.toggle));return;}
+  const ac=e.target.closest('[data-accept]');
+  if(ac){const d=BYID[ac.dataset.accept];choose(d,recOpts(d).map(o=>o.v));save();refresh();$('#dec-'+d.id).querySelector('.row-toggle').focus();return;}
+  const un=e.target.closest('[data-undo]');
+  if(un&&UNDO){UNDO.ids.forEach(id=>{delete S.a[id].v;$$(`input[name="d-${id}"]`).forEach(x=>{x.checked=false;});});save();refresh();un.hidden=true;$('#toast-'+UNDO.stop).textContent='Undone.';UNDO=null;return;}
+  const r=e.target.closest('[data-recs]');if(!r)return;
+  const st=STOPS.find(x=>x.id===r.dataset.recs),ids=[];
+  /* several passes, so a proposal that reveals a follow-up decision also fills it */
+  for(let pass=0;pass<3;pass++)st.decs.forEach(d=>{
+    if(d.detail||!shown(d)||isChosen(d)||isLater(d)||d.type==='inputs')return;
+    const recs=recOpts(d);if(!recs.length)return;
+    choose(d,recs.map(o=>o.v));ids.push(d.id);
+  });
+  save();refresh();
+  UNDO=ids.length?{stop:st.id,ids}:null;const ub=$(`[data-undo="${st.id}"]`);if(ub)ub.hidden=!ids.length;
+  $('#toast-'+st.id).textContent=ids.length?`${ids.length} accepted. Open any row to change it.`:'Nothing left to accept; the open rows need the room.';
+});
+/* keyboard: J/K move between rows, A accept, 1-9 choose, P park, [ and ] change stop */
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;const t=e.target;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)&&!(t.type==='radio'||t.type==='checkbox'))return;
+  const k=e.key.toLowerCase(),order=['start'].concat(STOPS.map(s=>s.id),['blueprint']),vi=order.indexOf(VIEW);
+  if(k===']'&&vi<order.length-1){location.hash='#'+order[vi+1];e.preventDefault();return;}
+  if(k==='['&&vi>0){location.hash='#'+order[vi-1];e.preventDefault();return;}
+  const view=$('#v-'+VIEW);if(!view||VIEW==='start'||VIEW==='blueprint')return;
+  const rows=$$('.row:not([hidden])',view).filter(r=>r.offsetParent!==null),cur=t.closest&&t.closest('.row');
+  if(k==='j'||k==='k'){const i=rows.indexOf(cur),n=rows[k==='j'?Math.min(rows.length-1,i+1):Math.max(0,i<0?0:i-1)];if(n){n.querySelector('.row-toggle').focus();n.scrollIntoView({block:'nearest'});}e.preventDefault();return;}
+  if(!cur)return;const d=BYID[cur.id.slice(4)];
+  if(k==='a'&&d.type!=='inputs'&&recOpts(d).length&&status(d)!=='chosen'){choose(d,recOpts(d).map(o=>o.v));save();refresh();e.preventDefault();return;}
+  if(k==='p'){const a=ans(d.id);a.later=!a.later;const lt=$(`[data-later="${d.id}"]`);if(lt)lt.checked=a.later;save();refresh();e.preventDefault();return;}
+  if(/^[1-9]$/.test(k)&&d.opts){const o=d.opts.filter(optShown)[+k-1];if(!o)return;const inp=$(`#o-${d.id}-${o.v}`);if(d.type!=='many'&&V(d.id)===o.v){clearAnswer(d);e.preventDefault();return;}inp.checked=d.type==='many'?!inp.checked:true;inp.dispatchEvent(new Event('change',{bubbles:true}));e.preventDefault();}
+});
+
+/* ---------- routing ---------- */
+function route(e){
+  const id=(location.hash||'#start').slice(1);
+  const known=['start','blueprint'].concat(STOPS.map(s=>s.id));
+  const v=known.includes(id)?id:(BYID[id]?BYID[id].stop.id:(/^bp-/.test(id)?'blueprint':'start'));
+  VIEW=v;
+  $$('.view').forEach(x=>x.classList.toggle('on',x.dataset.view===v));
+  $$('.ruler [data-step]').forEach(a=>{if(a.dataset.step===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  const act=$(`#ruler a[data-step="${v}"]`),nav=$('.r-scroll');
+  if(act&&nav&&nav.scrollWidth>nav.clientWidth)nav.scrollLeft=act.offsetLeft-(nav.clientWidth-act.offsetWidth)/2;
+  const order=known.slice(0,1).concat(STOPS.map(s=>s.id),['blueprint']),nx=order[order.indexOf(v)+1],nb=$('#next-btn');
+  nb.hidden=!nx;if(nx){nb.href='#'+nx;nb.innerHTML=`<span class="nb-l">${nx==='blueprint'?'Blueprint':v==='start'?'Begin':'Next stop'}</span> <span aria-hidden="true">→</span>`;nb.setAttribute('aria-label',nx==='blueprint'?'Go to the blueprint':v==='start'?'Begin at stop 1':'Next stop');}
+  const stw=STOPS.find(x=>x.id===v),wh=$('#where');wh.innerHTML=stw?`<span class="w-n">Stop ${stw.n} of ${STOPS.length}</span><span class="w-name">${esc(stw.name)}</span>`:v==='blueprint'?'<span class="w-name">The blueprint</span>':'<span class="w-name">Agent Deployment Blueprint</span>';
+  if(v==='blueprint')renderBlueprint();
+  if(BYID[id]){setOpen(id,true);const el=$('#dec-'+id);if(el)el.scrollIntoView({block:'start'});}
+  else if(!/^bp-/.test(id))scrollTo(0,0);
+  if(e&&e.type==='hashchange'&&known.includes(id)){const h=$(`#v-${v} h1`);if(h){h.tabIndex=-1;h.dataset.focusTarget='';h.focus({preventScroll:true});}}
+  tick();
+}
+addEventListener('hashchange',route);
+
+/* ---------- blueprint ---------- */
+function collectConfig(){
+  const out={};
+  live().forEach(d=>{
+    const push=(kind,k,v)=>{(out[kind]||(out[kind]=[])).push({k,v,src:d.id,assumed:isAssumed(d)});};
+    effOpts(d).forEach(o=>(o.cfg||[]).forEach(([kind,k,v])=>push(kind,k,v)));
+    if(d.type==='inputs')(d.fields||[]).forEach(f=>{if(f.cfg&&f.cfg[0]!=='note'){const v=F(d.id,f.k);if(v)push(f.cfg[0],f.cfg[1],v);else if(f.cfg[0]==='azd'&&!f.opt)push(f.cfg[0],f.cfg[1],'<'+(f.ph||'to confirm')+'>');}});
+  });
+  return out;
+}
+function needsList(){
+  const seen=new Map();
+  live().forEach(d=>{effOpts(d).forEach(o=>(o.needs||[]).forEach(n=>{if(!seen.has(n))seen.set(n,d.id);}));if(d.type==='inputs'&&d.needs&&!isLater(d)&&isChosen(d))d.needs.forEach(n=>{if(!seen.has(n))seen.set(n,d.id);});});
+  (BP.alwaysNeeds||[]).forEach(n=>{if(!seen.has(n))seen.set(n,'');});
+  return [...seen].map(([t,id])=>({t,id}));
+}
+function decisionText(d){
+  if(d.type==='inputs')return d.fields.filter(f=>filled(d,f)).map(f=>`${f.label}: ${F(d.id,f.k)}`).join(' · ');
+  return effOpts(d).map(o=>o.l).join(', ');
+}
+const MARK=`<svg viewBox="0 0 120 120" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-linecap="square" stroke-width="7"><path d="M 24 56 L 24 22 L 58 22"/><path d="M 96 64 L 96 98 L 62 98"/></g><circle cx="60" cy="60" r="5.5" fill="#B45F26"/></svg>`;
+function renderBlueprint(){
+  const L=live(),C=core(),ch=L.filter(d=>status(d)==='chosen'),assumed=L.filter(isAssumed),later=L.filter(isLater),open=C.filter(d=>status(d)==='open');
+  const m=S.meta,cfg=collectConfig(),needs=needsList(),outside=BP.outside(),steps=BP.nextSteps(),empty=!ch.length&&!later.length;
+  const table=(arr,rowFn,cols)=>{let last='',rows='';arr.forEach(d=>{if(d.stop.id!==last){last=d.stop.id;rows+=`<tr class="grp-row"><th colspan="${cols}" scope="colgroup">${d.stop.n} · ${esc(d.stop.name)}</th></tr>`;}rows+=rowFn(d);});return rows;};
+  const decRow=d=>{const a=S.a[d.id]||{},o=effOpts(d);return `<tr><td><code>${esc(d.id)}</code></td><td class="q1">${esc(d.q)}</td><td><b class="pick">${esc(decisionText(d))}</b>${a.note?`<span class="because">${esc(a.note)}</span>`:(o.length===1&&o[0].when?`<span class="because">Fits when ${o[0].when}</span>`:'')}</td><td>${esc(a.owner||'')}</td></tr>`;};
+  const asRow=d=>`<tr><td><code>${esc(d.id)}</code></td><td class="q1">${esc(d.q)}</td><td><b class="pick">${esc(decisionText(d))}</b></td></tr>`;
+  const openRow=d=>{const a=S.a[d.id]||{},r=recOpts(d);return `<tr><td><code>${esc(d.id)}</code></td><td class="q1">${esc(d.q)}</td><td><span class="pill ${isLater(d)?'p-later':'p-open'}">${isLater(d)?'Parked':'Not discussed'}</span>${a.note?`<span class="because">${esc(a.note)}</span>`:''}${r.length&&d.type!=='inputs'?`<span class="because">Our starting point: ${esc(r.map(o=>o.l).join(', '))}</span>`:''}</td><td>${esc(a.owner||'Unassigned')}</td></tr>`;};
+  const openAll=later.concat(open).sort((x,y)=>ALL.indexOf(x)-ALL.indexOf(y));
+  const blocks=BP.blocks.map((b,i)=>{const txt=b.render(cfg);if(!txt)return '';const n=txt.split('\n').length;return `<details class="code-block"${i<2?' open':''}><summary><span class="cb-t">${esc(b.title)}</span><span class="cb-n">${n} lines</span></summary><div class="cb-in"><p class="code-note">${b.note}</p><button class="btn small" type="button" data-copy-block="${b.id}">Copy</button><pre class="code" id="blk-${b.id}" tabindex="0">${hl(txt)}</pre></div></details>`;}).join('');
+  const f=BP.refFig(),iso=m.date||new Date().toISOString().slice(0,10),dm=iso.match(/^(\d{4})-(\d{2})-(\d{2})$/),date=dm?`${+dm[3]} ${['January','February','March','April','May','June','July','August','September','October','November','December'][+dm[2]-1]} ${dm[1]}`:iso;
+  const TOTALS=4;
+  const tblock=n=>`<footer class="tblock"><div><span class="tk">Client</span><span class="tv">${esc(m.client||'Not set')}</span></div><div><span class="tk">Agent</span><span class="tv">${esc(m.workload||'Not set')}</span></div><div><span class="tk">Date</span><span class="tv">${esc(date)}</span></div><div><span class="tk">Sheet</span><span class="tv">${n} of ${TOTALS}</span></div><div class="tmark">${MARK}<span>Agentic Standard</span></div></footer>`;
+  const people=(m.people||'').split(/[,;]/).map(x=>x.trim()).filter(Boolean);
+  $('#sheets').innerHTML=`
+  <article class="sheet cover" id="bp-shape" aria-label="Sheet 1: cover and shape">
+    <div class="letterhead"><span class="flk">${MARK}Agentic Standard</span><span class="lh-doc">Agent deployment blueprint${m.example?' · <b class="example-flag">Example client, not real</b>':''}</span></div>
+    <header class="sheet-head"><h2>${esc(m.client||'Your organisation')}</h2><p class="sheet-sub">${esc(m.workload||'First agent')}</p></header>
+    <p class="summary-line">${BP.summary()}</p>
+    <div class="headline">
+      <div><span class="num">${C.filter(d=>status(d)==='chosen').length}</span><span class="lab">decided in the room</span></div>
+      <div><span class="num">${assumed.length}</span><span class="lab">assumed at our recommendation</span></div>
+      <div><span class="num">${openAll.length}</span><span class="lab">still open</span></div>
+      <div><span class="num">${needs.length}</span><span class="lab">needed before day one</span></div>
+    </div>
+    <div class="drawing"><div class="drawing-wrap" tabindex="0">${BP.draw({theme:'paper'})}</div></div>
+    <details class="refdia"><summary>Compare with Microsoft's reference architecture for this shape</summary><figure class="fig"><a class="frame" href="${f.src}" target="_blank" rel="noopener" aria-label="Open Microsoft's diagram full size"><img src="${f.src}" alt="${esc(f.cap)}, Microsoft reference architecture" loading="lazy" width="${f.w}" height="${f.h}"></a><figcaption><span>${esc(f.cap)}</span><span>© Microsoft, MIT licence · <a href="${f.orig}" target="_blank" rel="noopener">original</a></span></figcaption></figure></details>
+    ${tblock(1)}
+  </article>
+  <article class="sheet" id="bp-decisions" aria-label="Sheet 2: decision record">
+    <section class="sblock first"><h3>What we agreed</h3>${ch.length?`<div class="tbl" tabindex="0"><table><thead><tr><th scope="col">ID</th><th scope="col">Decision</th><th scope="col">Choice and reason</th><th scope="col">Owner</th></tr></thead><tbody>${table(ch,decRow,4)}</tbody></table></div>`:'<p class="empty">No decisions yet. Start at stop 1.</p>'}</section>
+    ${assumed.length?`<section class="sblock" id="bp-assumed"><h3>What we assumed for you</h3><p>Smaller decisions nobody changed in the session. Each is our recommendation and each is in the settings on sheet 4. Tell us if one is wrong.</p><div class="tbl" tabindex="0"><table class="t3"><thead><tr><th scope="col">ID</th><th scope="col">Decision</th><th scope="col">Assumed</th></tr></thead><tbody>${table(assumed,asRow,3)}</tbody></table></div></section>`:''}
+    ${tblock(2)}
+  </article>
+  <article class="sheet" id="bp-needs" aria-label="Sheet 3: before day one, open items and next steps">
+    <section class="sblock first"><h3>What we need from you</h3><p>Collected from the choices on sheet 2. Each one blocks the first deployment until it is done.</p>
+      <ul class="tasks">${needs.map(n=>`<li><span class="box"></span><span class="tt"><span class="tq">${n.t}</span>${n.id?`<span class="tm">From decision <b>${esc(n.id)}</b></span>`:''}</span></li>`).join('')}</ul></section>
+    <section class="sblock" id="bp-open"><h3>Decisions to close</h3>${openAll.length?`<div class="tbl" tabindex="0"><table><thead><tr><th scope="col">ID</th><th scope="col">Decision</th><th scope="col">Where it stands</th><th scope="col">Owner</th></tr></thead><tbody>${table(openAll,openRow,4)}</tbody></table></div>`:(empty?'<p class="empty">Nothing has been discussed yet.</p>':'<p class="empty">Nothing open. Every decision has an answer.</p>')}</section>
+    ${outside.length?`<section class="sblock" id="bp-outside"><h3>Where your design leaves Microsoft's tested path</h3><p>Microsoft deploys one standard shape live for every release. These choices of yours are supported and documented, but sit outside that test, so we prove each one in your dev environment before production.</p><ul class="plain">${outside.map(x=>`<li>${x}</li>`).join('')}</ul></section>`:''}
+    <section class="sblock" id="bp-next"><h3>From this sheet to a running agent</h3><ol class="steps-list">${steps.map(([t,x],i)=>`<li><span class="sl-n">${i+1}</span><span class="sl-t"><b>${esc(t)}</b>${esc(x)}</span></li>`).join('')}</ol></section>
+    <section class="sblock agreed"><h3>Agreed in the room, ${esc(date)}</h3><ul class="sign">${(people.length?people:['Attendee']).map(p=>`<li><span class="sg-line"></span><span class="sg-name">${esc(p)}</span></li>`).join('')}</ul></section>
+    ${tblock(3)}
+  </article>
+  <article class="sheet tech" id="bp-settings" aria-label="Sheet 4: settings for the build team">
+    <section class="sblock first"><h3>What goes into the ${E('D1','bicep')?'deployment':'Terraform run'}</h3><p>${BP.configIntro}</p>${blocks}</section>
+    <section class="sblock"><h3>Where this comes from</h3><p class="src">${BP.sources}</p></section>
+    ${tblock(4)}
+  </article>`;
+}
+const hl=t=>esc(t).split('\n').map(l=>/^\s*(#|\/\/)/.test(l)?`<span class="c">${l}</span>`:l.replace(/^(azd env set )(\S+)/,'$1<span class="k">$2</span>').replace(/^(\s*)([a-z_][a-z0-9_-]*)(\s*=)/i,'$1<span class="k">$2</span>$3')).join('\n');
+
+/* ---------- copy, load, reset ---------- */
+async function copy(text,msg){
+  const t=$('#toast');
+  try{await navigator.clipboard.writeText(text);t.textContent=msg;}
+  catch(e){const fb=$('#copy-fallback');fb.hidden=false;fb.value=text;fb.focus();fb.select();t.textContent='Copy is blocked here. The text is selected below; press Ctrl+C.';}
+  setTimeout(()=>{t.textContent='';},4000);
+}
+const strip=s=>String(s).replace(/<[^>]+>/g,'');
+function planText(){
+  const m=S.meta,L=live(),cfg=collectConfig();
+  let s=`# Agent deployment blueprint: ${m.client||'Your organisation'}\n\n${m.workload||''}\nDate: ${m.date||'-'} · In the room: ${m.people||'-'}\n${m.example?'\nEXAMPLE CLIENT, NOT REAL\n':''}\n${strip(BP.summary())}\n\n## Decisions\n`;
+  STOPS.forEach(st=>{const ds=st.decs.filter(d=>shown(d)&&status(d)==='chosen');if(!ds.length)return;s+=`\n### ${st.n}. ${st.name}\n`;ds.forEach(d=>{const a=S.a[d.id]||{};s+=`- ${d.id} ${d.q}: **${decisionText(d)}**${a.owner?` (owner: ${a.owner})`:''}${a.note?` | ${a.note}`:''}\n`;});});
+  const as=L.filter(isAssumed);if(as.length)s+=`\n## Assumed at our recommendation\n`+as.map(d=>`- ${d.id} ${d.q}: ${decisionText(d)}`).join('\n')+'\n';
+  s+=`\n## Before day one\n`+needsList().map(n=>`- [ ] ${strip(n.t)}`).join('\n')+'\n';
+  const op=L.filter(d=>isLater(d)||status(d)==='open');if(op.length){s+=`\n## Still open\n`+op.map(d=>{const a=S.a[d.id]||{};return `- ${d.id} ${d.q} (${isLater(d)?'parked':'not discussed'}; owner: ${a.owner||'unassigned'}${a.note?'; '+a.note:''})`;}).join('\n')+'\n';}
+  const out=BP.outside();if(out.length)s+=`\n## To prove in dev (outside Microsoft's tested shape)\n`+out.map(x=>`- ${strip(x)}`).join('\n')+'\n';
+  s+=`\n## Next steps\n`+BP.nextSteps().map(([t,x],i)=>`${i+1}. ${t}: ${x}`).join('\n')+'\n';
+  BP.blocks.forEach(b=>{const t=b.render(cfg);if(t)s+=`\n## ${b.title}\n\n\`\`\`\n${t}\n\`\`\`\n`;});
+  s+=`\nSource: Microsoft AI Landing Zones, https://azure.github.io/AI-Landing-Zones/ (guidance paraphrased).\n`;
+  return s;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-copy-block]');
+  if(b){const blk=BP.blocks.find(x=>x.id===b.dataset.copyBlock);copy(blk.render(collectConfig()),`${blk.title} copied.`);return;}
+  const j=e.target.closest('[data-jump]');
+  if(j){e.preventDefault();const el=document.getElementById(j.dataset.jump);if(el){el.scrollIntoView({block:'start'});el.tabIndex=-1;el.focus({preventScroll:true});}}
+});
+$('#copy-plan').addEventListener('click',()=>copy(planText(),'Blueprint copied as text.'));
+$('#copy-json').addEventListener('click',()=>copy(JSON.stringify({meta:S.meta,a:S.a}),'Answers copied. Paste them back here to pick up later.'));
+$('#load-btn').addEventListener('click',()=>{
+  const msg=$('#load-msg');
+  try{const next=readAnswers(JSON.parse($('#load-text').value));S.meta=next.meta;S.a=next.a;save();rebuild();msg.textContent='Loaded.';}
+  catch(e){msg.textContent='That does not look like saved answers. Copy them again with "Copy answers".';}
+});
+/* one click acts; the same button then offers Undo, so nothing moves under the cursor */
+function undoable(btn,run,undoLabel,ms){let snap=null,tm;const label=btn.innerHTML;
+  btn.addEventListener('click',()=>{
+    if(snap){clearTimeout(tm);S=snap;snap=null;save();rebuild();btn.innerHTML=label;btn.classList.remove('armed');$('#toast').textContent='Restored.';return;}
+    snap=JSON.parse(JSON.stringify(S));run();btn.innerHTML=undoLabel;btn.classList.add('armed');
+    tm=setTimeout(()=>{snap=null;btn.innerHTML=label;btn.classList.remove('armed');},ms);});}
+undoable($('#reset'),()=>{const keepUi=S.ui;S=fresh();S.ui=keepUi;save();rebuild();$('#example-note').hidden=true;$('#toast').textContent='Every answer and the clock are cleared.';},'Undo clear',10000);
+undoable($('#clock-reset'),()=>{S.clock={acc:0,start:null};save();tick();},'<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9.8 6a3.8 3.8 0 1 1-1.1-2.7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.4 1.4v2.8H7.6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span class="rl">Undo</span>',6000);
+$('#load-example').addEventListener('click',()=>{S.meta=Object.assign({},EXAMPLE.meta,{example:true});S.a=JSON.parse(JSON.stringify(EXAMPLE.a));save();rebuild();$('#example-note').hidden=false;});
+$('#clock-btn').addEventListener('click',toggleClock);
+function rebuild(){build();refresh();route();tick();$('#example-note').hidden=!S.meta.example;}
+// The browser's Print command also works from any workshop stop.
+let printDetails=[];
+addEventListener('beforeprint',()=>{
+  renderBlueprint();
+  printDetails=$$('#sheets details.code-block:not([open])');
+  printDetails.forEach(detail=>{detail.open=true;});
+});
+addEventListener('afterprint',()=>{printDetails.forEach(detail=>{detail.open=false;});printDetails=[];});
+$('#print-plan').addEventListener('click',()=>window.print());
+rebuild();
